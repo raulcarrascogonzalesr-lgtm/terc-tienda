@@ -96,3 +96,5 @@ Configuración, una sola vez:
    - **Variables:** `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 Mientras no estén los datos FTP, el flujo solo comprueba que la tienda compila.
+
+Las dependencias (`node_modules`) no se suben por FTP: en cPanel se instalan con el botón **Ejecutar NPM Install** de la app Node.js. Hay que presionarlo después de la primera subida y cada vez que cambie `package.json`.

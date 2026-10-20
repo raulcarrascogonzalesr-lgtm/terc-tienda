@@ -45,6 +45,9 @@ jobs:
         run: |
           cp -r .next/static .next/standalone/.next/static
           cp -r public .next/standalone/public
+          # En cPanel (CloudLinux) node_modules es un enlace administrado por el panel:
+          # las dependencias se instalan con el botón "Ejecutar NPM Install", no se suben.
+          rm -rf .next/standalone/node_modules
           # Passenger (el que corre Node.js en cPanel) reinicia la app al ver este archivo nuevo.
           mkdir -p .next/standalone/tmp
           date > .next/standalone/tmp/restart.txt
