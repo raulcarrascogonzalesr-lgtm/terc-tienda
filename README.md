@@ -58,3 +58,22 @@ src/components/              Piezas reutilizables (carrito, tarjetas)
 src/lib/                     Datos, formatos y conexión a servicios
 supabase/schema.sql          Tablas y reglas de seguridad
 ```
+
+## Publicar con Docker (VPS)
+
+En un servidor con Docker instalado:
+
+```bash
+git clone https://github.com/raulcarrascogonzalesr-lgtm/terc-tienda
+cd terc-tienda
+cp .env.example .env      # completa los valores reales
+docker compose up -d --build
+```
+
+La tienda queda en el puerto 3000. Delante se pone un proxy (Nginx o Caddy) con el dominio y HTTPS.
+
+## Publicar en cPanel con "Setup Node.js App"
+
+1. Ejecuta `npm run build` en tu computador.
+2. Sube por FTP el contenido de `.next/standalone/`, la carpeta `.next/static/` dentro de `.next/` y la carpeta `public/`.
+3. En cPanel, crea la app Node.js con archivo de inicio `server.js` y agrega las variables de `.env.example`.
