@@ -32,7 +32,7 @@ Sin configurar nada, la tienda muestra productos de ejemplo (`src/lib/sample-pro
 ## Conectar Supabase
 
 1. Crea un proyecto gratis en https://supabase.com.
-2. En **SQL Editor**, pega y ejecuta el contenido de `supabase/schema.sql`.
+2. En **SQL Editor**, pega y ejecuta el contenido de `supabase/schema.sql` (y si quieres productos de ejemplo, también `supabase/seed.sql`).
 3. En **Project Settings > API**, copia la URL, la clave `anon` y la clave `service_role` en `.env.local`.
 4. Carga productos desde **Table Editor > products**.
 
@@ -57,6 +57,7 @@ src/app/                     Páginas y rutas de la API
 src/components/              Piezas reutilizables (carrito, tarjetas)
 src/lib/                     Datos, formatos y conexión a servicios
 supabase/schema.sql          Tablas y reglas de seguridad
+supabase/seed.sql            Productos de ejemplo (opcional)
 ```
 
 ## Publicar con Docker (VPS)
