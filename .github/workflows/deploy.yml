@@ -11,10 +11,11 @@ name: Publicar en el hosting
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 concurrency:
-  group: deploy
+  group: deploy-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -50,7 +51,7 @@ jobs:
 
       - name: Subir por FTP
         # Mientras no estén cargados los datos FTP, el flujo solo comprueba que la tienda compila.
-        if: ${{ env.FTP_SERVER != '' }}
+        if: ${{ github.event_name != 'pull_request' && env.FTP_SERVER != '' }}
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
