@@ -1,0 +1,64 @@
+# Publica la tienda en el hosting (cPanel con "Setup Node.js App") cada vez que se actualiza main.
+#
+# Configurar una vez en GitHub > Settings > Secrets and variables > Actions:
+#   Secrets:   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD
+#   Variables: NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
+# Las claves secretas del servidor (SUPABASE_SERVICE_ROLE_KEY, MERCADOPAGO_ACCESS_TOKEN)
+# se cargan directamente en cPanel, en la app Node.js, no aquí.
+
+name: Publicar en el hosting
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+
+      - name: Construir la tienda
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      - name: Armar la carpeta a subir
+        run: |
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
+          # En cPanel (CloudLinux) node_modules es un enlace administrado por el panel:
+          # las dependencias se instalan con el botón "Ejecutar NPM Install", no se suben.
+          rm -rf .next/standalone/node_modules
+          # Passenger (el que corre Node.js en cPanel) reinicia la app al ver este archivo nuevo.
+          mkdir -p .next/standalone/tmp
+          date > .next/standalone/tmp/restart.txt
+
+      - name: Subir por FTP
+        # Mientras no estén cargados los datos FTP, el flujo solo comprueba que la tienda compila.
+        if: ${{ github.event_name != 'pull_request' && env.FTP_SERVER != '' }}
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: .next/standalone/
+          server-dir: ./
