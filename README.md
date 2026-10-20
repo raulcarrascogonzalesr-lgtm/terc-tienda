@@ -77,3 +77,22 @@ La tienda queda en el puerto 3000. Delante se pone un proxy (Nginx o Caddy) con 
 1. Ejecuta `npm run build` en tu computador.
 2. Sube por FTP el contenido de `.next/standalone/`, la carpeta `.next/static/` dentro de `.next/` y la carpeta `public/`.
 3. En cPanel, crea la app Node.js con archivo de inicio `server.js` y agrega las variables de `.env.example`.
+
+## Publicación automática (GitHub Actions)
+
+Cada cambio que entra a `main` se compila en GitHub y se sube por FTP al hosting (`.github/workflows/deploy.yml`).
+
+Configuración, una sola vez:
+
+1. En cPanel, crea una cuenta FTP cuyo directorio sea la carpeta de la tienda (por ejemplo `/home2/wiresune/terc-tienda`).
+2. En cPanel > **Setup Node.js App**, crea una app con:
+   - Versión de Node.js: 20 o más nueva
+   - Application root: esa misma carpeta
+   - Application URL: el dominio de la tienda
+   - Application startup file: `server.js`
+   - Variables: `SUPABASE_SERVICE_ROLE_KEY`, `MERCADOPAGO_ACCESS_TOKEN` y las `NEXT_PUBLIC_*`
+3. En GitHub > Settings > Secrets and variables > Actions:
+   - **Secrets:** `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`
+   - **Variables:** `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+Mientras no estén los datos FTP, el flujo solo comprueba que la tienda compila.
