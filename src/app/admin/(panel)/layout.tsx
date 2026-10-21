@@ -8,6 +8,9 @@ import { Icon } from "./ui";
 // Cada visita revisa la sesión; nunca se guarda una copia estática.
 export const dynamic = "force-dynamic";
 
+// Guía paso a paso del panel (documento privado de Raúl).
+const GUIDE_URL = "https://claude.ai/artifact/5HvatsQDhSh3aBEGAgLA15";
+
 const today = new Intl.DateTimeFormat("es-CL", {
   weekday: "long",
   day: "numeric",
@@ -18,7 +21,7 @@ const today = new Intl.DateTimeFormat("es-CL", {
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   const user = await requireAdmin();
   return (
-    <div className="lg:flex min-h-screen">
+    <div className="lg:flex min-h-screen lg:bg-[linear-gradient(to_right,#0c2f2c_16rem,transparent_16rem)] print:bg-none">
       <aside className="print:hidden bg-[#0c2f2c] text-white lg:w-64 lg:shrink-0 lg:sticky lg:top-0 lg:h-screen flex flex-col gap-4 lg:gap-8 p-4 lg:p-5">
         <div className="flex items-center justify-between gap-3">
           <Link href="/admin" className="flex items-baseline gap-2">
@@ -45,6 +48,14 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           <p className="truncate" title={user.email ?? undefined}>
             {user.email}
           </p>
+          <a
+            href={GUIDE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block hover:text-white"
+          >
+            Guía de uso ↗
+          </a>
           <div className="flex gap-4">
             <Link href="/" className="hover:text-white">
               Ver tienda ↗
@@ -61,6 +72,9 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         <div className="print:hidden flex items-center justify-between gap-4 px-4 sm:px-8 lg:px-10 pt-4 sm:pt-6 text-xs text-[#6b716f]">
           <span className="first-letter:uppercase">{today.format(new Date())}</span>
           <span className="flex gap-4 lg:hidden">
+            <a href={GUIDE_URL} target="_blank" rel="noopener noreferrer">
+              Guía
+            </a>
             <Link href="/" className="hover:text-[#14201f]">
               Ver tienda ↗
             </Link>

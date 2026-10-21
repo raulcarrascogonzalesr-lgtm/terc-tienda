@@ -29,6 +29,7 @@ export default async function ResultsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Finanzas"
         title="¿Gané o perdí?"
         subtitle="Ventas menos el costo de los equipos y los gastos, mes a mes."
       />

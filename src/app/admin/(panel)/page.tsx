@@ -198,7 +198,8 @@ export default async function HomePage() {
           </dl>
           {stock.missingCost > 0 && (
             <p className="text-xs text-[#7a5200] mt-3">
-              {stock.missingCost} productos sin costo cargado.
+              {stock.missingCost} {stock.missingCost === 1 ? "producto" : "productos"} sin costo
+              cargado.
             </p>
           )}
           <div className="border-t border-[#efede8] mt-4 pt-4 space-y-2 text-sm">

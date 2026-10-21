@@ -583,9 +583,19 @@ export function RegisterWizard({
               {showDocs && docType && file && <Row label="Archivo">{file.name}</Row>}
               {description && <Row label="Detalle">{description}</Row>}
               <Row label="Tu caja quedará en">
-                <span className="tabular-nums">{formatCLP(newCash)}</span>
+                <span className={`tabular-nums ${newCash < 0 ? "text-[#b3362a]" : ""}`}>
+                  {formatCLP(newCash)}
+                </span>
               </Row>
             </dl>
+            {newCash < 0 && (
+              <div className="mx-5 sm:mx-6 mb-4">
+                <Tip title="Tu caja quedaría en negativo">
+                  Puede que falte registrar una entrada de plata, como el préstamo de tu papá.
+                  Puedes guardar igual y registrarla después.
+                </Tip>
+              </div>
+            )}
             {state && "error" in state && (
               <p className="mx-5 sm:mx-6 mb-4 rounded-lg bg-[#fbe9e6] border border-[#f2cbc5] px-4 py-3 text-sm text-[#8f2318]">
                 {state.error}

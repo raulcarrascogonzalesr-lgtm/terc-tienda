@@ -26,6 +26,7 @@ export default async function CampaignsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Finanzas"
         title="Campañas"
         subtitle={`Cuánto gastas en cada anuncio y cuántas ventas trae. Hasta ${formatCLP(CPA_GOOD)} por venta va bien; sobre ${formatCLP(CPA_LOSS)} pierdes plata.`}
       />
@@ -34,7 +35,8 @@ export default async function CampaignsPage() {
         <CampaignForm />
         <p className="text-xs text-[#6b716f] mt-3">
           Cada campaña tiene un enlace propio. Úsalo como destino del anuncio para saber qué ventas
-          trajo. El gasto lo anotas en Caja como &quot;Publicidad&quot; y eliges la campaña.
+          trajo. Lo que pagas lo anotas en Registrar movimiento → Pagué un gasto → Publicidad, y
+          eliges la campaña.
         </p>
       </Card>
 

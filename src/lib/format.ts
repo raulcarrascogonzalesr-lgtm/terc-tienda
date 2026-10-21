@@ -5,7 +5,7 @@ const clp = new Intl.NumberFormat("es-CL", {
 });
 
 export function formatCLP(value: number): string {
-  return clp.format(value);
+  return value < 0 ? `−${clp.format(-value)}` : clp.format(value);
 }
 
 export const GRADE_LABELS = {

@@ -42,6 +42,7 @@ export default async function SettlementPage({
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Finanzas"
         title={`Liquidación de ${monthLabel(month)}`}
         subtitle="TERC · centro de costos dentro de Wiremax"
       >
