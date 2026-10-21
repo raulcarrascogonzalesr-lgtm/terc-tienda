@@ -26,3 +26,27 @@ export type CartItem = {
   quantity: number;
   maxQuantity: number;
 };
+
+// Datos completos que solo ve el panel de administración.
+export type AdminProduct = Product & {
+  cost: number | null;
+  active: boolean;
+  created_at: string;
+};
+
+export type OrderStatus = "pending" | "paid" | "failed" | "shipped" | "delivered" | "cancelled";
+
+export type Order = {
+  id: string;
+  status: OrderStatus;
+  customer: Record<string, string>;
+  items: { product_id: string; name: string; unit_price: number; quantity: number }[];
+  shipping_zone: string;
+  shipping_cost: number;
+  subtotal: number;
+  total: number;
+  payment_id: string | null;
+  tracking_code: string | null;
+  created_at: string;
+  paid_at: string | null;
+};

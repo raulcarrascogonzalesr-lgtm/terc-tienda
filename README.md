@@ -38,6 +38,18 @@ Sin configurar nada, la tienda muestra productos de ejemplo (`src/lib/sample-pro
 
 La clave `service_role` es secreta: nunca la pongas en el código ni la compartas.
 
+## Panel de administración (`/admin`)
+
+En `terc.cl/admin` se ven los pedidos (con cambio de estado y código de seguimiento) y se crean o editan productos, con costo, margen y foto.
+
+Para activarlo, una sola vez:
+
+1. Ejecuta `supabase/schema.sql` de nuevo (crea la carpeta `productos` para las fotos; lo demás no se duplica).
+2. En Supabase > **Authentication > Users > Add user**, crea tu usuario con correo y contraseña (marca "Auto Confirm User").
+3. Agrega la variable `ADMIN_EMAILS` con ese correo. Si son varios, sepáralos con coma.
+
+Solo los correos de `ADMIN_EMAILS` pueden entrar. Marcar un pedido como "Pagado" a mano (por ejemplo, una transferencia) también descuenta el stock.
+
 ## Conectar Mercado Pago
 
 1. En https://www.mercadopago.cl/developers, crea una aplicación (Checkout Pro).
@@ -56,6 +68,7 @@ src/app/                     Páginas y rutas de la API
   api/webhooks/mercadopago/  Recibe la confirmación del pago
 src/components/              Piezas reutilizables (carrito, tarjetas)
 src/lib/                     Datos, formatos y conexión a servicios
+src/app/admin/               Panel de administración (pedidos y productos)
 supabase/schema.sql          Tablas y reglas de seguridad
 ```
 
@@ -90,7 +103,7 @@ Configuración, una sola vez:
    - Application root: esa misma carpeta
    - Application URL: el dominio de la tienda
    - Application startup file: `server.js`
-   - Variables: `SUPABASE_SERVICE_ROLE_KEY`, `MERCADOPAGO_ACCESS_TOKEN` y las `NEXT_PUBLIC_*`
+   - Variables: `SUPABASE_SERVICE_ROLE_KEY`, `MERCADOPAGO_ACCESS_TOKEN`, `ADMIN_EMAILS` y las `NEXT_PUBLIC_*`
 3. En GitHub > Settings > Secrets and variables > Actions:
    - **Secrets:** `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`
    - **Variables:** `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
