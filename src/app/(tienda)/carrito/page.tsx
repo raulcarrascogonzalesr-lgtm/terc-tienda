@@ -17,7 +17,7 @@ function readUtm(): unknown {
 }
 
 export default function CartPage() {
-  const { items, total, setQuantity, remove } = useCart();
+  const { items, total, setQuantity, remove, canBuy } = useCart();
   const [zone, setZone] = useState<ShippingZone>("rm");
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -124,9 +124,14 @@ export default function CartPage() {
         </dl>
 
         {error && <p className="text-sm text-red-700">{error}</p>}
+        {!canBuy && (
+          <p className="text-sm text-muted">
+            Estamos preparando la tienda: muy pronto podrás pagar tu pedido aquí.
+          </p>
+        )}
         <button
           type="submit"
-          disabled={sending}
+          disabled={sending || !canBuy}
           className="w-full bg-brand text-white font-medium rounded-lg px-6 py-3 hover:opacity-90 disabled:opacity-50"
         >
           {sending ? "Redirigiendo..." : "Pagar con Mercado Pago"}

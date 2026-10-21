@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { storeIsOpen } from "@/lib/store-status";
 import { formatCLP, formatDateTime, ORDER_STATUS_LABELS } from "@/lib/format";
 import { loadBusiness } from "./data";
 import {
@@ -14,6 +15,7 @@ import {
 } from "./finance";
 import { ICONS } from "./icons";
 import { SalesChart } from "./SalesChart";
+import { StoreSwitch } from "./StoreSwitch";
 import { Badge, Card, Icon, PageHeader, Stat } from "./ui";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +23,10 @@ export const dynamic = "force-dynamic";
 const VERDICT_TONE = { bien: "good", ojo: "warn", pierde: "bad", "sin-datos": "muted" } as const;
 
 export default async function HomePage() {
-  const { orders, products, movements, campaigns } = await loadBusiness();
+  const [{ orders, products, movements, campaigns }, open] = await Promise.all([
+    loadBusiness(),
+    storeIsOpen(),
+  ]);
   const months = lastMonths(6);
   const thisMonth = months[months.length - 1];
   const results = months.map((m) => monthResult(m, orders, movements, products));
@@ -77,6 +82,7 @@ export default async function HomePage() {
           Registrar movimiento
         </Link>
       </PageHeader>
+      <StoreSwitch open={open} />
 
       {pendingSteps > 0 && (
         <Card
