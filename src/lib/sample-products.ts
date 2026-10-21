@@ -19,6 +19,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     warranty_months: 6,
     description: "Equipo revisado en 30 puntos, liberado para cualquier compañía. Incluye cable de carga.",
     image_url: null,
+    images: [],
   },
   {
     id: "demo-2",
@@ -36,6 +37,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     warranty_months: 6,
     description: "Notebook empresarial con Windows 11 Pro, teclado en español y cargador original.",
     image_url: null,
+    images: [],
   },
   {
     id: "demo-3",
@@ -53,6 +55,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     warranty_months: 6,
     description: "Pantalla sin rayas, pequeñas marcas en el marco. Funcionamiento 100% probado.",
     image_url: null,
+    images: [],
   },
   {
     id: "demo-4",
@@ -70,5 +73,6 @@ export const SAMPLE_PRODUCTS: Product[] = [
     warranty_months: 6,
     description: "Ideal para estudio y trabajo. Se entrega restaurado de fábrica.",
     image_url: null,
+    images: [],
   },
 ];

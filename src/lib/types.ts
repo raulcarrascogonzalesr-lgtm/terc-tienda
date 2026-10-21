@@ -17,6 +17,7 @@ export type Product = {
   warranty_months: number;
   description: string;
   image_url: string | null;
+  images: string[]; // fotos extra, en el orden en que se muestran
 };
 
 // El carrito guarda una copia del nombre y precio solo para mostrarlos.
