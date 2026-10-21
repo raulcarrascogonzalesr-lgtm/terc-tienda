@@ -25,7 +25,7 @@ export default async function PaymentResultPage({
   const message = MESSAGES[estado] ?? MESSAGES.error;
 
   return (
-    <div className="max-w-lg space-y-4">
+    <div className="max-w-lg mx-auto px-4 py-12 space-y-4">
       {estado === "exito" && <ClearCartOnSuccess />}
       <h1 className="text-2xl font-bold">{message.title}</h1>
       <p>{message.text}</p>

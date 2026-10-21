@@ -9,6 +9,13 @@ export function formatCLP(value: number): string {
   return value < 0 ? `−${clp.format(-value)}` : clp.format(value || 0);
 }
 
+// Ahorro frente al precio de un equipo nuevo, solo si ese precio es mayor.
+export function savings(product: { price: number; list_price: number | null }) {
+  if (!product.list_price || product.list_price <= product.price) return null;
+  const amount = product.list_price - product.price;
+  return { amount, percent: Math.round((amount / product.list_price) * 100) };
+}
+
 export const GRADE_LABELS = {
   A: "Grado A · como nuevo",
   B: "Grado B · detalles leves",

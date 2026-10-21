@@ -25,7 +25,7 @@ export function AddToCartButton({ product }: { product: Product }) {
         });
         setAdded(true);
       }}
-      className="w-full sm:w-auto bg-brand text-white font-medium rounded-lg px-6 py-3 hover:opacity-90"
+      className="w-full rounded-full bg-pine px-6 py-3.5 font-semibold text-white transition hover:bg-pine-700"
     >
       {added ? "Agregado al carrito ✓" : "Agregar al carrito"}
     </button>

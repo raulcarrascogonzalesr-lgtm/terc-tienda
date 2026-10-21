@@ -2,19 +2,95 @@
 
 import Link from "next/link";
 import { useCart } from "./CartProvider";
+import { StoreIcon } from "./icons";
 import { Logo } from "./Logo";
 
-export function Header() {
+function SearchForm({ className = "" }: { className?: string }) {
+  return (
+    <form action="/" role="search" className={`relative ${className}`}>
+      <input
+        type="search"
+        name="q"
+        placeholder="¿Qué equipo buscas?"
+        aria-label="Buscar equipos"
+        className="w-full rounded-full border border-black/10 bg-paper py-2.5 pl-4 pr-11 text-sm text-ink placeholder:text-muted/80 focus:border-pine-700 focus:bg-white focus:outline-none focus:ring-4 focus:ring-pine-700/10"
+      />
+      <button
+        type="submit"
+        aria-label="Buscar"
+        className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-pine hover:bg-mint-50"
+      >
+        <StoreIcon name="search" className="w-[18px] h-[18px]" />
+      </button>
+    </form>
+  );
+}
+
+export function Header({ categories }: { categories: string[] }) {
   const { count } = useCart();
   return (
-    <header className="bg-white border-b border-black/10">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" aria-label="TERC, ir al inicio">
-          <Logo className="h-11 sm:h-12 w-auto" />
-        </Link>
-        <Link href="/carrito" className="text-sm font-medium">
-          Carrito ({count})
-        </Link>
+    <header className="sticky top-0 z-40">
+      <div className="bg-pine text-[13px] text-white/85">
+        <div className="max-w-6xl mx-auto px-4 h-9 flex items-center justify-center gap-6">
+          <span className="flex items-center gap-1.5">
+            <StoreIcon name="shield" className="w-4 h-4 text-gold" />
+            Todos los equipos con garantía
+          </span>
+          <span className="hidden sm:flex items-center gap-1.5">
+            <StoreIcon name="truck" className="w-4 h-4 text-gold" />
+            Envíos a todo Chile
+          </span>
+          <span className="hidden md:flex items-center gap-1.5">
+            <StoreIcon name="card" className="w-4 h-4 text-gold" />
+            Paga en cuotas con Mercado Pago
+          </span>
+        </div>
+      </div>
+
+      <div className="bg-white/95 backdrop-blur border-b border-black/[0.06]">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-6">
+          <Link href="/" aria-label="TERC, ir al inicio" className="shrink-0">
+            <Logo className="h-11 sm:h-12 w-auto" />
+          </Link>
+          <SearchForm className="hidden md:block flex-1 max-w-xl mx-auto" />
+          <Link
+            href="/carrito"
+            aria-label={`Carrito, ${count} productos`}
+            className="relative ml-auto md:ml-0 flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-ink hover:bg-paper"
+          >
+            <StoreIcon name="cart" className="w-[22px] h-[22px]" />
+            <span className="hidden sm:inline">Carrito</span>
+            {count > 0 && (
+              <span className="absolute -top-0.5 left-6 min-w-5 h-5 px-1 rounded-full bg-gold text-pine text-[11px] font-bold flex items-center justify-center">
+                {count}
+              </span>
+            )}
+          </Link>
+        </div>
+        <div className="md:hidden px-4 pb-3">
+          <SearchForm />
+        </div>
+        {categories.length > 0 && (
+          <nav aria-label="Categorías" className="border-t border-black/[0.06]">
+            <div className="max-w-6xl mx-auto px-4 h-11 flex items-center gap-1 overflow-x-auto text-sm">
+              <Link
+                href="/#equipos"
+                className="shrink-0 rounded-full px-3 py-1.5 font-medium text-ink hover:bg-paper"
+              >
+                Todos
+              </Link>
+              {categories.map((c) => (
+                <Link
+                  key={c}
+                  href={`/?categoria=${encodeURIComponent(c)}#equipos`}
+                  className="shrink-0 rounded-full px-3 py-1.5 text-muted hover:bg-paper hover:text-ink"
+                >
+                  {c}
+                </Link>
+              ))}
+            </div>
+          </nav>
+        )}
       </div>
     </header>
   );

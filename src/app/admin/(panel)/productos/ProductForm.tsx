@@ -84,7 +84,18 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
         </Field>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-3 gap-4">
+        <Field
+          label="Precio de un equipo nuevo (CLP)"
+          hint="Opcional. La tienda muestra cuánto ahorra el cliente."
+        >
+          <input
+            name="list_price"
+            inputMode="numeric"
+            defaultValue={product?.list_price ?? ""}
+            className="input"
+          />
+        </Field>
         <Field label="Salud de batería (%)" hint="Dejar vacío si no aplica">
           <input
             name="battery_health"

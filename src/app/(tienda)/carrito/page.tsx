@@ -24,7 +24,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="space-y-4">
+      <div className="max-w-6xl mx-auto px-4 py-12 space-y-4">
         <h1 className="text-2xl font-bold">Tu carrito está vacío</h1>
         <Link href="/" className="text-brand underline">
           Ver productos
@@ -62,7 +62,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="grid lg:grid-cols-[1fr_380px] gap-8">
+    <div className="max-w-6xl mx-auto px-4 py-8 grid lg:grid-cols-[1fr_380px] gap-8">
       <section className="space-y-4">
         <h1 className="text-2xl font-bold">Carrito</h1>
         {items.map((item) => (

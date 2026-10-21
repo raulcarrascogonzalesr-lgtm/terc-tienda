@@ -9,6 +9,7 @@ export type Product = {
   category: string;
   grade: Grade;
   price: number; // en pesos chilenos, sin decimales
+  list_price: number | null; // precio de un equipo nuevo equivalente, para mostrar el ahorro
   stock: number;
   battery_health: number | null; // porcentaje, si aplica
   warranty_months: number;

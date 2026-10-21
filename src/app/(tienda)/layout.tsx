@@ -1,18 +1,21 @@
 import { CartProvider } from "@/components/CartProvider";
+import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { UtmCapture } from "@/components/UtmCapture";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { listProducts } from "@/lib/products";
 
-export default function ShopLayout({ children }: { children: React.ReactNode }) {
+export default async function ShopLayout({ children }: { children: React.ReactNode }) {
+  const categories = [...new Set((await listProducts()).map((p) => p.category))].sort();
   return (
     <CartProvider>
       <UtmCapture />
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8">{children}</main>
-        <footer className="border-t border-black/10 py-6 text-center text-sm text-black/60">
-          TERC · Tecnología y Equipos Reacondicionados Chile
-        </footer>
+      <div className="min-h-screen flex flex-col bg-paper text-ink">
+        <Header categories={categories} />
+        <main className="flex-1 w-full">{children}</main>
+        <Footer categories={categories} />
       </div>
+      <WhatsAppButton />
     </CartProvider>
   );
 }
