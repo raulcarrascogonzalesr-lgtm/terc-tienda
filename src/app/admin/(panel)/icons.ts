@@ -13,5 +13,8 @@ export const ICONS = {
   gasto: "M6 2h12v20l-3-2-3 2-3-2-3 2zM9 7h6M9 11h6M9 15h4",
   devolucion: "M9 14l-5-5 5-5M4 9h11a5 5 0 0 1 0 10h-3",
   check: "M5 12l5 5 9-11",
+  venta: "M3 12V3h9l9 9-9 9zM7.5 7.5h.01",
+  reembolso: "M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5",
+  iva: "M19 5 5 19M6.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z",
   archivo: "M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5",
 };

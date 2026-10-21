@@ -12,7 +12,7 @@ export default async function RegisterPage({
   searchParams: Promise<{ tipo?: string }>;
 }) {
   const { tipo } = await searchParams;
-  const { orders, movements, campaigns } = await loadBusiness();
+  const { orders, products, movements, campaigns } = await loadBusiness();
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Santiago" });
 
   return (
@@ -24,6 +24,9 @@ export default async function RegisterPage({
       />
       <RegisterWizard
         campaigns={campaigns.filter((c) => c.active)}
+        products={products
+          .filter((p) => p.stock > 0)
+          .map((p) => ({ id: p.id, name: p.name, stock: p.stock }))}
         today={today}
         cash={cashBalance(orders, movements)}
         loanPending={loanStatus(movements).pending}

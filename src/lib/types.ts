@@ -73,12 +73,14 @@ export type Movement = {
   doc_number: string | null;
   supplier: string | null; // proveedor o quien pagó/recibió
   supplier_rut: string | null;
-  vat: number | null; // IVA de la factura, si tiene
+  vat: number | null; // IVA del documento (factura de compra, venta o nota de crédito)
   attachment: string | null; // ruta del archivo en el bucket privado "documentos"
+  product_id: string | null; // equipo vendido, en ventas fuera de la web
+  unit_cost: number | null; // costo neto de ese equipo al momento de la venta
   created_at: string;
 };
 
-export type DocType = "factura" | "boleta" | "otro";
+export type DocType = "factura" | "boleta" | "otro" | "nota_credito";
 
 export type Campaign = {
   id: string;

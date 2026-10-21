@@ -53,7 +53,7 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
       </div>
 
       <div className="grid sm:grid-cols-3 gap-4">
-        <Field label="Precio de venta (CLP)">
+        <Field label="Precio de venta con IVA (CLP)" hint="Lo que paga el cliente.">
           <input
             name="price"
             required
@@ -62,7 +62,10 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
             className="input"
           />
         </Field>
-        <Field label="Costo (CLP)" hint="Lo que pagaste al proveedor. Privado.">
+        <Field
+          label="Costo neto (CLP)"
+          hint="Lo que te costó un equipo, sin IVA, como sale en la factura. Privado."
+        >
           <input
             name="cost"
             inputMode="numeric"

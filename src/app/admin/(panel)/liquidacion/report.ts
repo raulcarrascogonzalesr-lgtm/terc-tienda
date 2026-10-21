@@ -1,5 +1,13 @@
 import type { AdminProduct, Movement, Order } from "@/lib/types";
-import { cashBalance, isSold, loanStatus, monthOf, monthResult, saleMonth } from "../finance";
+import {
+  cashBalance,
+  isSold,
+  loanStatus,
+  monthOf,
+  monthResult,
+  saleMonth,
+  vatMonths,
+} from "../finance";
 
 // Todo lo de un mes, para cuadrar con la contabilidad de Wiremax.
 export function monthReport(
@@ -19,10 +27,6 @@ export function monthReport(
   const salesIn = sales.reduce((s, o) => s + o.total, 0);
   const otherIn = moves.filter((m) => m.kind === "ingreso").reduce((s, m) => s + m.amount, 0);
   const out = moves.filter((m) => m.kind === "egreso").reduce((s, m) => s + m.amount, 0);
-  // IVA incluido en las ventas (precios con IVA del 19%). Referencial.
-  const vatInSales = Math.round((salesIn * 19) / 119);
-  // IVA de las facturas de compra y gastos del mes. Referencial.
-  const vatCredit = moves.filter((m) => m.kind === "egreso").reduce((s, m) => s + (m.vat ?? 0), 0);
 
   return {
     sales,
@@ -32,8 +36,7 @@ export function monthReport(
     otherIn,
     out,
     closing: opening + salesIn + otherIn - out,
-    vatInSales,
-    vatCredit,
+    vat: vatMonths(orders, movements, month).at(-1)!,
     result: monthResult(month, orders, movements, products),
     loan: loanStatus(movements.filter((m) => monthOf(m.date) <= month)),
   };

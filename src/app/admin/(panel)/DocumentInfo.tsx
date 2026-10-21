@@ -2,7 +2,12 @@ import type { Movement } from "@/lib/types";
 import { ICONS } from "./icons";
 import { Icon } from "./ui";
 
-const DOC_LABELS = { factura: "Factura", boleta: "Boleta", otro: "Comprobante" } as const;
+const DOC_LABELS = {
+  factura: "Factura",
+  boleta: "Boleta",
+  otro: "Comprobante",
+  nota_credito: "Nota de crédito",
+} as const;
 
 export function DocumentInfo({ movement: m }: { movement: Movement }) {
   if (!m.doc_type) return <span className="text-[#a3a8a5]">—</span>;

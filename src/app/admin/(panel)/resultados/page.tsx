@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { formatCLP } from "@/lib/format";
 import { loadBusiness } from "../data";
 import { EXPENSE_CATEGORIES, lastMonths, monthLabel, monthResult } from "../finance";
@@ -12,9 +13,9 @@ export default async function ResultsPage() {
   const total = results.reduce((s, r) => s + r.result, 0);
 
   const rows: { label: string; values: number[]; strong?: boolean; negative?: boolean }[] = [
-    { label: "Ventas (con envío cobrado)", values: results.map((r) => r.sales) },
+    { label: "Ventas netas (sin IVA, con envío)", values: results.map((r) => r.sales) },
     {
-      label: "Costo de los equipos vendidos",
+      label: "Costo neto de los equipos vendidos",
       values: results.map((r) => r.costOfGoods),
       negative: true,
     },
@@ -31,7 +32,7 @@ export default async function ResultsPage() {
       <PageHeader
         eyebrow="Finanzas"
         title="¿Gané o perdí?"
-        subtitle="Ventas menos el costo de los equipos y los gastos, mes a mes."
+        subtitle="Ventas menos el costo de los equipos y los gastos, mes a mes. Todo sin IVA."
       />
 
       <div className="grid md:grid-cols-2 gap-4">
@@ -48,7 +49,7 @@ export default async function ResultsPage() {
             <Result value={current.result} />
           </p>
           <p className="text-sm text-[#6b716f] mt-2">
-            Vendiste {formatCLP(current.sales)}, los equipos te costaron{" "}
+            Vendiste {formatCLP(current.sales)} sin IVA, los equipos te costaron{" "}
             {formatCLP(current.costOfGoods)} y gastaste {formatCLP(current.totalExpenses)}.
           </p>
         </Card>
@@ -100,6 +101,15 @@ export default async function ResultsPage() {
             </tr>
           </tbody>
         </table>
+        <p className="text-xs text-[#6b716f] mt-4">
+          Todo va sin IVA: el IVA de las ventas no es tuyo (se paga a Wiremax) y el de las facturas
+          se recupera. Los gastos sin factura cuentan completos, porque su IVA no se recupera. El
+          detalle está en{" "}
+          <Link href="/admin/iva" className="underline">
+            IVA e impuestos
+          </Link>
+          .
+        </p>
         {results.some((r) => r.missingCost) && (
           <p className="text-xs text-[#7a5200] mt-4">
             ! Algunos productos vendidos no tienen costo cargado, así que la ganancia aparece más

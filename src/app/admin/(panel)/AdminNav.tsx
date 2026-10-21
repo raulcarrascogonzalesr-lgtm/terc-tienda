@@ -22,6 +22,7 @@ const GROUPS = [
     links: [
       { href: "/admin/finanzas", label: "Caja", icon: ICONS.finanzas },
       { href: "/admin/resultados", label: "¿Gané o perdí?", icon: ICONS.resultados },
+      { href: "/admin/iva", label: "IVA e impuestos", icon: ICONS.iva },
       { href: "/admin/campanas", label: "Campañas", icon: ICONS.campanas },
       { href: "/admin/liquidacion", label: "Liquidación", icon: ICONS.liquidacion },
     ],

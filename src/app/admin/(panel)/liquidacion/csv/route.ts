@@ -1,11 +1,16 @@
 import { requireAdmin } from "@/lib/admin";
 import { loadBusiness } from "../../data";
-import { CATEGORY_LABELS, lastMonths } from "../../finance";
+import { CATEGORY_LABELS, lastMonths, movementTaxVat, netOf, vatIn } from "../../finance";
 import { monthReport } from "../report";
 
 export const dynamic = "force-dynamic";
 
-const DOC_NAMES = { factura: "Factura", boleta: "Boleta", otro: "Comprobante" } as const;
+const DOC_NAMES = {
+  factura: "Factura",
+  boleta: "Boleta",
+  otro: "Comprobante",
+  nota_credito: "Nota de crédito",
+} as const;
 
 function cell(value: string | number): string {
   const text = String(value);
@@ -28,8 +33,9 @@ export async function GET(request: Request) {
       "Detalle",
       "Documento",
       "Nº",
-      "Proveedor",
-      "RUT proveedor",
+      "Proveedor o cliente",
+      "RUT",
+      "Neto",
       "IVA",
       "Entrada",
       "Salida",
@@ -39,11 +45,12 @@ export async function GET(request: Request) {
       "Venta web",
       "Venta",
       `${o.customer.name}: ${o.items.map((i) => `${i.quantity} x ${i.name}`).join(", ")}`,
+      "Boleta",
       "",
+      o.customer.name,
       "",
-      "",
-      "",
-      "",
+      netOf(o.total),
+      vatIn(o.total),
       o.total,
       "",
     ]),
@@ -56,14 +63,16 @@ export async function GET(request: Request) {
       m.doc_number ?? "",
       m.supplier ?? "",
       m.supplier_rut ?? "",
-      m.vat ?? "",
+      m.amount - movementTaxVat(m),
+      movementTaxVat(m) || "",
       m.kind === "ingreso" ? m.amount : "",
       m.kind === "egreso" ? m.amount : "",
     ]),
     [],
-    ["Saldo inicial", "", "", "", "", "", "", "", "", r.opening, ""],
-    ["Saldo final", "", "", "", "", "", "", "", "", r.closing, ""],
-    ["Resultado del mes", "", "", "", "", "", "", "", "", r.result.result, ""],
+    ["Saldo inicial", "", "", "", "", "", "", "", "", "", r.opening, ""],
+    ["Saldo final", "", "", "", "", "", "", "", "", "", r.closing, ""],
+    ["Resultado del mes (neto)", "", "", "", "", "", "", "", "", "", r.result.result, ""],
+    ["IVA a traspasar a Wiremax", "", "", "", "", "", "", "", "", "", r.vat.toPay, ""],
   ];
 
   const csv = "﻿" + rows.map((row) => row.map(cell).join(";")).join("\r\n");

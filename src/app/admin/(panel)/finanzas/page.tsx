@@ -69,7 +69,7 @@ export default async function CashPage({
           }
         />
         <Stat
-          label="Invertido en stock"
+          label="Invertido en stock (neto)"
           value={formatCLP(stock.invested)}
           note={
             stock.missingCost > 0
