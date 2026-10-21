@@ -69,8 +69,16 @@ export type Movement = {
   amount: number; // siempre positivo, en CLP
   description: string;
   campaign_id: string | null;
+  doc_type: DocType | null; // documento que respalda el movimiento
+  doc_number: string | null;
+  supplier: string | null; // proveedor o quien pagó/recibió
+  supplier_rut: string | null;
+  vat: number | null; // IVA de la factura, si tiene
+  attachment: string | null; // ruta del archivo en el bucket privado "documentos"
   created_at: string;
 };
+
+export type DocType = "factura" | "boleta" | "otro";
 
 export type Campaign = {
   id: string;

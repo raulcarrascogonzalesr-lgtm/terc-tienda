@@ -32,7 +32,7 @@ export function SalesChart({ data }: { data: ChartPoint[] }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-4 text-xs text-black/70">
+      <div className="flex gap-4 text-xs text-[#3b4442]">
         {SERIES.map((s) => (
           <span key={s.key} className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm" style={{ background: s.color }} />
@@ -108,7 +108,7 @@ export function SalesChart({ data }: { data: ChartPoint[] }) {
         </svg>
         {hover !== null && (
           <div
-            className="absolute top-0 pointer-events-none bg-white border border-black/10 shadow-md rounded-lg px-3 py-2 text-xs space-y-0.5"
+            className="absolute top-0 pointer-events-none bg-white border border-[#e4e2dc] shadow-md rounded-lg px-3 py-2 text-xs space-y-0.5"
             style={{
               left: `${((hover + 0.5) / data.length) * 100}%`,
               transform: "translateX(-50%)",

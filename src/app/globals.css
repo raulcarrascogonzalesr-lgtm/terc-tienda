@@ -19,13 +19,29 @@ body {
 }
 
 @layer components {
+  /* Panel de gestión: estilo sobrio, líneas finas y números alineados. */
   .input {
-    @apply w-full border border-black/20 rounded-lg px-3 py-2 bg-white;
+    @apply w-full rounded-lg border border-[#d8d6cf] bg-white px-3 py-2.5 text-[15px] text-[#14201f] placeholder:text-black/35 transition focus:border-[#0f5f59] focus:outline-none focus:ring-4 focus:ring-[#0f5f59]/10;
   }
   .btn-primary {
-    @apply bg-brand text-white font-medium rounded-lg px-4 py-2 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-[#0f5f59] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0b4a45] disabled:opacity-50;
   }
   .btn-secondary {
-    @apply border border-black/20 font-medium rounded-lg px-4 py-2 bg-white;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-[#d8d6cf] bg-white px-4 py-2.5 text-sm font-medium text-[#14201f] transition hover:border-[#b5b2a8] hover:bg-[#fafaf8];
+  }
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.09em] text-[#6b716f];
+  }
+  .data-table {
+    @apply w-full text-sm tabular-nums;
+  }
+  .data-table thead th {
+    @apply border-b border-[#e4e2dc] py-2.5 pr-3 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6b716f];
+  }
+  .data-table tbody td {
+    @apply border-b border-[#efede8] py-3 pr-3 align-top;
+  }
+  .data-table tbody tr:last-child td {
+    @apply border-0;
   }
 }

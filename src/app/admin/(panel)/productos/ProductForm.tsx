@@ -19,7 +19,7 @@ function Field({
     <label className="block space-y-1">
       <span className="text-sm font-medium">{label}</span>
       {children}
-      {hint && <span className="block text-xs text-black/50">{hint}</span>}
+      {hint && <span className="block text-xs text-[#6b716f]">{hint}</span>}
     </label>
   );
 }
@@ -27,7 +27,7 @@ function Field({
 export function ProductForm({ product }: { product?: AdminProduct }) {
   const [state, action, pending] = useActionState(saveProduct, null);
   return (
-    <form action={action} className="bg-white rounded-xl border border-black/10 p-6 space-y-5">
+    <form action={action} className="bg-white rounded-xl border border-[#e4e2dc] p-6 space-y-5">
       {product && <input type="hidden" name="id" value={product.id} />}
 
       <Field label="Nombre" hint="Ej: iPhone 12 128 GB Azul">
@@ -120,7 +120,7 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
           <img
             src={product.image_url}
             alt=""
-            className="w-32 h-32 object-cover rounded-lg border border-black/10"
+            className="w-32 h-32 object-cover rounded-lg border border-[#e4e2dc]"
           />
         )}
         <input name="photo" type="file" accept="image/*" className="block text-sm" />
@@ -135,7 +135,7 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
         Visible en la tienda
       </label>
 
-      {state?.error && <p className="text-sm text-red-700">{state.error}</p>}
+      {state?.error && <p className="text-sm text-[#b3362a]">{state.error}</p>}
 
       <div className="flex gap-3">
         <button type="submit" disabled={pending} className="btn-primary">

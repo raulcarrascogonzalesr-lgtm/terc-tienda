@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getProduct } from "../../data";
 import { ProductForm } from "../ProductForm";
+import { PageHeader } from "../../ui";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   if (!product) notFound();
   return (
     <section className="space-y-4 max-w-3xl">
-      <h1 className="text-2xl font-bold">Editar producto</h1>
+      <PageHeader eyebrow="Productos" title="Editar producto" />
       <ProductForm product={product} />
     </section>
   );

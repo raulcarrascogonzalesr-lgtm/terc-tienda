@@ -29,13 +29,14 @@ export default async function ResultsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Finanzas"
         title="¿Gané o perdí?"
         subtitle="Ventas menos el costo de los equipos y los gastos, mes a mes."
       />
 
       <div className="grid md:grid-cols-2 gap-4">
         <Card>
-          <p className="text-sm text-black/60 first-letter:uppercase">
+          <p className="text-sm text-[#6b716f] first-letter:uppercase">
             {monthLabel(current.month)}
           </p>
           <p className="text-3xl font-bold mt-1">
@@ -46,17 +47,17 @@ export default async function ResultsPage() {
                 : "Vas en cero "}
             <Result value={current.result} />
           </p>
-          <p className="text-sm text-black/60 mt-2">
+          <p className="text-sm text-[#6b716f] mt-2">
             Vendiste {formatCLP(current.sales)}, los equipos te costaron{" "}
             {formatCLP(current.costOfGoods)} y gastaste {formatCLP(current.totalExpenses)}.
           </p>
         </Card>
         <Card>
-          <p className="text-sm text-black/60">Últimos 6 meses</p>
+          <p className="text-sm text-[#6b716f]">Últimos 6 meses</p>
           <p className="text-3xl font-bold mt-1">
             <Result value={total} />
           </p>
-          <p className="text-sm text-black/60 mt-2">
+          <p className="text-sm text-[#6b716f] mt-2">
             Comprar equipos y devolver el préstamo no cuentan como gasto: el equipo se descuenta
             cuando lo vendes, y el préstamo solo baja la deuda.
           </p>
@@ -66,7 +67,7 @@ export default async function ResultsPage() {
       <Card className="overflow-x-auto">
         <table className="w-full text-sm min-w-[640px]">
           <thead>
-            <tr className="text-black/50 border-b border-black/10">
+            <tr className="text-[#6b716f] border-b border-[#e4e2dc]">
               <th className="text-left py-2 pr-3 font-medium">Concepto</th>
               {results.map((r) => (
                 <th key={r.month} className="text-right py-2 px-2 font-medium capitalize">
@@ -79,11 +80,11 @@ export default async function ResultsPage() {
             {rows.map((row) => (
               <tr
                 key={row.label}
-                className={`border-b border-black/5 ${row.strong ? "font-semibold" : ""}`}
+                className={`border-b border-[#efede8] ${row.strong ? "font-semibold" : ""}`}
               >
                 <td className="py-2 pr-3">{row.label}</td>
                 {row.values.map((v, i) => (
-                  <td key={i} className="py-2 px-2 text-right whitespace-nowrap text-black/80">
+                  <td key={i} className="py-2 px-2 text-right whitespace-nowrap text-[#3b4442]">
                     {v === 0 ? "—" : `${row.negative ? "−" : ""}${formatCLP(v)}`}
                   </td>
                 ))}
