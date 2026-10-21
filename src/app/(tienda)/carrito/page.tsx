@@ -5,6 +5,16 @@ import { useState } from "react";
 import { useCart } from "@/components/CartProvider";
 import { formatCLP } from "@/lib/format";
 import { SHIPPING_ZONES, type ShippingZone } from "@/lib/shipping";
+import { UTM_MAX_AGE_MS, UTM_STORAGE_KEY } from "@/lib/utm";
+
+function readUtm(): unknown {
+  try {
+    const saved = JSON.parse(localStorage.getItem(UTM_STORAGE_KEY) ?? "null");
+    return saved && Date.now() - saved.at < UTM_MAX_AGE_MS ? saved : null;
+  } catch {
+    return null;
+  }
+}
 
 export default function CartPage() {
   const { items, total, setQuantity, remove } = useCart();
@@ -38,6 +48,7 @@ export default function CartPage() {
           items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
           shippingZone: zone,
           customer: Object.fromEntries(form.entries()),
+          utm: readUtm(),
         }),
       });
       const data = await res.json();

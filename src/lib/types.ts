@@ -40,7 +40,13 @@ export type Order = {
   id: string;
   status: OrderStatus;
   customer: Record<string, string>;
-  items: { product_id: string; name: string; unit_price: number; quantity: number }[];
+  items: {
+    product_id: string;
+    name: string;
+    unit_price: number;
+    unit_cost?: number | null; // costo al momento de la venta (pedidos nuevos)
+    quantity: number;
+  }[];
   shipping_zone: string;
   shipping_cost: number;
   subtotal: number;
@@ -49,4 +55,29 @@ export type Order = {
   tracking_code: string | null;
   created_at: string;
   paid_at: string | null;
+  utm: Record<string, string> | null;
+};
+
+export type MovementKind = "ingreso" | "egreso";
+
+// Entrada o salida de plata que no es una venta de la web.
+export type Movement = {
+  id: string;
+  date: string; // AAAA-MM-DD
+  kind: MovementKind;
+  category: string;
+  amount: number; // siempre positivo, en CLP
+  description: string;
+  campaign_id: string | null;
+  created_at: string;
+};
+
+export type Campaign = {
+  id: string;
+  name: string;
+  channel: string;
+  code: string; // valor de utm_campaign en el enlace del anuncio
+  monthly_budget: number | null;
+  active: boolean;
+  created_at: string;
 };

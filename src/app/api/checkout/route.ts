@@ -5,11 +5,13 @@ import { getMercadoPagoClient } from "@/lib/mercadopago";
 import { getProductsByIds } from "@/lib/products";
 import { isShippingZone, SHIPPING_ZONES } from "@/lib/shipping";
 import { getAdminClient } from "@/lib/supabase";
+import { sanitizeUtm } from "@/lib/utm";
 
 type CheckoutBody = {
   items?: { productId?: unknown; quantity?: unknown }[];
   shippingZone?: unknown;
   customer?: Record<string, unknown>;
+  utm?: unknown;
 };
 
 const CUSTOMER_FIELDS = ["name", "email", "phone", "region", "comuna", "address"] as const;
@@ -60,6 +62,13 @@ export async function POST(request: Request) {
 
   const supabase = getAdminClient();
   if (supabase) {
+    // Costo de cada equipo al momento de la venta, para calcular la ganancia real.
+    const { data: costs } = await supabase
+      .from("products")
+      .select("id, cost")
+      .in("id", lines.map((l) => l.product.id));
+    const costById = new Map((costs ?? []).map((c) => [c.id, c.cost as number | null]));
+
     const { error } = await supabase.from("orders").insert({
       id: orderId,
       status: "pending",
@@ -72,8 +81,10 @@ export async function POST(request: Request) {
         product_id: l.product.id,
         name: l.product.name,
         unit_price: l.product.price,
+        unit_cost: costById.get(l.product.id) ?? null,
         quantity: l.quantity,
       })),
+      utm: sanitizeUtm(body.utm),
     });
     if (error) {
       console.error("No se pudo guardar el pedido", error);
@@ -122,7 +133,10 @@ export async function POST(request: Request) {
 
   const checkoutUrl = preference.init_point;
   if (!checkoutUrl) {
-    return NextResponse.json({ error: "Mercado Pago no devolvió un enlace de pago" }, { status: 502 });
+    return NextResponse.json(
+      { error: "Mercado Pago no devolvió un enlace de pago" },
+      { status: 502 },
+    );
   }
   return NextResponse.json({ checkoutUrl, orderId });
 }

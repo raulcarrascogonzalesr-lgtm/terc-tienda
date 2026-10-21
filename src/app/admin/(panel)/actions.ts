@@ -7,6 +7,7 @@ import { requireAdmin } from "@/lib/admin";
 import { ORDER_STATUS_LABELS } from "@/lib/format";
 import { getAdminClient } from "@/lib/supabase";
 import type { OrderStatus } from "@/lib/types";
+import { CHANNEL_LABELS, EXPENSE_CATEGORIES, INCOME_CATEGORIES, OTHER_OUTFLOWS } from "./finance";
 
 function db() {
   const supabase = getAdminClient();
@@ -137,4 +138,76 @@ export async function saveProduct(_prev: SaveResult, form: FormData): Promise<Sa
 
   revalidatePath("/", "layout");
   redirect("/admin/productos");
+}
+
+const MOVEMENT_CATEGORIES = {
+  ingreso: Object.keys(INCOME_CATEGORIES),
+  egreso: [...Object.keys(EXPENSE_CATEGORIES), ...Object.keys(OTHER_OUTFLOWS)],
+};
+
+export async function addMovement(_prev: SaveResult, form: FormData): Promise<SaveResult> {
+  await requireAdmin();
+  const [kind, category] = String(form.get("category") ?? "").split(":");
+  if (kind !== "ingreso" && kind !== "egreso") return { error: "Elige un tipo" };
+  if (!MOVEMENT_CATEGORIES[kind].includes(category)) return { error: "Elige un tipo" };
+
+  const amount = intOrNull(form.get("amount"));
+  if (amount === null || amount <= 0) return { error: "El monto no es válido" };
+  const date = String(form.get("date") ?? "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: "La fecha no es válida" };
+
+  const campaignId = String(form.get("campaign_id") ?? "") || null;
+  const { error } = await db()
+    .from("movements")
+    .insert({
+      kind,
+      category,
+      amount,
+      date,
+      description: String(form.get("description") ?? "")
+        .trim()
+        .slice(0, 300),
+      campaign_id: category === "publicidad" ? campaignId : null,
+    });
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin", "layout");
+  return null;
+}
+
+export async function deleteMovement(id: string) {
+  await requireAdmin();
+  const { error } = await db().from("movements").delete().eq("id", id);
+  if (error) throw error;
+  revalidatePath("/admin", "layout");
+}
+
+export async function saveCampaign(_prev: SaveResult, form: FormData): Promise<SaveResult> {
+  await requireAdmin();
+  const name = String(form.get("name") ?? "").trim();
+  if (!name) return { error: "Falta el nombre" };
+  const channel = String(form.get("channel") ?? "otro");
+  if (!(channel in CHANNEL_LABELS)) return { error: "Canal no válido" };
+
+  const { error } = await db()
+    .from("campaigns")
+    .insert({
+      name,
+      channel,
+      code: slugify(String(form.get("code") ?? "") || name),
+      monthly_budget: intOrNull(form.get("monthly_budget")),
+    });
+  if (error) {
+    if (error.code === "23505") return { error: "Ya existe una campaña con ese código" };
+    return { error: error.message };
+  }
+  revalidatePath("/admin", "layout");
+  return null;
+}
+
+export async function toggleCampaign(id: string, active: boolean) {
+  await requireAdmin();
+  const { error } = await db().from("campaigns").update({ active }).eq("id", id);
+  if (error) throw error;
+  revalidatePath("/admin", "layout");
 }

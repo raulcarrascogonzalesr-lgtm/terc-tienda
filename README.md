@@ -48,6 +48,15 @@ Para activarlo, una sola vez:
 2. En Supabase > **Authentication > Users > Add user**, crea tu usuario con correo y contraseña (marca "Auto Confirm User").
 3. Agrega la variable `ADMIN_EMAILS` con ese correo. Si son varios, sepáralos con coma.
 
+El panel también tiene:
+
+- **Caja**: entradas y salidas de plata (préstamo, compras al proveedor, publicidad, envíos…) y cuánto falta por devolver del préstamo.
+- **¿Gané o perdí?**: resultado mes a mes (ventas − costo de los equipos − gastos).
+- **Campañas**: gasto, ventas y costo por venta de cada anuncio. Cada campaña entrega un enlace con `utm_campaign`, y la tienda guarda en el pedido de qué campaña llegó el cliente.
+- **Liquidación**: resumen mensual para imprimir o descargar en CSV y cuadrar con la contabilidad de Wiremax.
+
+Estas secciones necesitan las tablas de `supabase/finanzas.sql` (también incluidas en `schema.sql`).
+
 Solo los correos de `ADMIN_EMAILS` pueden entrar. Marcar un pedido como "Pagado" a mano (por ejemplo, una transferencia) también descuenta el stock.
 
 ## Conectar Mercado Pago
@@ -60,16 +69,17 @@ Solo los correos de `ADMIN_EMAILS` pueden entrar. Marcar un pedido como "Pagado"
 
 ```
 src/app/                     Páginas y rutas de la API
-  page.tsx                   Portada con catálogo
-  producto/[slug]/           Ficha de producto
-  carrito/                   Carrito y datos de envío
-  pago/[estado]/             Resultado del pago (exito, pendiente, error)
+  (tienda)/page.tsx          Portada con catálogo
+  (tienda)/producto/[slug]/  Ficha de producto
+  (tienda)/carrito/          Carrito y datos de envío
+  (tienda)/pago/[estado]/    Resultado del pago (exito, pendiente, error)
   api/checkout/              Crea el pedido y el pago en Mercado Pago
   api/webhooks/mercadopago/  Recibe la confirmación del pago
 src/components/              Piezas reutilizables (carrito, tarjetas)
 src/lib/                     Datos, formatos y conexión a servicios
 src/app/admin/               Panel de administración (pedidos y productos)
 supabase/schema.sql          Tablas y reglas de seguridad
+supabase/finanzas.sql        Tablas de caja y campañas (panel)
 ```
 
 ## Publicar con Docker (VPS)
