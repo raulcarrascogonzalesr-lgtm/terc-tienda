@@ -9,6 +9,7 @@ import {
   monthLabel,
   monthResult,
   stockValue,
+  vatMonths,
   VERDICT_LABELS,
 } from "./finance";
 import { ICONS } from "./icons";
@@ -28,6 +29,7 @@ export default async function HomePage() {
   const cash = cashBalance(orders, movements);
   const loan = loanStatus(movements);
   const stock = stockValue(products);
+  const vat = vatMonths(orders, movements, thisMonth).at(-1)!;
 
   const toShip = orders.filter((o) => o.status === "paid");
   const lowStock = products
@@ -152,13 +154,15 @@ export default async function HomePage() {
           label={current.result >= 0 ? "Ganancia del mes" : "Pérdida del mes"}
           value={formatCLP(Math.abs(current.result))}
           note={
-            current.missingCost ? "Faltan costos de algunos productos" : "Ventas − costos − gastos"
+            current.missingCost
+              ? "Faltan costos de algunos productos"
+              : "Ventas − costos − gastos, sin IVA"
           }
         />
         <Stat
-          label="Ventas del mes"
+          label="Ventas netas del mes"
           value={formatCLP(current.sales)}
-          note={`${current.orders} pedidos pagados`}
+          note={`Sin IVA · ${formatCLP(current.salesGross)} con IVA`}
         />
         <Stat
           label="Préstamo por devolver"
@@ -170,6 +174,33 @@ export default async function HomePage() {
           }
         />
       </div>
+
+      <Link
+        href="/admin/iva"
+        className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 rounded-xl border border-[#e4e2dc] bg-white px-5 py-4 text-sm transition hover:border-[#0f5f59]"
+      >
+        <span className="flex items-center gap-3 font-medium">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f3f2ee] text-[#0c2f2c]">
+            <Icon path={ICONS.iva} className="w-4 h-4" />
+          </span>
+          IVA estimado de {monthLabel(thisMonth)}
+        </span>
+        <span className="flex flex-wrap gap-x-6 gap-y-1 tabular-nums text-[#6b716f]">
+          <span>
+            Ventas <span className="font-semibold text-[#14201f]">{formatCLP(vat.debit)}</span>
+          </span>
+          <span>
+            Facturas <span className="font-semibold text-[#14201f]">−{formatCLP(vat.credit)}</span>
+          </span>
+          <span>
+            {vat.carryOut > 0 ? "A favor " : "A traspasar a Wiremax "}
+            <span className="font-semibold text-[#0f5f59]">
+              {formatCLP(vat.carryOut > 0 ? vat.carryOut : vat.toPay)}
+            </span>
+          </span>
+          <span aria-hidden>→</span>
+        </span>
+      </Link>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <Card title="Ventas y publicidad, últimos 6 meses" className="lg:col-span-2">
@@ -184,11 +215,11 @@ export default async function HomePage() {
         <Card title="Stock">
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between">
-              <dt className="text-[#6b716f]">Invertido en equipos</dt>
+              <dt className="text-[#6b716f]">Invertido en equipos (neto)</dt>
               <dd className="font-semibold tabular-nums">{formatCLP(stock.invested)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-[#6b716f]">Si vendes todo</dt>
+              <dt className="text-[#6b716f]">Si vendes todo (neto)</dt>
               <dd className="font-semibold tabular-nums">{formatCLP(stock.atPrice)}</dd>
             </div>
             <div className="flex justify-between">
@@ -282,7 +313,8 @@ export default async function HomePage() {
       </div>
 
       <p className="text-xs text-[#6b716f]">
-        Los números se calculan con los pedidos pagados y lo que registras en Caja.
+        Los números se calculan con los pedidos pagados y lo que registras en Caja. Ventas, costos y
+        ganancia van sin IVA; el IVA está en su propia sección.
       </p>
     </div>
   );

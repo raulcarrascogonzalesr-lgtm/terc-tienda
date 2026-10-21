@@ -147,7 +147,6 @@ const MOVEMENT_CATEGORIES = {
 
 export type MovementResult = { error: string } | { ok: true } | null;
 
-const DOC_TYPES = ["factura", "boleta", "otro"];
 const MAX_DOC_BYTES = 5 * 1024 * 1024;
 
 function text(form: FormData, key: string, max = 120): string | null {
@@ -172,6 +171,16 @@ async function uploadDocument(file: File, date: string): Promise<string> {
   return path;
 }
 
+// Qué documentos acepta cada tipo de movimiento.
+function allowedDocs(category: string): string[] {
+  if (category === "venta_directa") return ["boleta", "factura"];
+  if (category === "devolucion_cliente") return ["nota_credito"];
+  if (category in EXPENSE_CATEGORIES || category === "compra_equipos") {
+    return ["factura", "boleta", "otro"];
+  }
+  return [];
+}
+
 export async function addMovement(_prev: MovementResult, form: FormData): Promise<MovementResult> {
   await requireAdmin();
   const [kind, category] = String(form.get("category") ?? "").split(":");
@@ -183,12 +192,43 @@ export async function addMovement(_prev: MovementResult, form: FormData): Promis
   const date = String(form.get("date") ?? "");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: "La fecha no es válida" };
 
-  const docType = kind === "egreso" ? String(form.get("doc_type") ?? "") : "";
-  if (docType && !DOC_TYPES.includes(docType)) return { error: "Documento no válido" };
+  const isSale = category === "venta_directa" || category === "devolucion_cliente";
+  const docs = allowedDocs(category);
+  const docType = String(form.get("doc_type") ?? "");
+  if (docType ? !docs.includes(docType) : isSale) return { error: "Elige el documento" };
   const docNumber = docType ? text(form, "doc_number", 40) : null;
   const supplier = text(form, "supplier");
-  if (docType === "factura" && (!docNumber || !supplier)) {
-    return { error: "Para una factura, anota el proveedor y el número" };
+  if ((docType === "factura" || docType === "nota_credito") && !docNumber) {
+    return { error: "Anota el número del documento" };
+  }
+  if (docType === "factura" && !isSale && !supplier) {
+    return { error: "Para una factura, anota el proveedor" };
+  }
+
+  // IVA tal como sale en el documento; si no viene, 19/119 del total.
+  let vat: number | null = null;
+  if (isSale || docType === "factura") {
+    vat = intOrNull(form.get("vat")) ?? Math.round((amount * 19) / 119);
+    if (vat < 0 || vat > amount) return { error: "El IVA no puede ser mayor que el total" };
+  }
+
+  // Venta fuera de la web de un equipo del catálogo: guarda su costo y baja el stock.
+  let productId: string | null = null;
+  let unitCost: number | null = null;
+  if (category === "venta_directa") {
+    productId = String(form.get("product_id") ?? "") || null;
+    if (productId) {
+      const { data: product } = await db()
+        .from("products")
+        .select("cost, stock")
+        .eq("id", productId)
+        .maybeSingle();
+      if (!product) return { error: "El producto no existe" };
+      if (product.stock < 1) return { error: "Ese producto no tiene stock" };
+      unitCost = product.cost;
+    } else {
+      unitCost = intOrNull(form.get("unit_cost"));
+    }
   }
 
   let attachment: string | null = null;
@@ -215,17 +255,28 @@ export async function addMovement(_prev: MovementResult, form: FormData): Promis
       doc_number: docNumber,
       supplier,
       supplier_rut: docType ? text(form, "supplier_rut", 20) : null,
-      // Las facturas en Chile incluyen 19% de IVA dentro del total.
-      vat: docType === "factura" ? Math.round((amount * 19) / 119) : null,
+      vat,
       attachment,
+      product_id: productId,
+      unit_cost: unitCost,
     });
   if (error) {
     if (attachment) await db().storage.from("documentos").remove([attachment]);
     return { error: error.message };
   }
+  if (productId) await changeStock(productId, -1);
 
-  revalidatePath("/admin", "layout");
+  revalidatePath("/", "layout");
   return { ok: true };
+}
+
+async function changeStock(productId: string, delta: number) {
+  const { data } = await db().from("products").select("stock").eq("id", productId).maybeSingle();
+  if (!data) return;
+  await db()
+    .from("products")
+    .update({ stock: Math.max(data.stock + delta, 0) })
+    .eq("id", productId);
 }
 
 export async function deleteMovement(id: string) {
@@ -234,11 +285,36 @@ export async function deleteMovement(id: string) {
     .from("movements")
     .delete()
     .eq("id", id)
-    .select("attachment")
+    .select("attachment, category, product_id")
     .maybeSingle();
   if (error) throw error;
   if (data?.attachment) await db().storage.from("documentos").remove([data.attachment]);
+  // Si se borra una venta fuera de la web, el equipo vuelve al stock.
+  if (data?.category === "venta_directa" && data.product_id) await changeStock(data.product_id, 1);
+  revalidatePath("/", "layout");
+}
+
+export async function savePpmRate(_prev: SaveResult, form: FormData): Promise<SaveResult> {
+  await requireAdmin();
+  const raw = String(form.get("ppm_rate") ?? "")
+    .trim()
+    .replace(",", ".");
+  const supabase = db();
+  if (raw === "") {
+    const { error } = await supabase.from("settings").delete().eq("key", "ppm_rate");
+    if (error) return { error: error.message };
+  } else {
+    const rate = Number(raw);
+    if (!Number.isFinite(rate) || rate < 0 || rate > 10) {
+      return { error: "Escribe la tasa como porcentaje, por ejemplo 0,25" };
+    }
+    const { error } = await supabase
+      .from("settings")
+      .upsert({ key: "ppm_rate", value: String(rate), updated_at: new Date().toISOString() });
+    if (error) return { error: error.message };
+  }
   revalidatePath("/admin", "layout");
+  return null;
 }
 
 export async function saveCampaign(_prev: SaveResult, form: FormData): Promise<SaveResult> {

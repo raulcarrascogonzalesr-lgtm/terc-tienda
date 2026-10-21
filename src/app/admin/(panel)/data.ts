@@ -72,3 +72,10 @@ export async function loadBusiness() {
   ]);
   return { orders, products, movements, campaigns };
 }
+
+// Ajustes guardados del panel (por ahora, la tasa de PPM de Wiremax).
+export async function getSettings(): Promise<Record<string, string>> {
+  const { data, error } = await db().from("settings").select("key, value");
+  if (error) return {}; // la tabla puede no existir todavía
+  return Object.fromEntries(data.map((row) => [row.key, row.value]));
+}

@@ -7,14 +7,28 @@ import type { Campaign, DocType } from "@/lib/types";
 import { addMovement } from "../actions";
 import { ICONS } from "../icons";
 import { Icon, Tip } from "../ui";
-import { INTENTS, type IntentKey } from "./intents";
+import { INTENTS, type DocMode, type IntentKey } from "./intents";
 
-const DOC_OPTIONS: { value: DocType | ""; label: string }[] = [
-  { value: "factura", label: "Factura" },
-  { value: "boleta", label: "Boleta" },
-  { value: "otro", label: "Otro comprobante" },
-  { value: "", label: "No tengo" },
-];
+const DOC_NAMES: Record<DocType, string> = {
+  factura: "Factura",
+  boleta: "Boleta",
+  otro: "Otro comprobante",
+  nota_credito: "Nota de crédito",
+};
+
+const DOC_OPTIONS: Record<NonNullable<DocMode>, (DocType | "")[]> = {
+  compra: ["factura", "boleta", "otro", ""],
+  venta: ["boleta", "factura"],
+  nota: ["nota_credito"],
+};
+
+const DEFAULT_DOC: Record<NonNullable<DocMode>, DocType> = {
+  compra: "factura",
+  venta: "boleta",
+  nota: "nota_credito",
+};
+
+export type SellableProduct = { id: string; name: string; stock: number };
 
 const MAX_FILE = 5 * 1024 * 1024;
 
@@ -92,12 +106,14 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 
 export function RegisterWizard({
   campaigns,
+  products,
   today,
   cash,
   loanPending,
   initialIntent,
 }: {
   campaigns: Campaign[];
+  products: SellableProduct[];
   today: string;
   cash: number;
   loanPending: number;
@@ -116,6 +132,9 @@ export function RegisterWizard({
   const [docNumber, setDocNumber] = useState("");
   const [campaignId, setCampaignId] = useState("");
   const [description, setDescription] = useState("");
+  const [vatText, setVatText] = useState("");
+  const [productId, setProductId] = useState("");
+  const [unitCost, setUnitCost] = useState("");
   const [file, setFile] = useState<{ name: string; error?: string } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const top = useRef<HTMLDivElement>(null);
@@ -128,7 +147,9 @@ export function RegisterWizard({
     if (!intent) return;
     const keys = Object.keys(INTENTS[intent].options);
     setSub(keys.length === 1 ? keys[0] : "");
-    setDocType(intent === "compra" ? "factura" : "");
+    const docs = INTENTS[intent].docs;
+    setDocType(docs ? DEFAULT_DOC[docs] : "");
+    setVatText("");
   }, [intent]);
 
   useEffect(() => {
@@ -140,16 +161,25 @@ export function RegisterWizard({
   }, [step, done]);
 
   const value = Number(amount || 0);
-  const vat = docType === "factura" ? Math.round((value * 19) / 119) : 0;
-  const showDocs = !!config?.documents;
-  const needsDocData = showDocs && docType === "factura";
+  const mode = config?.docs ?? null;
+  const showDocs = !!mode;
+  const isSale = mode === "venta" || mode === "nota";
+  // IVA del documento: lo calcula solo, pero se puede corregir como sale en el papel.
+  const hasVat = isSale || (mode === "compra" && docType === "factura");
+  const vat = hasVat ? (vatText !== "" ? Number(vatText) : Math.round((value * 19) / 119)) : 0;
+  const needsNumber = docType === "factura" || docType === "nota_credito";
+  const needsSupplier = mode === "compra" && docType === "factura";
   const ready =
     !!config &&
     !!sub &&
     value > 0 &&
     /^\d{4}-\d{2}-\d{2}$/.test(date) &&
-    (!needsDocData || (supplier.trim() !== "" && docNumber.trim() !== "")) &&
+    (!showDocs || !isSale || docType !== "") &&
+    (!needsNumber || docNumber.trim() !== "") &&
+    (!needsSupplier || supplier.trim() !== "") &&
+    vat <= value &&
     !file?.error;
+  const partyLabel = isSale ? "Cliente" : "Proveedor";
   const newCash = config?.kind === "ingreso" ? cash + value : cash - value;
 
   function choose(key: IntentKey) {
@@ -170,6 +200,9 @@ export function RegisterWizard({
     setDocNumber("");
     setCampaignId("");
     setDescription("");
+    setVatText("");
+    setProductId("");
+    setUnitCost("");
     setFile(null);
     if (fileInput.current) fileInput.current.value = "";
   }
@@ -249,11 +282,18 @@ export function RegisterWizard({
         <input type="hidden" name="doc_number" value={docNumber} />
         <input type="hidden" name="campaign_id" value={campaignId} />
         <input type="hidden" name="description" value={description} />
+        <input type="hidden" name="vat" value={hasVat ? String(vat) : ""} />
+        <input type="hidden" name="product_id" value={mode === "venta" ? productId : ""} />
+        <input
+          type="hidden"
+          name="unit_cost"
+          value={mode === "venta" && !productId ? unitCost : ""}
+        />
 
         {/* Paso 1: qué pasó */}
         <section hidden={step !== 1} className="space-y-4">
           <h2 className="text-lg font-semibold">¿Qué pasó con la plata?</h2>
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {(Object.keys(INTENTS) as IntentKey[]).map((key) => {
               const item = INTENTS[key];
               const incoming = item.kind === "ingreso";
@@ -289,7 +329,8 @@ export function RegisterWizard({
             })}
           </div>
           <Tip>
-            ¿Vendiste algo en la tienda web? No lo anotes aquí: las ventas pagadas se suman solas.
+            ¿Vendiste algo en la tienda web? No lo anotes aquí: las ventas pagadas en terc.cl se
+            suman solas.
           </Tip>
         </section>
 
@@ -360,6 +401,46 @@ export function RegisterWizard({
                     </select>
                   </Field>
                 )}
+                {sub === "publicidad" && (
+                  <Tip>
+                    Meta (Instagram y Facebook) y Google cobran desde el extranjero y no entregan
+                    factura chilena. Elige <strong>Otro comprobante</strong>: ese gasto no rebaja
+                    IVA.
+                  </Tip>
+                )}
+              </div>
+            )}
+
+            {mode === "venta" && (
+              <div className="p-5 sm:p-6 grid sm:grid-cols-2 gap-5">
+                <Field label="¿Qué vendiste?" hint="Si es del catálogo, el stock baja solo.">
+                  <select
+                    value={productId}
+                    onChange={(e) => setProductId(e.target.value)}
+                    className="input"
+                  >
+                    <option value="">No está en el catálogo</option>
+                    {products.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} (quedan {p.stock})
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                {!productId && (
+                  <Field
+                    label="Costo neto de lo que vendiste (opcional)"
+                    hint="Lo que te costó, sin IVA. Sirve para calcular la ganancia."
+                  >
+                    <input
+                      inputMode="numeric"
+                      value={unitCost ? Number(unitCost).toLocaleString("es-CL") : ""}
+                      onChange={(e) => setUnitCost(digits(e.target.value))}
+                      placeholder="0"
+                      className="input tabular-nums"
+                    />
+                  </Field>
+                )}
               </div>
             )}
 
@@ -367,11 +448,15 @@ export function RegisterWizard({
               <Field
                 label="¿Cuánto fue?"
                 hint={
-                  docType === "factura"
-                    ? "El total de la factura, con IVA incluido."
-                    : intent === "devolucion" && loanPending > 0
-                      ? `Te quedan ${formatCLP(loanPending)} por devolver.`
-                      : "Solo números, sin puntos."
+                  mode === "venta"
+                    ? "Lo que te pagó el cliente, con IVA incluido."
+                    : mode === "nota"
+                      ? "Lo que le devolviste, con IVA incluido."
+                      : docType === "factura"
+                        ? "El total de la factura, con IVA incluido."
+                        : intent === "devolucion" && loanPending > 0
+                          ? `Te quedan ${formatCLP(loanPending)} por devolver.`
+                          : "Solo números, sin puntos."
                 }
               >
                 <div className="relative">
@@ -383,12 +468,22 @@ export function RegisterWizard({
                     autoComplete="off"
                     placeholder="0"
                     value={amount ? Number(amount).toLocaleString("es-CL") : ""}
-                    onChange={(e) => setAmount(digits(e.target.value))}
+                    onChange={(e) => {
+                      setAmount(digits(e.target.value));
+                      setVatText("");
+                    }}
                     className="input pl-7 text-lg font-semibold tabular-nums"
                   />
                 </div>
               </Field>
-              <Field label="¿Cuándo?" hint="La fecha en que pagaste o recibiste la plata.">
+              <Field
+                label="¿Cuándo?"
+                hint={
+                  showDocs && docType
+                    ? "La fecha del documento."
+                    : "La fecha en que pagaste o recibiste la plata."
+                }
+              >
                 <input
                   type="date"
                   value={date}
@@ -402,22 +497,31 @@ export function RegisterWizard({
             {showDocs && (
               <div className="p-5 sm:p-6 space-y-5">
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">¿Tienes factura o boleta?</p>
+                  <p className="text-sm font-medium">
+                    {mode === "compra"
+                      ? "¿Tienes factura o boleta?"
+                      : mode === "venta"
+                        ? "¿Qué documento le diste al cliente?"
+                        : "Documento"}
+                  </p>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" role="radiogroup">
-                    {DOC_OPTIONS.map((o) => (
+                    {DOC_OPTIONS[mode!].map((o) => (
                       <button
-                        key={o.label}
+                        key={o || "ninguno"}
                         type="button"
                         role="radio"
-                        aria-checked={docType === o.value}
-                        onClick={() => setDocType(o.value)}
+                        aria-checked={docType === o}
+                        onClick={() => {
+                          setDocType(o);
+                          setVatText("");
+                        }}
                         className={`rounded-lg border px-3 py-2.5 text-sm transition ${
-                          docType === o.value
+                          docType === o
                             ? "border-[#0f5f59] bg-[#f0f7f6] font-semibold text-[#0c2f2c] ring-1 ring-[#0f5f59]"
                             : "border-[#e4e2dc] hover:border-[#b5b2a8]"
                         }`}
                       >
-                        {o.label}
+                        {o ? DOC_NAMES[o] : "No tengo"}
                       </button>
                     ))}
                   </div>
@@ -427,18 +531,26 @@ export function RegisterWizard({
                   <>
                     <div className="grid sm:grid-cols-2 gap-5">
                       <Field
-                        label={docType === "factura" ? "Proveedor" : "Proveedor (opcional)"}
-                        hint="Nombre de la empresa o persona a quien le pagaste."
+                        label={needsSupplier ? partyLabel : `${partyLabel} (opcional)`}
+                        hint={
+                          isSale
+                            ? "Nombre de la persona o empresa."
+                            : "Nombre de la empresa o persona a quien le pagaste."
+                        }
                       >
                         <input
                           value={supplier}
                           onChange={(e) => setSupplier(e.target.value)}
-                          placeholder="Ej: Reacondicionados SpA"
+                          placeholder={isSale ? "Ej: Juan Pérez" : "Ej: Reacondicionados SpA"}
                           className="input"
                         />
                       </Field>
                       <Field
-                        label={docType === "factura" ? "Número de factura" : "Número (opcional)"}
+                        label={
+                          needsNumber
+                            ? `Número de ${DOC_NAMES[docType as DocType].toLowerCase()}`
+                            : "Número (opcional)"
+                        }
                         hint="Aparece arriba a la derecha del documento, como «Nº 1234»."
                       >
                         <input
@@ -449,7 +561,7 @@ export function RegisterWizard({
                         />
                       </Field>
                       {docType === "factura" && (
-                        <Field label="RUT del proveedor (opcional)">
+                        <Field label={`RUT del ${partyLabel.toLowerCase()} (opcional)`}>
                           <input
                             value={supplierRut}
                             onChange={(e) => setSupplierRut(e.target.value)}
@@ -476,26 +588,56 @@ export function RegisterWizard({
                       </Field>
                     </div>
 
-                    {docType === "factura" && value > 0 && (
-                      <dl className="grid grid-cols-3 rounded-lg bg-[#f8f7f3] border border-[#e4e2dc] text-center tabular-nums">
-                        <div className="p-3">
-                          <dt className="eyebrow">Neto</dt>
-                          <dd className="font-semibold mt-1">{formatCLP(value - vat)}</dd>
+                    {hasVat && value > 0 && (
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-3 rounded-lg bg-[#f8f7f3] border border-[#e4e2dc] text-center tabular-nums">
+                          <div className="p-3">
+                            <p className="eyebrow">Neto</p>
+                            <p className="font-semibold mt-1">{formatCLP(value - vat)}</p>
+                          </div>
+                          <label className="p-3 border-x border-[#e4e2dc] block">
+                            <span className="eyebrow block">IVA</span>
+                            <input
+                              inputMode="numeric"
+                              value={vat.toLocaleString("es-CL")}
+                              onChange={(e) => setVatText(digits(e.target.value) || "0")}
+                              className="mt-1 w-full rounded-md border border-[#d8d6cf] bg-white px-2 py-1 text-center font-semibold"
+                              aria-label="IVA del documento"
+                            />
+                          </label>
+                          <div className="p-3">
+                            <p className="eyebrow">Total</p>
+                            <p className="font-semibold mt-1">{formatCLP(value)}</p>
+                          </div>
                         </div>
-                        <div className="p-3 border-x border-[#e4e2dc]">
-                          <dt className="eyebrow">IVA 19%</dt>
-                          <dd className="font-semibold mt-1">{formatCLP(vat)}</dd>
-                        </div>
-                        <div className="p-3">
-                          <dt className="eyebrow">Total</dt>
-                          <dd className="font-semibold mt-1">{formatCLP(value)}</dd>
-                        </div>
-                      </dl>
+                        <p className="text-xs text-[#6b716f]">
+                          El IVA se calcula solo (19%). Si el documento dice otro monto, por ejemplo
+                          porque tiene partes exentas, cópialo tal como sale.
+                        </p>
+                        {vat > value && (
+                          <p className="text-xs text-[#b3362a]">
+                            El IVA no puede ser mayor que el total.
+                          </p>
+                        )}
+                      </div>
                     )}
-                    {docType === "factura" && (
+                    {mode === "compra" && docType === "factura" && (
                       <Tip>
                         Pide que la factura salga a nombre de <strong>Wiremax</strong> (con su RUT).
-                        Así tu papá puede descontar el IVA en su contabilidad.
+                        Solo así su IVA se puede rebajar.
+                      </Tip>
+                    )}
+                    {mode === "venta" && (
+                      <Tip>
+                        La boleta o factura la emite Wiremax en el SII. Aquí solo anotas su número y
+                        montos para llevar la cuenta del IVA.
+                      </Tip>
+                    )}
+                    {mode === "nota" && (
+                      <Tip>
+                        Si devolviste un pedido de la web en el mismo mes en que se vendió, basta
+                        con cambiar el pedido a <strong>Cancelado</strong>. Usa esto para
+                        devoluciones de meses anteriores o de ventas fuera de la web.
                       </Tip>
                     )}
                   </>
@@ -505,7 +647,13 @@ export function RegisterWizard({
 
             <div className="p-5 sm:p-6">
               <Field
-                label={intent === "compra" ? "¿Qué compraste?" : "Detalle (opcional)"}
+                label={
+                  intent === "compra"
+                    ? "¿Qué compraste?"
+                    : intent === "reembolso"
+                      ? "¿Por qué devolviste?"
+                      : "Detalle (opcional)"
+                }
                 hint="Una nota corta para acordarte después."
               >
                 <input
@@ -519,7 +667,11 @@ export function RegisterWizard({
                         ? "Ej: préstamo de mi papá para partir"
                         : intent === "devolucion"
                           ? "Ej: primera cuota"
-                          : "Ej: anuncio de notebooks en Instagram"
+                          : intent === "venta"
+                            ? "Ej: notebook a un compañero del colegio"
+                            : intent === "reembolso"
+                              ? "Ej: el equipo llegó con la pantalla fallada"
+                              : "Ej: anuncio de notebooks en Instagram"
                   }
                   className="input"
                 />
@@ -564,21 +716,29 @@ export function RegisterWizard({
               {sub === "publicidad" && campaignId && (
                 <Row label="Campaña">{campaigns.find((c) => c.id === campaignId)?.name}</Row>
               )}
+              {mode === "venta" && (
+                <Row label="Qué vendiste">
+                  {products.find((p) => p.id === productId)?.name ?? "Fuera del catálogo"}
+                </Row>
+              )}
               {showDocs && (
                 <Row label="Documento">
                   {docType
-                    ? `${DOC_OPTIONS.find((o) => o.value === docType)?.label}${docNumber ? ` Nº ${docNumber}` : ""}`
+                    ? `${DOC_NAMES[docType]}${docNumber ? ` Nº ${docNumber}` : ""}`
                     : "Sin documento"}
                 </Row>
               )}
               {showDocs && docType && supplier && (
-                <Row label="Proveedor">
+                <Row label={partyLabel}>
                   {supplier}
                   {supplierRut && <span className="text-[#6b716f]"> · {supplierRut}</span>}
                 </Row>
               )}
-              {docType === "factura" && showDocs && (
-                <Row label="IVA incluido">{formatCLP(vat)}</Row>
+              {hasVat && (
+                <>
+                  <Row label="Neto">{formatCLP(value - vat)}</Row>
+                  <Row label="IVA">{formatCLP(vat)}</Row>
+                </>
               )}
               {showDocs && docType && file && <Row label="Archivo">{file.name}</Row>}
               {description && <Row label="Detalle">{description}</Row>}

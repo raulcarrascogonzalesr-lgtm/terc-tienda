@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatCLP } from "@/lib/format";
 import { listAllProducts } from "../data";
+import { netOf } from "../finance";
 import { PageHeader } from "../ui";
 
 export const dynamic = "force-dynamic";
@@ -24,16 +25,18 @@ export default async function ProductsPage() {
             <tr>
               <th className="p-3">Producto</th>
               <th className="p-3">Grado</th>
-              <th className="p-3 text-right">Precio</th>
-              <th className="p-3 text-right">Costo</th>
-              <th className="p-3 text-right">Margen</th>
+              <th className="p-3 text-right">Precio con IVA</th>
+              <th className="p-3 text-right">Costo neto</th>
+              <th className="p-3 text-right">Margen neto</th>
               <th className="p-3 text-right">Stock</th>
               <th className="p-3">Visible</th>
             </tr>
           </thead>
           <tbody>
             {products.map((p) => {
-              const margin = p.cost === null ? null : p.price - p.cost;
+              // Se compara sin IVA: precio neto menos costo neto.
+              const priceNet = netOf(p.price);
+              const margin = p.cost === null ? null : priceNet - p.cost;
               return (
                 <tr
                   key={p.id}
@@ -52,7 +55,7 @@ export default async function ProductsPage() {
                   <td className="p-3 text-right whitespace-nowrap">
                     {margin === null
                       ? "—"
-                      : `${formatCLP(margin)} (${p.price ? Math.round((margin / p.price) * 100) : 0}%)`}
+                      : `${formatCLP(margin)} (${priceNet ? Math.round((margin / priceNet) * 100) : 0}%)`}
                   </td>
                   <td className={`p-3 text-right ${p.stock === 0 ? "text-[#b3362a]" : ""}`}>
                     {p.stock}
@@ -66,7 +69,7 @@ export default async function ProductsPage() {
       </div>
       <p className="text-sm text-[#6b716f]">
         En la tienda solo aparecen los productos visibles y con stock. El costo nunca se muestra al
-        cliente.
+        cliente. El margen compara el precio sin IVA con el costo sin IVA.
       </p>
     </section>
   );
