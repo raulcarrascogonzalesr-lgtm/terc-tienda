@@ -35,6 +35,8 @@ Si una regla cambia (por ejemplo, el margen), se cambia aquí y vale desde la pr
 - La tienda agrega sola, al final, una tarjeta con la garantía TERC; no hay que subirla.
 - Las fotos tienen que parecerse lo más posible al equipo real: mismo modelo, mismo color
   y misma capacidad cuando cambia el aspecto.
+- Que no se vean tan genéricas: además del render de frente, preferir vistas en ángulo,
+  de detalle (teclado, puertos, cámaras) o del equipo en uso, siempre del mismo modelo.
 - Para saber qué fotos usar, mirar cómo muestran ese modelo las tiendas de reacondicionados
   (Back Market, Reuse, Macnificos, etc.) y elegir el mismo tipo de imagen desde la fuente
   oficial del fabricante (sitio, sala de prensa o ficha técnica), con fondo blanco y sin
