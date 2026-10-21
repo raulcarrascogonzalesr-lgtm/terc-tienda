@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
 import { GRADE_SHORT } from "@/components/ProductCard";
-import { ProductImage } from "@/components/ProductImage";
+import { ProductGallery } from "@/components/ProductGallery";
 import { formatCLP, GRADE_LABELS, offer, savings } from "@/lib/format";
 import { getProductBySlug } from "@/lib/products";
 import { SITE, whatsappLink } from "@/lib/site";
@@ -57,25 +57,24 @@ export default async function ProductPage({ params }: Props) {
       </nav>
 
       <div className="grid gap-8 lg:gap-12 md:grid-cols-2">
-        <div className="relative self-start overflow-hidden rounded-3xl border border-black/[0.06] bg-white">
-          <ProductImage product={product} />
-          {product.on_demand && product.image_url && (
-            <span className="absolute bottom-3 right-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] text-muted">
-              Imagen referencial
-            </span>
-          )}
-          <div className="absolute left-4 top-4 flex flex-col items-start gap-2">
-            {sale && (
-              <span className="rounded-md bg-sale px-3 py-1 text-sm font-bold text-white">
-                Oferta −{sale.percent}%
-              </span>
-            )}
-            {off && (
-              <span className="rounded-md bg-gold px-3 py-1 text-xs font-bold text-pine">
-                −{off.percent}% vs. nuevo
-              </span>
-            )}
-          </div>
+        <div className="relative self-start">
+          <ProductGallery
+            product={product}
+            badges={
+              <div className="absolute left-4 top-4 flex flex-col items-start gap-2">
+                {sale && (
+                  <span className="rounded-md bg-sale px-3 py-1 text-sm font-bold text-white">
+                    Oferta −{sale.percent}%
+                  </span>
+                )}
+                {off && (
+                  <span className="rounded-md bg-gold px-3 py-1 text-xs font-bold text-pine">
+                    −{off.percent}% vs. nuevo
+                  </span>
+                )}
+              </div>
+            }
+          />
         </div>
 
         <div className="space-y-6">

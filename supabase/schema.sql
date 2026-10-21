@@ -166,3 +166,8 @@ create unique index if not exists products_supplier_sku_key on products (supplie
 
 -- La tienda necesita saber si es a pedido; el proveedor y su código quedan privados.
 grant select (on_demand) on products to anon, authenticated;
+
+-- Fotos extra de cada producto (la principal sigue en image_url).
+-- Ejecutar una vez en Supabase > SQL Editor (no borra nada si se repite).
+alter table products add column if not exists images text[] not null default '{}';
+grant select (images) on products to anon, authenticated;
