@@ -420,3 +420,13 @@ export async function toggleCampaign(id: string, active: boolean) {
   if (error) throw error;
   revalidatePath("/admin", "layout");
 }
+
+// Abre o cierra las compras de la tienda (los visitantes siguen viendo equipos y precios).
+export async function setStoreOpen(open: boolean) {
+  await requireAdmin();
+  const { error } = await db()
+    .from("settings")
+    .upsert({ key: "store_open", value: String(open), updated_at: new Date().toISOString() });
+  if (error) throw error;
+  revalidatePath("/", "layout");
+}

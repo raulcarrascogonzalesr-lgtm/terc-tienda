@@ -1,10 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { Preference } from "mercadopago";
+import { getAdminUser } from "@/lib/admin";
 import { maxUnits } from "@/lib/format";
 import { getMercadoPagoClient } from "@/lib/mercadopago";
 import { getProductsByIds } from "@/lib/products";
 import { isShippingZone, SHIPPING_ZONES } from "@/lib/shipping";
+import { storeIsOpen } from "@/lib/store-status";
 import { getAdminClient } from "@/lib/supabase";
 import { sanitizeUtm } from "@/lib/utm";
 
@@ -18,6 +20,13 @@ type CheckoutBody = {
 const CUSTOMER_FIELDS = ["name", "email", "phone", "region", "comuna", "address"] as const;
 
 export async function POST(request: Request) {
+  // Con las compras cerradas desde el panel, solo el administrador puede pagar (para probar).
+  if (!(await storeIsOpen()) && !(await getAdminUser())) {
+    return NextResponse.json(
+      { error: "Estamos preparando la tienda: muy pronto podrás comprar." },
+      { status: 503 },
+    );
+  }
   const body = (await request.json().catch(() => null)) as CheckoutBody | null;
   if (!body || !Array.isArray(body.items) || body.items.length === 0) {
     return NextResponse.json({ error: "El carrito está vacío" }, { status: 400 });

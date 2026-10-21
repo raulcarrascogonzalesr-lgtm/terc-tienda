@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { ADMIN_BROWSER_KEY } from "@/lib/admin-browser";
 import type { CartItem } from "@/lib/types";
 
 type CartContextValue = {
@@ -11,20 +12,30 @@ type CartContextValue = {
   setQuantity: (productId: string, quantity: number) => void;
   remove: (productId: string) => void;
   clear: () => void;
+  // Falso mientras las compras están cerradas (salvo en el navegador del administrador).
+  canBuy: boolean;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
 const STORAGE_KEY = "terc-cart";
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
+export function CartProvider({
+  children,
+  storeOpen = true,
+}: {
+  children: React.ReactNode;
+  storeOpen?: boolean;
+}) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [adminBrowser, setAdminBrowser] = useState(false);
 
   // Recupera el carrito guardado en el navegador.
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) setItems(JSON.parse(saved));
+      setAdminBrowser(localStorage.getItem(ADMIN_BROWSER_KEY) === "1");
     } catch {
       // Sin acceso al almacenamiento: el carrito parte vacío.
     }
@@ -86,8 +97,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setQuantity,
       remove,
       clear,
+      canBuy: storeOpen || adminBrowser,
     }),
-    [items, add, setQuantity, remove, clear],
+    [items, add, setQuantity, remove, clear, storeOpen, adminBrowser],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

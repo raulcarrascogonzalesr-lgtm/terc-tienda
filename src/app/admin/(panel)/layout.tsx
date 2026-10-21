@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import { logout } from "../login/actions";
 import { AdminNav } from "./AdminNav";
+import { MarkAdminBrowser } from "./MarkAdminBrowser";
 import { ICONS } from "./icons";
 import { Icon } from "./ui";
 
@@ -22,6 +23,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const user = await requireAdmin();
   return (
     <div className="lg:flex min-h-screen lg:bg-[linear-gradient(to_right,#0c2f2c_16rem,transparent_16rem)] print:bg-none">
+      <MarkAdminBrowser />
       <aside className="print:hidden bg-[#0c2f2c] text-white lg:w-64 lg:shrink-0 lg:sticky lg:top-0 lg:h-screen flex flex-col gap-4 lg:gap-8 p-4 lg:p-5">
         <div className="flex items-center justify-between gap-3">
           <Link href="/admin" className="flex items-baseline gap-2">
