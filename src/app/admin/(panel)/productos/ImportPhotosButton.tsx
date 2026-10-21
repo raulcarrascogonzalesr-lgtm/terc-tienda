@@ -11,7 +11,7 @@ export function ImportPhotosButton({ pending: count }: { pending: number }) {
     <form action={action} className="flex flex-wrap items-center gap-3 rounded-xl border border-[#e4e2dc] bg-[#fbf8ef] p-4 text-sm">
       <span className="flex-1">
         {count > 0
-          ? `${count} ${count === 1 ? "producto tiene" : "productos tienen"} la foto enlazada desde otra página. Guárdalas en la tienda para que no se pierdan.`
+          ? `${count} ${count === 1 ? "producto tiene" : "productos tienen"} fotos enlazadas desde otra página. Guárdalas en la tienda para que no se pierdan (15 productos por clic).`
           : "Todas las fotos están guardadas en la tienda."}
         {result && (
           <span className="block mt-1 text-[#6b716f]">

@@ -30,10 +30,17 @@ Si una regla cambia (por ejemplo, el margen), se cambia aquí y vale desde la pr
 
 ## Fotos y descripciones
 
-- Foto: preferir la imagen oficial del fabricante (sitio o sala de prensa de Apple, Samsung,
-  Lenovo, etc.), con fondo blanco y sin marcas de agua. Evitar fotos propias de otras tiendas.
-- Se pone el enlace en `image_url` y luego, en Panel → Productos, se aprieta
-  **"Guardar fotos en la tienda"**, que las copia al almacenamiento de TERC.
+- Cada producto lleva **varias fotos** (ideal 3 o 4): frente, espalda o tapa, lateral y, si hay,
+  una del equipo en uso. La principal va en `image_url` y el resto en `images` (hasta 8).
+- La tienda agrega sola, al final, una tarjeta con la garantía TERC; no hay que subirla.
+- Las fotos tienen que parecerse lo más posible al equipo real: mismo modelo, mismo color
+  y misma capacidad cuando cambia el aspecto.
+- Para saber qué fotos usar, mirar cómo muestran ese modelo las tiendas de reacondicionados
+  (Back Market, Reuse, Macnificos, etc.) y elegir el mismo tipo de imagen desde la fuente
+  oficial del fabricante (sitio, sala de prensa o ficha técnica), con fondo blanco y sin
+  marcas de agua. No copiar las fotos que esas tiendas sacaron ellas mismas.
+- Se ponen los enlaces y luego, en Panel → Productos, se aprieta
+  **"Guardar fotos en la tienda"**, que las copia al almacenamiento de TERC (15 productos por clic).
 - La tienda muestra "Imagen referencial" en las fotos de productos a pedido.
 - Descripción: 2 o 3 frases en español, con datos verificables del fabricante
   (pantalla, procesador, memoria, batería). Nada inventado.

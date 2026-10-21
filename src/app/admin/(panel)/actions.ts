@@ -125,9 +125,17 @@ export async function saveProduct(_prev: SaveResult, form: FormData): Promise<Sa
   };
   if (!values.brand || !values.category) return { error: "Faltan la marca o la categoría" };
 
+  // Fotos extra: enlaces (uno por línea) más los archivos que se suban.
+  const links = String(form.get("images") ?? "")
+    .split(/\s+/)
+    .filter((url) => url.startsWith("https://"));
   try {
     const photo = form.get("photo");
     if (photo instanceof File && photo.size > 0) values.image_url = await uploadImage(photo);
+    for (const file of form.getAll("extra_photos")) {
+      if (file instanceof File && file.size > 0) links.push(await uploadImage(file));
+    }
+    values.images = links.slice(0, 8);
   } catch (err) {
     return { error: err instanceof Error ? err.message : "No se pudo subir la foto" };
   }
@@ -156,38 +164,56 @@ const PHOTO_TYPES: Record<string, string> = {
 
 export type ImportResult = { saved: number; failed: string[] } | null;
 
+// Dirección donde quedan las fotos guardadas en la tienda.
+function storageUrl(): string {
+  return db().storage.from("productos").getPublicUrl("").data.publicUrl;
+}
+
+// Descarga una foto de otra página y la guarda en la tienda; devuelve su nueva dirección.
+async function copyPhoto(url: string): Promise<string> {
+  const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+  const type = res.headers.get("content-type")?.split(";")[0].trim() ?? "";
+  if (!res.ok || !PHOTO_TYPES[type]) throw new Error("No es una foto");
+  const body = await res.arrayBuffer();
+  if (body.byteLength > 6 * 1024 * 1024) throw new Error("Foto muy pesada");
+  const path = `${randomUUID()}.${PHOTO_TYPES[type]}`;
+  const supabase = db();
+  const upload = await supabase.storage.from("productos").upload(path, body, { contentType: type });
+  if (upload.error) throw upload.error;
+  return supabase.storage.from("productos").getPublicUrl(path).data.publicUrl;
+}
+
 // Copia a la tienda las fotos que se pusieron como enlace a otra página,
 // para que no dependan de que esa página las siga teniendo.
 export async function importExternalPhotos(): Promise<ImportResult> {
   await requireAdmin();
-  const supabase = db();
-  const ours = supabase.storage.from("productos").getPublicUrl("").data.publicUrl;
-  const { data, error } = await supabase
-    .from("products")
-    .select("id, name, image_url")
-    .like("image_url", "https://%");
+  const ours = storageUrl();
+  const isExternal = (url: string | null): url is string =>
+    !!url && url.startsWith("https://") && !url.startsWith(ours);
+  const { data, error } = await db().from("products").select("id, name, image_url, images");
   if (error) throw error;
 
   let saved = 0;
   const failed: string[] = [];
-  for (const p of data.filter((p) => !p.image_url.startsWith(ours)).slice(0, 40)) {
-    try {
-      const res = await fetch(p.image_url, { signal: AbortSignal.timeout(15000) });
-      const type = res.headers.get("content-type")?.split(";")[0].trim() ?? "";
-      if (!res.ok || !PHOTO_TYPES[type]) throw new Error();
-      const body = await res.arrayBuffer();
-      if (body.byteLength > 6 * 1024 * 1024) throw new Error();
-      const path = `${randomUUID()}.${PHOTO_TYPES[type]}`;
-      const upload = await supabase.storage
-        .from("productos")
-        .upload(path, body, { contentType: type });
-      if (upload.error) throw upload.error;
-      const url = supabase.storage.from("productos").getPublicUrl(path).data.publicUrl;
-      await supabase.from("products").update({ image_url: url }).eq("id", p.id);
-      saved++;
-    } catch {
-      failed.push(p.name);
-    }
+  const pending = data.filter((p) => isExternal(p.image_url) || p.images.some(isExternal));
+  for (const p of pending.slice(0, 15)) {
+    let ok = true;
+    const copy = async (url: string) => {
+      if (!isExternal(url)) return url;
+      try {
+        const copied = await copyPhoto(url);
+        saved++;
+        return copied;
+      } catch {
+        ok = false;
+        return url;
+      }
+    };
+    const image_url = p.image_url ? await copy(p.image_url) : null;
+    const images: string[] = [];
+    for (const url of p.images as string[]) images.push(await copy(url));
+    await db().from("products").update({ image_url, images }).eq("id", p.id);
+    if (!ok) failed.push(p.name);
   }
 
   revalidatePath("/", "layout");
@@ -200,12 +226,15 @@ export async function deleteProduct(id: string) {
     .from("products")
     .delete()
     .eq("id", id)
-    .select("image_url")
+    .select("image_url, images")
     .maybeSingle();
   if (error) throw error;
-  // La foto se borra del almacenamiento; los pedidos y movimientos guardan su propio detalle.
-  const photo = data?.image_url?.split("/productos/").pop();
-  if (photo) await db().storage.from("productos").remove([photo]);
+  // Las fotos guardadas en la tienda se borran; los pedidos y movimientos guardan su propio detalle.
+  const ours = storageUrl();
+  const photos = [data?.image_url, ...(data?.images ?? [])]
+    .filter((url): url is string => !!url && url.startsWith(ours))
+    .map((url) => url.slice(ours.length));
+  if (photos.length) await db().storage.from("productos").remove(photos);
   revalidatePath("/", "layout");
 }
 

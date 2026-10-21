@@ -182,6 +182,33 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
         <input name="photo" type="file" accept="image/*" className="block text-sm" />
       </Field>
 
+      <Field
+        label="Más fotos"
+        hint="Enlaces a fotos (uno por línea), en el orden en que se muestran. Hasta 8. La tienda agrega al final una tarjeta con la garantía TERC."
+      >
+        {product && product.images.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {product.images.map((url) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={url}
+                src={url}
+                alt=""
+                className="w-20 h-20 object-cover rounded-lg border border-[#e4e2dc]"
+              />
+            ))}
+          </div>
+        )}
+        <textarea
+          name="images"
+          rows={3}
+          defaultValue={product?.images.join("\n")}
+          placeholder="https://…"
+          className="input font-mono text-xs"
+        />
+        <input name="extra_photos" type="file" accept="image/*" multiple className="block text-sm" />
+      </Field>
+
       <Field label="Dirección web (slug)" hint="Se crea sola a partir del nombre si la dejas vacía">
         <input name="slug" defaultValue={product?.slug} className="input" />
       </Field>

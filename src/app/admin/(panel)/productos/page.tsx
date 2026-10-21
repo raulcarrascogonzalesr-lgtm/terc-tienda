@@ -12,8 +12,9 @@ export const dynamic = "force-dynamic";
 export default async function ProductsPage() {
   const products = await listAllProducts();
   const ours = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/productos/`;
+  const isExternal = (url: string | null) => !!url?.startsWith("https://") && !url.startsWith(ours);
   const externalPhotos = products.filter(
-    (p) => p.image_url?.startsWith("https://") && !p.image_url.startsWith(ours),
+    (p) => isExternal(p.image_url) || p.images.some(isExternal),
   ).length;
   return (
     <section className="space-y-4">
