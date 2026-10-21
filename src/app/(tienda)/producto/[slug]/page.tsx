@@ -5,7 +5,7 @@ import { AddToCartButton } from "@/components/AddToCartButton";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
 import { GRADE_SHORT } from "@/components/ProductCard";
 import { ProductImage } from "@/components/ProductImage";
-import { formatCLP, GRADE_LABELS, savings } from "@/lib/format";
+import { formatCLP, GRADE_LABELS, offer, savings } from "@/lib/format";
 import { getProductBySlug } from "@/lib/products";
 import { whatsappLink } from "@/lib/site";
 
@@ -26,6 +26,7 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProductBySlug((await params).slug);
   if (!product) notFound();
 
+  const sale = offer(product);
   const off = savings(product);
   const whatsapp = whatsappLink(`Hola, me interesa el ${product.name}. ¿Me pueden dar más información?`);
   const trust: { icon: IconName; text: string }[] = [
@@ -50,11 +51,18 @@ export default async function ProductPage({ params }: Props) {
       <div className="grid gap-8 lg:gap-12 md:grid-cols-2">
         <div className="relative self-start overflow-hidden rounded-3xl border border-black/[0.06] bg-white">
           <ProductImage product={product} />
-          {off && (
-            <span className="absolute left-4 top-4 rounded-full bg-gold px-3 py-1 text-xs font-bold text-pine">
-              −{off.percent}% vs. nuevo
-            </span>
-          )}
+          <div className="absolute left-4 top-4 flex flex-col items-start gap-2">
+            {sale && (
+              <span className="rounded-md bg-sale px-3 py-1 text-sm font-bold text-white">
+                Oferta −{sale.percent}%
+              </span>
+            )}
+            {off && (
+              <span className="rounded-md bg-gold px-3 py-1 text-xs font-bold text-pine">
+                −{off.percent}% vs. nuevo
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="space-y-6">
@@ -81,15 +89,23 @@ export default async function ProductPage({ params }: Props) {
           </div>
 
           <div className="space-y-1">
-            {off && (
+            {sale && (
               <p className="text-sm text-muted">
-                Nuevo cuesta <span className="line-through">{formatCLP(product.list_price!)}</span>
+                Antes <span className="line-through">{formatCLP(sale.before)}</span>
               </p>
             )}
-            <p className="text-4xl font-bold tracking-tight text-ink">{formatCLP(product.price)}</p>
+            <p className={`text-4xl font-bold tracking-tight ${sale ? "text-sale" : "text-ink"}`}>
+              {formatCLP(product.price)}
+            </p>
+            {sale && (
+              <p className="text-sm font-semibold text-sale">
+                Oferta: ahorras {formatCLP(sale.amount)} ({sale.percent}%)
+              </p>
+            )}
             {off && (
-              <p className="text-sm font-semibold text-pine-700">
-                Ahorras {formatCLP(off.amount)} ({off.percent}%)
+              <p className="text-sm text-pine-700">
+                Un equipo nuevo cuesta <span className="line-through">{formatCLP(off.before)}</span>:{" "}
+                <strong>ahorras {formatCLP(off.amount)} ({off.percent}%)</strong>
               </p>
             )}
             <p className="text-sm text-muted">IVA incluido. Paga con tarjeta, débito o en cuotas.</p>

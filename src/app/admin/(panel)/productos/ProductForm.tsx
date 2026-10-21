@@ -84,7 +84,18 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
         </Field>
       </div>
 
-      <div className="grid sm:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 gap-4">
+        <Field
+          label="Precio antes, para ofertas (CLP)"
+          hint="Opcional. Pon el precio al que lo vendías antes de rebajarlo; la tienda lo muestra tachado con el % de descuento. Debe ser un precio real: inventarlo es publicidad engañosa."
+        >
+          <input
+            name="compare_price"
+            inputMode="numeric"
+            defaultValue={product?.compare_price ?? ""}
+            className="input"
+          />
+        </Field>
         <Field
           label="Precio de un equipo nuevo (CLP)"
           hint="Opcional. La tienda muestra cuánto ahorra el cliente."
@@ -96,6 +107,9 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
             className="input"
           />
         </Field>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4">
         <Field label="Salud de batería (%)" hint="Dejar vacío si no aplica">
           <input
             name="battery_health"

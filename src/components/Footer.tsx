@@ -39,6 +39,11 @@ export function Footer({ categories }: { categories: string[] }) {
               </li>
             )}
             <li>
+              <Link href="/por-que-terc" className="flex items-center gap-2 hover:text-white">
+                <StoreIcon name="leaf" className="w-4 h-4" /> Por qué TERC
+              </Link>
+            </li>
+            <li>
               <a href={`mailto:${SITE.email}`} className="flex items-center gap-2 hover:text-white">
                 <StoreIcon name="mail" className="w-4 h-4" /> {SITE.email}
               </a>

@@ -26,7 +26,7 @@ function SearchForm({ className = "" }: { className?: string }) {
   );
 }
 
-export function Header({ categories }: { categories: string[] }) {
+export function Header({ categories, hasOffers }: { categories: string[]; hasOffers: boolean }) {
   const { count } = useCart();
   return (
     <header className="sticky top-0 z-40">
@@ -79,6 +79,14 @@ export function Header({ categories }: { categories: string[] }) {
               >
                 Todos
               </Link>
+              {hasOffers && (
+                <Link
+                  href="/?ofertas=1#equipos"
+                  className="shrink-0 rounded-full px-3 py-1.5 font-semibold text-sale hover:bg-sale-50"
+                >
+                  Ofertas
+                </Link>
+              )}
               {categories.map((c) => (
                 <Link
                   key={c}
@@ -88,6 +96,12 @@ export function Header({ categories }: { categories: string[] }) {
                   {c}
                 </Link>
               ))}
+              <Link
+                href="/por-que-terc"
+                className="ml-auto shrink-0 rounded-full px-3 py-1.5 text-muted hover:bg-paper hover:text-ink"
+              >
+                Por qué TERC
+              </Link>
             </div>
           </nav>
         )}

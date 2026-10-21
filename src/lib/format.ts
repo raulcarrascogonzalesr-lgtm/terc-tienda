@@ -9,11 +9,20 @@ export function formatCLP(value: number): string {
   return value < 0 ? `−${clp.format(-value)}` : clp.format(value || 0);
 }
 
+function discount(price: number, before: number | null) {
+  if (!before || before <= price) return null;
+  const amount = before - price;
+  return { before, amount, percent: Math.round((amount / before) * 100) };
+}
+
 // Ahorro frente al precio de un equipo nuevo, solo si ese precio es mayor.
 export function savings(product: { price: number; list_price: number | null }) {
-  if (!product.list_price || product.list_price <= product.price) return null;
-  const amount = product.list_price - product.price;
-  return { amount, percent: Math.round((amount / product.list_price) * 100) };
+  return discount(product.price, product.list_price);
+}
+
+// Rebaja frente al precio anterior de TERC, cuando el equipo está en oferta.
+export function offer(product: { price: number; compare_price: number | null }) {
+  return discount(product.price, product.compare_price);
 }
 
 export const GRADE_LABELS = {
