@@ -84,6 +84,34 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
         </Field>
       </div>
 
+      <label className="flex items-start gap-2 text-sm">
+        <input
+          name="on_demand"
+          type="checkbox"
+          defaultChecked={product?.on_demand ?? false}
+          className="mt-0.5"
+        />
+        <span>
+          A pedido: no lo tengo en stock, se lo pido al proveedor cuando alguien lo compra.
+          <span className="block text-xs text-[#6b716f]">
+            Se puede comprar aunque el stock sea 0 y no cuenta como plata invertida.
+          </span>
+        </span>
+      </label>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        <Field label="Proveedor" hint="Opcional. Privado.">
+          <input name="supplier" defaultValue={product?.supplier ?? ""} className="input" />
+        </Field>
+        <Field label="Código en la lista del proveedor" hint="Opcional. Privado.">
+          <input
+            name="supplier_sku"
+            defaultValue={product?.supplier_sku ?? ""}
+            className="input"
+          />
+        </Field>
+      </div>
+
       <div className="grid sm:grid-cols-2 gap-4">
         <Field
           label="Precio antes, para ofertas (CLP)"

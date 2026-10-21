@@ -4,7 +4,7 @@ import type { Product } from "./types";
 
 // Columnas públicas. El costo del proveedor nunca se envía al navegador.
 const PRODUCT_COLUMNS =
-  "id, slug, name, brand, category, grade, price, list_price, compare_price, stock, battery_health, warranty_months, description, image_url";
+  "id, slug, name, brand, category, grade, price, list_price, compare_price, stock, on_demand, battery_health, warranty_months, description, image_url";
 
 export async function listProducts(): Promise<Product[]> {
   const supabase = getPublicClient();
@@ -14,7 +14,7 @@ export async function listProducts(): Promise<Product[]> {
     .from("products")
     .select(PRODUCT_COLUMNS)
     .eq("active", true)
-    .gt("stock", 0)
+    .or("stock.gt.0,on_demand.eq.true")
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data as Product[];
@@ -38,7 +38,12 @@ export async function getProductsByIds(ids: string[]): Promise<Product[]> {
   const supabase = getPublicClient();
   if (!supabase) return SAMPLE_PRODUCTS.filter((p) => ids.includes(p.id));
 
-  const { data, error } = await supabase.from("products").select(PRODUCT_COLUMNS).in("id", ids);
+  // Solo productos visibles: si uno se ocultó mientras estaba en un carrito, ya no se puede pagar.
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCT_COLUMNS)
+    .in("id", ids)
+    .eq("active", true);
   if (error) throw error;
   return data as Product[];
 }

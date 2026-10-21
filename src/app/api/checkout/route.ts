@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { Preference } from "mercadopago";
+import { maxUnits } from "@/lib/format";
 import { getMercadoPagoClient } from "@/lib/mercadopago";
 import { getProductsByIds } from "@/lib/products";
 import { isShippingZone, SHIPPING_ZONES } from "@/lib/shipping";
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
     if (!product) {
       return NextResponse.json({ error: "Un producto ya no está disponible" }, { status: 409 });
     }
-    if (product.stock < item.quantity) {
+    if (maxUnits(product) < item.quantity) {
       return NextResponse.json({ error: `Sin stock suficiente de ${product.name}` }, { status: 409 });
     }
     lines.push({ product, quantity: item.quantity });

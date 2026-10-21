@@ -28,7 +28,7 @@ const DEFAULT_DOC: Record<NonNullable<DocMode>, DocType> = {
   nota: "nota_credito",
 };
 
-export type SellableProduct = { id: string; name: string; stock: number };
+export type SellableProduct = { id: string; name: string; stock: number; onDemand: boolean };
 
 const MAX_FILE = 5 * 1024 * 1024;
 
@@ -422,7 +422,7 @@ export function RegisterWizard({
                     <option value="">No está en el catálogo</option>
                     {products.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.name} (quedan {p.stock})
+                        {p.name} {p.onDemand ? "(a pedido)" : `(quedan ${p.stock})`}
                       </option>
                     ))}
                   </select>
