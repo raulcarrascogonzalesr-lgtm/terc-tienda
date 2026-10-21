@@ -1,134 +1,204 @@
 import Link from "next/link";
 import { formatCLP, formatDateTime, ORDER_STATUS_LABELS } from "@/lib/format";
-import { listAllProducts, listOrders } from "./data";
-import { summarize } from "./summary";
+import { loadBusiness } from "./data";
+import {
+  campaignStats,
+  cashBalance,
+  lastMonths,
+  loanStatus,
+  monthLabel,
+  monthResult,
+  stockValue,
+  VERDICT_LABELS,
+} from "./finance";
+import { SalesChart } from "./SalesChart";
+import { Badge, Card, PageHeader, Stat } from "./ui";
 
 export const dynamic = "force-dynamic";
 
-function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
+const VERDICT_TONE = { bien: "good", ojo: "warn", pierde: "bad", "sin-datos": "muted" } as const;
+
+export default async function HomePage() {
+  const { orders, products, movements, campaigns } = await loadBusiness();
+  const months = lastMonths(6);
+  const thisMonth = months[months.length - 1];
+  const results = months.map((m) => monthResult(m, orders, movements, products));
+  const current = results[results.length - 1];
+  const cash = cashBalance(orders, movements);
+  const loan = loanStatus(movements);
+  const stock = stockValue(products);
+
+  const toShip = orders.filter((o) => o.status === "paid");
+  const lowStock = products
+    .filter((p) => p.active && p.stock <= 1)
+    .sort((a, b) => a.stock - b.stock);
+  const activeCampaigns = campaigns.filter((c) => c.active);
+
   return (
-    <div className="bg-white rounded-xl border border-black/10 p-4 space-y-1">
-      <p className="text-sm text-black/60">{label}</p>
-      <p className="text-2xl font-bold">{value}</p>
-      {note && <p className="text-xs text-black/50">{note}</p>}
-    </div>
-  );
-}
+    <div className="space-y-6">
+      <PageHeader title="Inicio" subtitle={`Así va TERC en ${monthLabel(thisMonth)}`} />
 
-export default async function SummaryPage() {
-  const [orders, products] = await Promise.all([listOrders(), listAllProducts()]);
-  const s = summarize(orders, products);
-  const monthName = new Intl.DateTimeFormat("es-CL", {
-    month: "long",
-    timeZone: "America/Santiago",
-  }).format(new Date());
-
-  return (
-    <section className="space-y-8">
-      <h1 className="text-2xl font-bold">Resumen</h1>
-
-      {(s.toShip > 0 || s.awaitingPayment > 0) && (
-        <div className="flex flex-wrap gap-3 text-sm">
-          {s.toShip > 0 && (
-            <Link
-              href="/admin/pedidos"
-              className="rounded-full bg-amber-100 text-amber-900 px-3 py-1"
-            >
-              {s.toShip} {s.toShip === 1 ? "pedido pagado" : "pedidos pagados"} por despachar
+      {(toShip.length > 0 || lowStock.some((p) => p.stock === 0)) && (
+        <div className="flex flex-wrap gap-2">
+          {toShip.length > 0 && (
+            <Link href="/admin/pedidos">
+              <Badge tone="warn">
+                {toShip.length} {toShip.length === 1 ? "pedido pagado" : "pedidos pagados"} por
+                despachar
+              </Badge>
             </Link>
           )}
-          {s.awaitingPayment > 0 && (
-            <Link href="/admin/pedidos" className="rounded-full bg-black/5 px-3 py-1">
-              {s.awaitingPayment} esperando pago
+          {lowStock.some((p) => p.stock === 0) && (
+            <Link href="/admin/productos">
+              <Badge tone="bad">Hay productos agotados</Badge>
             </Link>
           )}
         </div>
       )}
 
-      <div className="space-y-3">
-        <h2 className="font-semibold capitalize">Ventas de {monthName}</h2>
-        <div className="grid sm:grid-cols-3 gap-4">
-          <Stat label="Vendido" value={formatCLP(s.month.sales)} note="Sin contar el envío" />
-          <Stat
-            label="Ganancia estimada"
-            value={formatCLP(s.month.profit.total)}
-            note={
-              s.month.profit.missingCost ? "Hay productos sin costo cargado" : "Venta menos costo"
-            }
-          />
-          <Stat label="Pedidos pagados" value={String(s.month.orders)} />
-        </div>
+      <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <Stat
+          tone="brand"
+          label="Caja disponible"
+          value={formatCLP(cash)}
+          note="Según lo registrado en Caja"
+        />
+        <Stat
+          tone={current.result > 0 ? "good" : current.result < 0 ? "bad" : "neutral"}
+          label={current.result >= 0 ? "Ganancia del mes" : "Pérdida del mes"}
+          value={formatCLP(Math.abs(current.result))}
+          note={
+            current.missingCost ? "Faltan costos de algunos productos" : "Ventas − costos − gastos"
+          }
+        />
+        <Stat
+          label="Ventas del mes"
+          value={formatCLP(current.sales)}
+          note={`${current.orders} pedidos pagados`}
+        />
+        <Stat
+          label="Préstamo por devolver"
+          value={formatCLP(loan.pending)}
+          note={
+            loan.received
+              ? `Devuelto ${formatCLP(loan.repaid)} de ${formatCLP(loan.received)}`
+              : "Registra el préstamo en Caja"
+          }
+        />
       </div>
 
-      <div className="space-y-3">
-        <h2 className="font-semibold">Stock</h2>
-        <div className="grid sm:grid-cols-3 gap-4">
-          <Stat
-            label="Invertido en stock"
-            value={formatCLP(s.stock.invested)}
-            note={
-              s.stock.missingCost
-                ? `${s.stock.missingCost} productos sin costo cargado`
-                : "Lo que pagaste por lo que tienes"
-            }
+      <div className="grid lg:grid-cols-3 gap-6">
+        <Card title="Ventas y publicidad, últimos 6 meses" className="lg:col-span-2">
+          <SalesChart
+            data={results.map((r) => ({
+              label: monthLabel(r.month, true),
+              sales: r.sales,
+              ads: r.expenses.publicidad,
+            }))}
           />
-          <Stat
-            label="Si vendes todo"
-            value={formatCLP(s.stock.atPrice)}
-            note={`Ganarías ${formatCLP(s.stock.atPrice - s.stock.invested)}`}
-          />
-          <Stat label="Equipos disponibles" value={String(s.stock.units)} />
-        </div>
+        </Card>
+        <Card title="Stock">
+          <dl className="space-y-3 text-sm">
+            <div className="flex justify-between">
+              <dt className="text-black/60">Invertido en equipos</dt>
+              <dd className="font-semibold">{formatCLP(stock.invested)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-black/60">Si vendes todo</dt>
+              <dd className="font-semibold">{formatCLP(stock.atPrice)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-black/60">Equipos disponibles</dt>
+              <dd className="font-semibold">{stock.units}</dd>
+            </div>
+          </dl>
+          {stock.missingCost > 0 && (
+            <p className="text-xs text-[#7a5200] mt-3">
+              {stock.missingCost} productos sin costo cargado.
+            </p>
+          )}
+          <div className="border-t border-black/5 mt-4 pt-4 space-y-2 text-sm">
+            <p className="font-medium">Por agotarse</p>
+            {lowStock.length === 0 ? (
+              <p className="text-black/60">Todo con stock.</p>
+            ) : (
+              lowStock.slice(0, 5).map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/admin/productos/${p.id}`}
+                  className="flex justify-between gap-3 hover:text-brand"
+                >
+                  <span className="min-w-0 truncate">{p.name}</span>
+                  <span className={p.stock === 0 ? "text-[#c0392b]" : "text-black/60"}>
+                    {p.stock === 0 ? "Agotado" : `Queda ${p.stock}`}
+                  </span>
+                </Link>
+              ))
+            )}
+          </div>
+        </Card>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-black/10 p-4 space-y-3 text-sm">
-          <h2 className="font-semibold">Por agotarse</h2>
-          {s.lowStock.length === 0 ? (
-            <p className="text-black/60">Todo con stock.</p>
-          ) : (
-            s.lowStock.map((p) => (
-              <Link
-                key={p.id}
-                href={`/admin/productos/${p.id}`}
-                className="flex justify-between gap-4 hover:text-brand"
-              >
-                <span>{p.name}</span>
-                <span className={p.stock === 0 ? "text-red-700" : ""}>
-                  {p.stock === 0 ? "Agotado" : `Queda ${p.stock}`}
-                </span>
+        <Card title={`Campañas activas en ${monthLabel(thisMonth, true)}`}>
+          {activeCampaigns.length === 0 ? (
+            <p className="text-sm text-black/60">
+              Aún no hay campañas.{" "}
+              <Link href="/admin/campanas" className="text-brand underline">
+                Crea la primera
               </Link>
-            ))
-          )}
-        </div>
-
-        <div className="bg-white rounded-xl border border-black/10 p-4 space-y-3 text-sm">
-          <h2 className="font-semibold">Últimos pedidos</h2>
-          {s.recent.length === 0 ? (
-            <p className="text-black/60">Todavía no hay pedidos.</p>
+              .
+            </p>
           ) : (
-            s.recent.map((o) => (
-              <Link
-                key={o.id}
-                href={`/admin/pedidos/${o.id}`}
-                className="flex justify-between gap-4 hover:text-brand"
-              >
-                <span>
-                  {formatDateTime(o.created_at)} · {o.customer.name}
-                </span>
-                <span className="whitespace-nowrap">
-                  {formatCLP(o.total)} · {ORDER_STATUS_LABELS[o.status]}
-                </span>
-              </Link>
-            ))
+            <ul className="space-y-3 text-sm">
+              {activeCampaigns.slice(0, 5).map((c) => {
+                const s = campaignStats(c, orders, movements, thisMonth);
+                return (
+                  <li
+                    key={c.id}
+                    className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1"
+                  >
+                    <span className="min-w-0 truncate">{c.name}</span>
+                    <span className="flex items-center gap-3 whitespace-nowrap">
+                      <span className="text-black/60">
+                        {formatCLP(s.spend)} · {s.sales} ventas
+                      </span>
+                      <Badge tone={VERDICT_TONE[s.verdict]}>{VERDICT_LABELS[s.verdict]}</Badge>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
           )}
-        </div>
+        </Card>
+        <Card title="Últimos pedidos">
+          {orders.length === 0 ? (
+            <p className="text-sm text-black/60">Todavía no hay pedidos.</p>
+          ) : (
+            <ul className="space-y-3 text-sm">
+              {orders.slice(0, 5).map((o) => (
+                <li key={o.id}>
+                  <Link
+                    href={`/admin/pedidos/${o.id}`}
+                    className="flex flex-col sm:flex-row sm:justify-between gap-x-3 hover:text-brand"
+                  >
+                    <span className="min-w-0 truncate">
+                      {formatDateTime(o.created_at)} · {o.customer.name}
+                    </span>
+                    <span className="whitespace-nowrap text-black/70">
+                      {formatCLP(o.total)} · {ORDER_STATUS_LABELS[o.status]}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
       </div>
 
-      <p className="text-sm text-black/60">
-        Desde que abriste: {formatCLP(s.allTime.sales)} vendidos en {s.allTime.orders} pedidos, con
-        ganancia estimada de {formatCLP(s.allTime.profit.total)}.
+      <p className="text-xs text-black/50">
+        Los números se calculan con los pedidos pagados y lo que registras en Caja.
       </p>
-    </section>
+    </div>
   );
 }

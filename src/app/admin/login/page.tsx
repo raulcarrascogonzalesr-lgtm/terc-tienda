@@ -9,9 +9,14 @@ export const dynamic = "force-dynamic";
 export default async function LoginPage() {
   if (await getAdminUser()) redirect("/admin");
   return (
-    <div className="max-w-sm mx-auto bg-white rounded-xl border border-black/10 p-6 space-y-6">
-      <h1 className="text-xl font-bold">Panel de administración</h1>
-      <LoginForm />
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-black/5 p-8 space-y-6">
+        <div className="space-y-1">
+          <p className="text-2xl font-black text-brand tracking-tight">TERC</p>
+          <h1 className="text-lg font-semibold">Panel de administración</h1>
+        </div>
+        <LoginForm />
+      </div>
     </div>
   );
 }
