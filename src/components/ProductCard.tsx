@@ -1,53 +1,81 @@
 import Link from "next/link";
-import { formatCLP, savings } from "@/lib/format";
+import { formatCLP, offer, savings } from "@/lib/format";
 import type { Product } from "@/lib/types";
+import { AddToCartButton } from "./AddToCartButton";
+import { StoreIcon } from "./icons";
 import { ProductImage } from "./ProductImage";
 
 export const GRADE_SHORT = { A: "Como nuevo", B: "Detalles leves", C: "Marcas visibles" } as const;
 
 export function ProductCard({ product }: { product: Product }) {
-  const off = savings(product);
+  const sale = offer(product);
+  const vsNew = savings(product);
+  const href = `/producto/${product.slug}`;
   return (
-    <Link
-      href={`/producto/${product.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-black/[0.06] bg-white transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-pine/10"
-    >
-      <div className="relative overflow-hidden">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-black/[0.06] bg-white transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-pine/10">
+      <Link href={href} className="relative block overflow-hidden">
         <div className="transition duration-500 group-hover:scale-[1.03]">
           <ProductImage product={product} />
         </div>
-        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-          <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-pine shadow-sm">
-            Grado {product.grade}
-            <span className="hidden sm:inline"> · {GRADE_SHORT[product.grade]}</span>
-          </span>
-          {off && (
-            <span className="rounded-full bg-gold px-2.5 py-1 text-[11px] font-bold text-pine shadow-sm">
-              −{off.percent}%
+        <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
+          {sale ? (
+            <span className="rounded-md bg-sale px-2 py-1 text-xs font-bold text-white shadow-sm">
+              −{sale.percent}%
             </span>
+          ) : (
+            vsNew && (
+              <span className="rounded-md bg-gold px-2 py-1 text-xs font-bold text-pine shadow-sm">
+                −{vsNew.percent}% vs. nuevo
+              </span>
+            )
           )}
         </div>
+        <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-pine shadow-sm">
+          Grado {product.grade}
+          <span className="hidden sm:inline"> · {GRADE_SHORT[product.grade]}</span>
+        </span>
         {product.stock === 1 && (
           <span className="absolute bottom-3 left-3 rounded-full bg-pine px-2.5 py-1 text-[11px] font-semibold text-white">
-            Última unidad
+            ¡Última unidad!
           </span>
         )}
-      </div>
+      </Link>
       <div className="flex flex-1 flex-col gap-1 p-4">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
           {product.brand}
         </p>
-        <h3 className="line-clamp-2 font-medium leading-snug text-ink">{product.name}</h3>
+        <Link href={href} className="line-clamp-2 font-medium leading-snug text-ink hover:text-pine-700">
+          {product.name}
+        </Link>
         <div className="mt-auto pt-3">
-          {off && (
+          {sale ? (
             <p className="text-xs text-muted">
-              Nuevo <span className="line-through">{formatCLP(product.list_price!)}</span>
+              Antes <span className="line-through">{formatCLP(sale.before)}</span>
+            </p>
+          ) : (
+            vsNew && (
+              <p className="text-xs text-muted">
+                Nuevo <span className="line-through">{formatCLP(vsNew.before)}</span>
+              </p>
+            )
+          )}
+          <p className={`text-xl font-bold tracking-tight ${sale ? "text-sale" : "text-ink"}`}>
+            {formatCLP(product.price)}
+          </p>
+          {(sale ?? vsNew) && (
+            <p className={`text-xs font-semibold ${sale ? "text-sale" : "text-pine-700"}`}>
+              Ahorras {formatCLP((sale ?? vsNew)!.amount)}
             </p>
           )}
-          <p className="text-xl font-bold tracking-tight text-ink">{formatCLP(product.price)}</p>
-          <p className="mt-1 text-xs text-pine-700">Garantía {product.warranty_months} meses</p>
+          <p className="mt-2 flex items-center gap-1.5 text-[11px] text-muted">
+            <StoreIcon name="shield" className="w-3.5 h-3.5 text-pine-700" />
+            {product.warranty_months} meses de garantía
+          </p>
+          <div className="mt-3">
+            <AddToCartButton product={product} compact />
+          </div>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }

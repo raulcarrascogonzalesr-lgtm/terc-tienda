@@ -10,6 +10,7 @@ export type Product = {
   grade: Grade;
   price: number; // en pesos chilenos, sin decimales
   list_price: number | null; // precio de un equipo nuevo equivalente, para mostrar el ahorro
+  compare_price: number | null; // precio anterior de TERC cuando el equipo está en oferta
   stock: number;
   battery_health: number | null; // porcentaje, si aplica
   warranty_months: number;

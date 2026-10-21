@@ -3,8 +3,10 @@
 import { useState } from "react";
 import type { Product } from "@/lib/types";
 import { useCart } from "./CartProvider";
+import { StoreIcon } from "./icons";
 
-export function AddToCartButton({ product }: { product: Product }) {
+// "compact" es la versión chica de las tarjetas de la portada.
+export function AddToCartButton({ product, compact = false }: { product: Product; compact?: boolean }) {
   const { add } = useCart();
   const [added, setAdded] = useState(false);
 
@@ -25,9 +27,14 @@ export function AddToCartButton({ product }: { product: Product }) {
         });
         setAdded(true);
       }}
-      className="w-full rounded-full bg-pine px-6 py-3.5 font-semibold text-white transition hover:bg-pine-700"
+      className={
+        compact
+          ? "flex w-full items-center justify-center gap-2 rounded-full bg-pine px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-pine-700"
+          : "w-full rounded-full bg-pine px-6 py-3.5 font-semibold text-white transition hover:bg-pine-700"
+      }
     >
-      {added ? "Agregado al carrito ✓" : "Agregar al carrito"}
+      {compact && !added && <StoreIcon name="cart" className="w-4 h-4" />}
+      {added ? "Agregado al carrito ✓" : compact ? "Agregar" : "Agregar al carrito"}
     </button>
   );
 }

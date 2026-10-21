@@ -150,3 +150,7 @@ alter table settings enable row level security;
 alter table products add column if not exists list_price integer check (list_price >= 0);
 -- La tienda pública lee el catálogo columna por columna (el costo queda oculto).
 grant select (list_price) on products to anon, authenticated;
+
+-- Precio anterior de TERC cuando un equipo está en oferta.
+alter table products add column if not exists compare_price integer check (compare_price >= 0);
+grant select (compare_price) on products to anon, authenticated;

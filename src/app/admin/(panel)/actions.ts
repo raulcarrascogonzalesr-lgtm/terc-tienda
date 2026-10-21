@@ -112,6 +112,7 @@ export async function saveProduct(_prev: SaveResult, form: FormData): Promise<Sa
     grade,
     price,
     list_price: intOrNull(form.get("list_price")),
+    compare_price: intOrNull(form.get("compare_price")),
     cost: intOrNull(form.get("cost")),
     stock,
     battery_health: battery,
