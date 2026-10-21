@@ -140,6 +140,21 @@ export async function saveProduct(_prev: SaveResult, form: FormData): Promise<Sa
   redirect("/admin/productos");
 }
 
+export async function deleteProduct(id: string) {
+  await requireAdmin();
+  const { data, error } = await db()
+    .from("products")
+    .delete()
+    .eq("id", id)
+    .select("image_url")
+    .maybeSingle();
+  if (error) throw error;
+  // La foto se borra del almacenamiento; los pedidos y movimientos guardan su propio detalle.
+  const photo = data?.image_url?.split("/productos/").pop();
+  if (photo) await db().storage.from("productos").remove([photo]);
+  revalidatePath("/", "layout");
+}
+
 const MOVEMENT_CATEGORIES = {
   ingreso: Object.keys(INCOME_CATEGORIES),
   egreso: [...Object.keys(EXPENSE_CATEGORIES), ...Object.keys(OTHER_OUTFLOWS)],

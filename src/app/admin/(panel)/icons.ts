@@ -17,4 +17,6 @@ export const ICONS = {
   reembolso: "M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5",
   iva: "M19 5 5 19M6.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM17.5 20a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z",
   archivo: "M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5",
+  editar: "M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4",
+  basurero: "M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3",
 };

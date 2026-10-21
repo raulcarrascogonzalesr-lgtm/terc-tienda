@@ -2,7 +2,9 @@ import Link from "next/link";
 import { formatCLP } from "@/lib/format";
 import { listAllProducts } from "../data";
 import { netOf } from "../finance";
-import { PageHeader } from "../ui";
+import { ICONS } from "../icons";
+import { Icon, PageHeader } from "../ui";
+import { DeleteProductButton } from "./DeleteProductButton";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +32,9 @@ export default async function ProductsPage() {
               <th className="p-3 text-right">Margen neto</th>
               <th className="p-3 text-right">Stock</th>
               <th className="p-3">Visible</th>
+              <th className="p-3">
+                <span className="sr-only">Acciones</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -61,6 +66,19 @@ export default async function ProductsPage() {
                     {p.stock}
                   </td>
                   <td className="p-3">{p.active ? "Sí" : "No"}</td>
+                  <td className="px-3 py-1.5">
+                    <div className="flex items-center justify-end gap-1">
+                      <Link
+                        href={`/admin/productos/${p.id}`}
+                        title="Editar producto"
+                        aria-label={`Editar ${p.name}`}
+                        className="rounded-lg p-1.5 text-[#6b716f] transition hover:bg-[#eef5f3] hover:text-[#0f5f59]"
+                      >
+                        <Icon path={ICONS.editar} className="w-[18px] h-[18px]" />
+                      </Link>
+                      <DeleteProductButton id={p.id} name={p.name} />
+                    </div>
+                  </td>
                 </tr>
               );
             })}
