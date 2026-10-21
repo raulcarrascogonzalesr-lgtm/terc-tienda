@@ -234,7 +234,7 @@ export function loanStatus(movements: Movement[]) {
 }
 
 export function stockValue(products: AdminProduct[]) {
-  const inStock = products.filter((p) => p.active && p.stock > 0);
+  const inStock = products.filter((p) => p.active && !p.on_demand && p.stock > 0);
   const invested = inStock.reduce((s, p) => s + (p.cost ?? 0) * p.stock, 0);
   // Costo y precio en neto, para compararlos sin IVA.
   const atPrice = inStock.reduce((s, p) => s + netOf(p.price) * p.stock, 0);

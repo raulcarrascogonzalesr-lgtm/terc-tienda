@@ -7,7 +7,7 @@ import { GRADE_SHORT } from "@/components/ProductCard";
 import { ProductImage } from "@/components/ProductImage";
 import { formatCLP, GRADE_LABELS, offer, savings } from "@/lib/format";
 import { getProductBySlug } from "@/lib/products";
-import { whatsappLink } from "@/lib/site";
+import { SITE, whatsappLink } from "@/lib/site";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -31,9 +31,17 @@ export default async function ProductPage({ params }: Props) {
   const whatsapp = whatsappLink(`Hola, me interesa el ${product.name}. ¿Me pueden dar más información?`);
   const trust: { icon: IconName; text: string }[] = [
     { icon: "shield", text: `${product.warranty_months} meses de garantía TERC` },
-    { icon: "checklist", text: "Revisado y probado uno por uno" },
+    {
+      icon: "checklist",
+      text: product.on_demand ? "Lo revisamos antes de enviártelo" : "Revisado y probado uno por uno",
+    },
     { icon: "card", text: "Pago seguro con Mercado Pago, también en cuotas" },
-    { icon: "truck", text: "Envío a todo Chile" },
+    {
+      icon: "truck",
+      text: product.on_demand
+        ? `Envío a todo Chile. Es a pedido: suma ${SITE.onDemandLeadTime} al despacho`
+        : "Envío a todo Chile",
+    },
   ];
 
   return (
@@ -51,6 +59,11 @@ export default async function ProductPage({ params }: Props) {
       <div className="grid gap-8 lg:gap-12 md:grid-cols-2">
         <div className="relative self-start overflow-hidden rounded-3xl border border-black/[0.06] bg-white">
           <ProductImage product={product} />
+          {product.on_demand && product.image_url && (
+            <span className="absolute bottom-3 right-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] text-muted">
+              Imagen referencial
+            </span>
+          )}
           <div className="absolute left-4 top-4 flex flex-col items-start gap-2">
             {sale && (
               <span className="rounded-md bg-sale px-3 py-1 text-sm font-bold text-white">
@@ -74,7 +87,12 @@ export default async function ProductPage({ params }: Props) {
               <span className="rounded-full bg-paper px-3 py-1 text-xs font-semibold text-pine">
                 Grado {product.grade} · {GRADE_SHORT[product.grade]}
               </span>
-              {product.stock === 1 && (
+              {product.on_demand && (
+                <span className="rounded-full bg-gold/30 px-3 py-1 text-xs font-semibold text-pine">
+                  A pedido
+                </span>
+              )}
+              {!product.on_demand && product.stock === 1 && (
                 <span className="rounded-full bg-pine px-3 py-1 text-xs font-semibold text-white">
                   Última unidad
                 </span>
@@ -157,7 +175,9 @@ export default async function ProductPage({ params }: Props) {
             </div>
             <div className="grid grid-cols-[140px_1fr] gap-3 px-5 py-3">
               <dt className="text-muted">Disponibles</dt>
-              <dd className="text-ink">{product.stock}</dd>
+              <dd className="text-ink">
+                {product.on_demand ? "A pedido, sujeto a disponibilidad del proveedor" : product.stock}
+              </dd>
             </div>
           </dl>
 

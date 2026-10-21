@@ -119,6 +119,9 @@ export async function saveProduct(_prev: SaveResult, form: FormData): Promise<Sa
     warranty_months: intOrNull(form.get("warranty_months")) ?? 6,
     description: String(form.get("description") ?? "").trim(),
     active: form.get("active") === "on",
+    on_demand: form.get("on_demand") === "on",
+    supplier: String(form.get("supplier") ?? "").trim() || null,
+    supplier_sku: String(form.get("supplier_sku") ?? "").trim() || null,
   };
   if (!values.brand || !values.category) return { error: "Faltan la marca o la categoría" };
 
@@ -134,12 +137,61 @@ export async function saveProduct(_prev: SaveResult, form: FormData): Promise<Sa
     ? await supabase.from("products").update(values).eq("id", id)
     : await supabase.from("products").insert(values);
   if (error) {
-    if (error.code === "23505") return { error: "Ya existe un producto con esa dirección (slug)" };
+    if (error.code === "23505") {
+      return { error: "Ya existe un producto con esa dirección (slug) o con ese código del proveedor" };
+    }
     return { error: error.message };
   }
 
   revalidatePath("/", "layout");
   redirect("/admin/productos");
+}
+
+const PHOTO_TYPES: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/avif": "avif",
+};
+
+export type ImportResult = { saved: number; failed: string[] } | null;
+
+// Copia a la tienda las fotos que se pusieron como enlace a otra página,
+// para que no dependan de que esa página las siga teniendo.
+export async function importExternalPhotos(): Promise<ImportResult> {
+  await requireAdmin();
+  const supabase = db();
+  const ours = supabase.storage.from("productos").getPublicUrl("").data.publicUrl;
+  const { data, error } = await supabase
+    .from("products")
+    .select("id, name, image_url")
+    .like("image_url", "https://%");
+  if (error) throw error;
+
+  let saved = 0;
+  const failed: string[] = [];
+  for (const p of data.filter((p) => !p.image_url.startsWith(ours)).slice(0, 40)) {
+    try {
+      const res = await fetch(p.image_url, { signal: AbortSignal.timeout(15000) });
+      const type = res.headers.get("content-type")?.split(";")[0].trim() ?? "";
+      if (!res.ok || !PHOTO_TYPES[type]) throw new Error();
+      const body = await res.arrayBuffer();
+      if (body.byteLength > 6 * 1024 * 1024) throw new Error();
+      const path = `${randomUUID()}.${PHOTO_TYPES[type]}`;
+      const upload = await supabase.storage
+        .from("productos")
+        .upload(path, body, { contentType: type });
+      if (upload.error) throw upload.error;
+      const url = supabase.storage.from("productos").getPublicUrl(path).data.publicUrl;
+      await supabase.from("products").update({ image_url: url }).eq("id", p.id);
+      saved++;
+    } catch {
+      failed.push(p.name);
+    }
+  }
+
+  revalidatePath("/", "layout");
+  return { saved, failed };
 }
 
 export async function deleteProduct(id: string) {
@@ -237,11 +289,11 @@ export async function addMovement(_prev: MovementResult, form: FormData): Promis
     if (productId) {
       const { data: product } = await db()
         .from("products")
-        .select("cost, stock")
+        .select("cost, stock, on_demand")
         .eq("id", productId)
         .maybeSingle();
       if (!product) return { error: "El producto no existe" };
-      if (product.stock < 1) return { error: "Ese producto no tiene stock" };
+      if (product.stock < 1 && !product.on_demand) return { error: "Ese producto no tiene stock" };
       unitCost = product.cost;
     } else {
       unitCost = intOrNull(form.get("unit_cost"));
@@ -288,8 +340,13 @@ export async function addMovement(_prev: MovementResult, form: FormData): Promis
 }
 
 async function changeStock(productId: string, delta: number) {
-  const { data } = await db().from("products").select("stock").eq("id", productId).maybeSingle();
-  if (!data) return;
+  const { data } = await db()
+    .from("products")
+    .select("stock, on_demand")
+    .eq("id", productId)
+    .maybeSingle();
+  // Los productos a pedido no tienen stock propio que subir o bajar.
+  if (!data || data.on_demand) return;
   await db()
     .from("products")
     .update({ stock: Math.max(data.stock + delta, 0) })

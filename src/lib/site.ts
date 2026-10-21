@@ -6,6 +6,8 @@ export const SITE = {
   email: "contacto@terc.cl",
   company: "Wiremax Telecomunicaciones SpA",
   slogan: "Segunda vida, primera calidad",
+  // Plazo extra de los productos a pedido, que se piden al proveedor después de la compra.
+  onDemandLeadTime: "3 a 5 días hábiles",
 };
 
 export function whatsappLink(message: string): string | null {
