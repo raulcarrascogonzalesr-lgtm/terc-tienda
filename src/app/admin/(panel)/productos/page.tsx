@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatCLP } from "@/lib/format";
 import { listAllProducts } from "../data";
+import { PageHeader } from "../ui";
 
 export const dynamic = "force-dynamic";
 
@@ -8,15 +9,18 @@ export default async function ProductsPage() {
   const products = await listAllProducts();
   return (
     <section className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">Productos</h1>
+      <PageHeader
+        eyebrow="Tienda"
+        title="Productos"
+        subtitle="Precio, costo, margen y stock de cada equipo."
+      >
         <Link href="/admin/productos/nuevo" className="btn-primary">
           + Nuevo producto
         </Link>
-      </div>
-      <div className="bg-white rounded-xl border border-black/10 overflow-x-auto">
+      </PageHeader>
+      <div className="bg-white rounded-xl border border-[#e4e2dc] overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="text-left text-black/60 border-b border-black/10">
+          <thead className="text-left text-[#6b716f] border-b border-[#e4e2dc]">
             <tr>
               <th className="p-3">Producto</th>
               <th className="p-3">Grado</th>
@@ -33,10 +37,10 @@ export default async function ProductsPage() {
               return (
                 <tr
                   key={p.id}
-                  className="border-b border-black/5 last:border-0 hover:bg-black/[.02]"
+                  className="border-b border-[#efede8] last:border-0 hover:bg-[#fafaf8]"
                 >
                   <td className="p-3">
-                    <Link href={`/admin/productos/${p.id}`} className="text-brand underline">
+                    <Link href={`/admin/productos/${p.id}`} className="text-[#0f5f59] underline">
                       {p.name}
                     </Link>
                   </td>
@@ -50,7 +54,7 @@ export default async function ProductsPage() {
                       ? "—"
                       : `${formatCLP(margin)} (${p.price ? Math.round((margin / p.price) * 100) : 0}%)`}
                   </td>
-                  <td className={`p-3 text-right ${p.stock === 0 ? "text-red-700" : ""}`}>
+                  <td className={`p-3 text-right ${p.stock === 0 ? "text-[#b3362a]" : ""}`}>
                     {p.stock}
                   </td>
                   <td className="p-3">{p.active ? "Sí" : "No"}</td>
@@ -60,7 +64,7 @@ export default async function ProductsPage() {
           </tbody>
         </table>
       </div>
-      <p className="text-sm text-black/60">
+      <p className="text-sm text-[#6b716f]">
         En la tienda solo aparecen los productos visibles y con stock. El costo nunca se muestra al
         cliente.
       </p>

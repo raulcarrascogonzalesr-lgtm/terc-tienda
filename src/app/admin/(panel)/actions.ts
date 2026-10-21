@@ -145,7 +145,34 @@ const MOVEMENT_CATEGORIES = {
   egreso: [...Object.keys(EXPENSE_CATEGORIES), ...Object.keys(OTHER_OUTFLOWS)],
 };
 
-export async function addMovement(_prev: SaveResult, form: FormData): Promise<SaveResult> {
+export type MovementResult = { error: string } | { ok: true } | null;
+
+const DOC_TYPES = ["factura", "boleta", "otro"];
+const MAX_DOC_BYTES = 5 * 1024 * 1024;
+
+function text(form: FormData, key: string, max = 120): string | null {
+  return (
+    String(form.get(key) ?? "")
+      .trim()
+      .slice(0, max) || null
+  );
+}
+
+async function uploadDocument(file: File, date: string): Promise<string> {
+  if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
+    throw new Error("El documento debe ser una foto o un PDF");
+  }
+  if (file.size > MAX_DOC_BYTES) throw new Error("El archivo pesa más de 5 MB");
+  const ext = file.type === "application/pdf" ? "pdf" : file.type.split("/")[1].replace(/\W/g, "");
+  const path = `${date.slice(0, 7)}/${randomUUID()}.${ext || "jpg"}`;
+  const { error } = await db()
+    .storage.from("documentos")
+    .upload(path, file, { contentType: file.type });
+  if (error) throw error;
+  return path;
+}
+
+export async function addMovement(_prev: MovementResult, form: FormData): Promise<MovementResult> {
   await requireAdmin();
   const [kind, category] = String(form.get("category") ?? "").split(":");
   if (kind !== "ingreso" && kind !== "egreso") return { error: "Elige un tipo" };
@@ -156,6 +183,24 @@ export async function addMovement(_prev: SaveResult, form: FormData): Promise<Sa
   const date = String(form.get("date") ?? "");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: "La fecha no es válida" };
 
+  const docType = kind === "egreso" ? String(form.get("doc_type") ?? "") : "";
+  if (docType && !DOC_TYPES.includes(docType)) return { error: "Documento no válido" };
+  const docNumber = docType ? text(form, "doc_number", 40) : null;
+  const supplier = text(form, "supplier");
+  if (docType === "factura" && (!docNumber || !supplier)) {
+    return { error: "Para una factura, anota el proveedor y el número" };
+  }
+
+  let attachment: string | null = null;
+  const file = form.get("attachment");
+  if (docType && file instanceof File && file.size > 0) {
+    try {
+      attachment = await uploadDocument(file, date);
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : "No se pudo subir el documento" };
+    }
+  }
+
   const campaignId = String(form.get("campaign_id") ?? "") || null;
   const { error } = await db()
     .from("movements")
@@ -164,21 +209,35 @@ export async function addMovement(_prev: SaveResult, form: FormData): Promise<Sa
       category,
       amount,
       date,
-      description: String(form.get("description") ?? "")
-        .trim()
-        .slice(0, 300),
+      description: text(form, "description", 300) ?? "",
       campaign_id: category === "publicidad" ? campaignId : null,
+      doc_type: docType || null,
+      doc_number: docNumber,
+      supplier,
+      supplier_rut: docType ? text(form, "supplier_rut", 20) : null,
+      // Las facturas en Chile incluyen 19% de IVA dentro del total.
+      vat: docType === "factura" ? Math.round((amount * 19) / 119) : null,
+      attachment,
     });
-  if (error) return { error: error.message };
+  if (error) {
+    if (attachment) await db().storage.from("documentos").remove([attachment]);
+    return { error: error.message };
+  }
 
   revalidatePath("/admin", "layout");
-  return null;
+  return { ok: true };
 }
 
 export async function deleteMovement(id: string) {
   await requireAdmin();
-  const { error } = await db().from("movements").delete().eq("id", id);
+  const { data, error } = await db()
+    .from("movements")
+    .delete()
+    .eq("id", id)
+    .select("attachment")
+    .maybeSingle();
   if (error) throw error;
+  if (data?.attachment) await db().storage.from("documentos").remove([data.attachment]);
   revalidatePath("/admin", "layout");
 }
 

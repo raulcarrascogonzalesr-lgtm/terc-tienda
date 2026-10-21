@@ -21,6 +21,8 @@ export function monthReport(
   const out = moves.filter((m) => m.kind === "egreso").reduce((s, m) => s + m.amount, 0);
   // IVA incluido en las ventas (precios con IVA del 19%). Referencial.
   const vatInSales = Math.round((salesIn * 19) / 119);
+  // IVA de las facturas de compra y gastos del mes. Referencial.
+  const vatCredit = moves.filter((m) => m.kind === "egreso").reduce((s, m) => s + (m.vat ?? 0), 0);
 
   return {
     sales,
@@ -31,6 +33,7 @@ export function monthReport(
     out,
     closing: opening + salesIn + otherIn - out,
     vatInSales,
+    vatCredit,
     result: monthResult(month, orders, movements, products),
     loan: loanStatus(movements.filter((m) => monthOf(m.date) <= month)),
   };

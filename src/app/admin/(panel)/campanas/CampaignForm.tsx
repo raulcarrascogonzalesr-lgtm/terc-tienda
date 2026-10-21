@@ -38,7 +38,7 @@ export function CampaignForm() {
         {pending ? "Creando…" : "Crear campaña"}
       </button>
       {state?.error && (
-        <p className="text-sm text-red-700 sm:col-span-2 lg:col-span-4">{state.error}</p>
+        <p className="text-sm text-[#b3362a] sm:col-span-2 lg:col-span-4">{state.error}</p>
       )}
     </form>
   );

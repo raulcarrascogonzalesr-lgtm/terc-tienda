@@ -1,6 +1,7 @@
 import { formatCLP, formatDateTime } from "@/lib/format";
 import { loadBusiness } from "../data";
 import { CATEGORY_LABELS, EXPENSE_CATEGORIES, lastMonths, monthLabel } from "../finance";
+import { DocumentInfo } from "../DocumentInfo";
 import { MonthPicker } from "../MonthPicker";
 import { Card, PageHeader, Result } from "../ui";
 import { PrintButton } from "./PrintButton";
@@ -19,7 +20,7 @@ function Line({
 }) {
   return (
     <div
-      className={`flex justify-between gap-4 py-1.5 ${strong ? "font-semibold border-t border-black/10 mt-1 pt-2" : ""}`}
+      className={`flex justify-between gap-4 py-1.5 ${strong ? "font-semibold border-t border-[#e4e2dc] mt-1 pt-2" : ""}`}
     >
       <span>{label}</span>
       <span className="whitespace-nowrap">{value}</span>
@@ -85,19 +86,20 @@ export default async function SettlementPage({
               strong
             />
           </div>
-          <p className="text-xs text-black/50 mt-3">
-            IVA incluido en las ventas (referencial): {formatCLP(r.vatInSales)}. Préstamo pendiente
-            al cierre: {formatCLP(r.loan.pending)}.
+          <p className="text-xs text-[#6b716f] mt-3">
+            Referencial para la contabilidad de Wiremax: IVA en las ventas {formatCLP(r.vatInSales)}
+            , IVA en facturas de compra {formatCLP(r.vatCredit)}. Préstamo pendiente al cierre:{" "}
+            {formatCLP(r.loan.pending)}.
           </p>
         </Card>
       </div>
 
       <Card title={`Ventas (${r.sales.length})`}>
         {r.sales.length === 0 ? (
-          <p className="text-sm text-black/60">Sin ventas este mes.</p>
+          <p className="text-sm text-[#6b716f]">Sin ventas este mes.</p>
         ) : (
           <table className="w-full text-sm">
-            <thead className="text-left text-black/50 border-b border-black/10">
+            <thead className="text-left text-[#6b716f] border-b border-[#e4e2dc]">
               <tr>
                 <th className="py-2 pr-3">Fecha</th>
                 <th className="py-2 pr-3">Cliente</th>
@@ -107,12 +109,12 @@ export default async function SettlementPage({
             </thead>
             <tbody>
               {r.sales.map((o) => (
-                <tr key={o.id} className="border-b border-black/5 last:border-0 align-top">
+                <tr key={o.id} className="border-b border-[#efede8] last:border-0 align-top">
                   <td className="py-2 pr-3 whitespace-nowrap">
                     {formatDateTime(o.paid_at ?? o.created_at)}
                   </td>
                   <td className="py-2 pr-3">{o.customer.name}</td>
-                  <td className="py-2 pr-3 text-black/70">
+                  <td className="py-2 pr-3 text-[#3b4442]">
                     {o.items.map((i) => `${i.quantity} × ${i.name}`).join(", ")}
                   </td>
                   <td className="py-2 text-right whitespace-nowrap">{formatCLP(o.total)}</td>
@@ -125,25 +127,34 @@ export default async function SettlementPage({
 
       <Card title={`Movimientos de caja (${r.moves.length})`}>
         {r.moves.length === 0 ? (
-          <p className="text-sm text-black/60">Sin movimientos este mes.</p>
+          <p className="text-sm text-[#6b716f]">Sin movimientos este mes.</p>
         ) : (
           <table className="w-full text-sm">
-            <thead className="text-left text-black/50 border-b border-black/10">
+            <thead className="text-left text-[#6b716f] border-b border-[#e4e2dc]">
               <tr>
                 <th className="py-2 pr-3">Fecha</th>
                 <th className="py-2 pr-3">Tipo</th>
                 <th className="py-2 pr-3">Detalle</th>
+                <th className="py-2 pr-3">Documento</th>
                 <th className="py-2 text-right">Monto</th>
               </tr>
             </thead>
             <tbody>
               {r.moves.map((m) => (
-                <tr key={m.id} className="border-b border-black/5 last:border-0">
+                <tr key={m.id} className="border-b border-[#efede8] last:border-0">
                   <td className="py-2 pr-3 whitespace-nowrap">
                     {m.date.split("-").reverse().join("-")}
                   </td>
                   <td className="py-2 pr-3">{CATEGORY_LABELS[m.category] ?? m.category}</td>
-                  <td className="py-2 pr-3 text-black/70">{m.description}</td>
+                  <td className="py-2 pr-3 text-[#3b4442]">
+                    {m.description}
+                    {m.supplier && (
+                      <span className="block text-xs text-[#6b716f]">{m.supplier}</span>
+                    )}
+                  </td>
+                  <td className="py-2 pr-3 whitespace-nowrap">
+                    <DocumentInfo movement={m} />
+                  </td>
                   <td className="py-2 text-right whitespace-nowrap">
                     {m.kind === "ingreso" ? "+" : "−"}
                     {formatCLP(m.amount)}

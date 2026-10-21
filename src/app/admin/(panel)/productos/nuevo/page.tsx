@@ -1,9 +1,10 @@
 import { ProductForm } from "../ProductForm";
+import { PageHeader } from "../../ui";
 
 export default function NewProductPage() {
   return (
     <section className="space-y-4 max-w-3xl">
-      <h1 className="text-2xl font-bold">Nuevo producto</h1>
+      <PageHeader eyebrow="Productos" title="Nuevo producto" />
       <ProductForm />
     </section>
   );

@@ -5,6 +5,8 @@ import { monthReport } from "../report";
 
 export const dynamic = "force-dynamic";
 
+const DOC_NAMES = { factura: "Factura", boleta: "Boleta", otro: "Comprobante" } as const;
+
 function cell(value: string | number): string {
   const text = String(value);
   return /[";\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
@@ -19,12 +21,29 @@ export async function GET(request: Request) {
   const r = monthReport(month, orders, movements, products);
 
   const rows: (string | number)[][] = [
-    ["Fecha", "Tipo", "Categoría", "Detalle", "Entrada", "Salida"],
+    [
+      "Fecha",
+      "Tipo",
+      "Categoría",
+      "Detalle",
+      "Documento",
+      "Nº",
+      "Proveedor",
+      "RUT proveedor",
+      "IVA",
+      "Entrada",
+      "Salida",
+    ],
     ...r.sales.map((o) => [
       (o.paid_at ?? o.created_at).slice(0, 10),
       "Venta web",
       "Venta",
       `${o.customer.name}: ${o.items.map((i) => `${i.quantity} x ${i.name}`).join(", ")}`,
+      "",
+      "",
+      "",
+      "",
+      "",
       o.total,
       "",
     ]),
@@ -33,13 +52,18 @@ export async function GET(request: Request) {
       m.kind === "ingreso" ? "Ingreso" : "Egreso",
       CATEGORY_LABELS[m.category] ?? m.category,
       m.description,
+      m.doc_type ? DOC_NAMES[m.doc_type] : "",
+      m.doc_number ?? "",
+      m.supplier ?? "",
+      m.supplier_rut ?? "",
+      m.vat ?? "",
       m.kind === "ingreso" ? m.amount : "",
       m.kind === "egreso" ? m.amount : "",
     ]),
     [],
-    ["Saldo inicial", "", "", "", r.opening, ""],
-    ["Saldo final", "", "", "", r.closing, ""],
-    ["Resultado del mes", "", "", "", r.result.result, ""],
+    ["Saldo inicial", "", "", "", "", "", "", "", "", r.opening, ""],
+    ["Saldo final", "", "", "", "", "", "", "", "", r.closing, ""],
+    ["Resultado del mes", "", "", "", "", "", "", "", "", r.result.result, ""],
   ];
 
   const csv = "﻿" + rows.map((row) => row.map(cell).join(";")).join("\r\n");

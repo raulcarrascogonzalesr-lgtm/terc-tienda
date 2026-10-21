@@ -4,6 +4,7 @@ import { formatCLP, formatDateTime, ORDER_STATUS_LABELS } from "@/lib/format";
 import { SHIPPING_ZONES, isShippingZone } from "@/lib/shipping";
 import { updateOrder } from "../../actions";
 import { getOrder } from "../../data";
+import { PageHeader } from "../../ui";
 
 export const dynamic = "force-dynamic";
 
@@ -27,24 +28,24 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
   return (
     <section className="space-y-6">
-      <Link href="/admin/pedidos" className="text-sm text-brand underline">
+      <Link href="/admin/pedidos" className="text-sm text-[#0f5f59] underline">
         ← Volver a pedidos
       </Link>
-      <h1 className="text-2xl font-bold">Pedido del {formatDateTime(order.created_at)}</h1>
+      <PageHeader eyebrow="Pedido" title={`Pedido del ${formatDateTime(order.created_at)}`} />
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-black/10 p-4 space-y-2 text-sm">
+        <div className="bg-white rounded-xl border border-[#e4e2dc] p-4 space-y-2 text-sm">
           <h2 className="font-semibold">Cliente</h2>
           {Object.entries(CUSTOMER_LABELS).map(([key, label]) => (
             <p key={key}>
-              <span className="text-black/60">{label}:</span> {order.customer[key]}
+              <span className="text-[#6b716f]">{label}:</span> {order.customer[key]}
             </p>
           ))}
         </div>
 
         <form
           action={updateOrder.bind(null, order.id)}
-          className="bg-white rounded-xl border border-black/10 p-4 space-y-4 text-sm"
+          className="bg-white rounded-xl border border-[#e4e2dc] p-4 space-y-4 text-sm"
         >
           <h2 className="font-semibold">Estado</h2>
           <select name="status" defaultValue={order.status} className="input">
@@ -62,7 +63,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               className="input"
             />
           </label>
-          <p className="text-black/60">
+          <p className="text-[#6b716f]">
             {order.paid_at ? `Pagado el ${formatDateTime(order.paid_at)}` : "Sin pago registrado"}
             {order.payment_id && ` · Pago ${order.payment_id}`}
           </p>
@@ -72,7 +73,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         </form>
       </div>
 
-      <div className="bg-white rounded-xl border border-black/10 p-4 text-sm space-y-2">
+      <div className="bg-white rounded-xl border border-[#e4e2dc] p-4 text-sm space-y-2">
         <h2 className="font-semibold">Productos</h2>
         {order.items.map((item) => (
           <div key={item.product_id} className="flex justify-between gap-4">
@@ -82,11 +83,11 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <span>{formatCLP(item.unit_price * item.quantity)}</span>
           </div>
         ))}
-        <div className="flex justify-between gap-4 text-black/60">
+        <div className="flex justify-between gap-4 text-[#6b716f]">
           <span>Envío {zone}</span>
           <span>{formatCLP(order.shipping_cost)}</span>
         </div>
-        <div className="flex justify-between gap-4 font-semibold border-t border-black/10 pt-2">
+        <div className="flex justify-between gap-4 font-semibold border-t border-[#e4e2dc] pt-2">
           <span>Total</span>
           <span>{formatCLP(order.total)}</span>
         </div>
