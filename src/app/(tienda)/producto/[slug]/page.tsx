@@ -39,7 +39,7 @@ export default async function ProductPage({ params }: Props) {
     {
       icon: "truck",
       text: product.on_demand
-        ? `Envío a todo Chile. Es a pedido: suma ${SITE.onDemandLeadTime} al despacho`
+        ? `Envío a todo Chile. Despacho en ${SITE.onDemandLeadTime}`
         : "Envío a todo Chile",
     },
   ];
@@ -86,12 +86,7 @@ export default async function ProductPage({ params }: Props) {
               <span className="rounded-full bg-paper px-3 py-1 text-xs font-semibold text-pine">
                 Grado {product.grade} · {GRADE_SHORT[product.grade]}
               </span>
-              {product.on_demand && (
-                <span className="rounded-full bg-gold/30 px-3 py-1 text-xs font-semibold text-pine">
-                  A pedido
-                </span>
-              )}
-              {!product.on_demand && product.stock === 1 && (
+              {product.stock === 1 && (
                 <span className="rounded-full bg-pine px-3 py-1 text-xs font-semibold text-white">
                   Última unidad
                 </span>
@@ -175,7 +170,7 @@ export default async function ProductPage({ params }: Props) {
             <div className="grid grid-cols-[140px_1fr] gap-3 px-5 py-3">
               <dt className="text-muted">Disponibles</dt>
               <dd className="text-ink">
-                {product.on_demand ? "A pedido, sujeto a disponibilidad del proveedor" : product.stock}
+                {product.stock}
               </dd>
             </div>
           </dl>

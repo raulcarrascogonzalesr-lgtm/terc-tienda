@@ -67,7 +67,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
     price: 219990,
     list_price: null,
     compare_price: null,
-    stock: 0,
+    stock: 4,
     on_demand: true,
     battery_health: 92,
     warranty_months: 6,

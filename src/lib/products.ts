@@ -14,7 +14,7 @@ export async function listProducts(): Promise<Product[]> {
     .from("products")
     .select(PRODUCT_COLUMNS)
     .eq("active", true)
-    .or("stock.gt.0,on_demand.eq.true")
+    .gt("stock", 0)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data as Product[];

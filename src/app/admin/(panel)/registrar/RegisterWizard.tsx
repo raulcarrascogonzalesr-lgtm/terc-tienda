@@ -422,7 +422,7 @@ export function RegisterWizard({
                     <option value="">No está en el catálogo</option>
                     {products.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.name} {p.onDemand ? "(a pedido)" : `(quedan ${p.stock})`}
+                        {p.name} (quedan {p.stock}{p.onDemand ? ", del proveedor" : ""})
                       </option>
                     ))}
                   </select>

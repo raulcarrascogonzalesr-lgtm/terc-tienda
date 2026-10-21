@@ -92,9 +92,10 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
           className="mt-0.5"
         />
         <span>
-          A pedido: no lo tengo en stock, se lo pido al proveedor cuando alguien lo compra.
+          Del proveedor: no lo tengo yo, se lo pido al proveedor cuando alguien lo compra.
           <span className="block text-xs text-[#6b716f]">
-            Se puede comprar aunque el stock sea 0 y no cuenta como plata invertida.
+            El stock es la cantidad que informa el proveedor. El cliente lo ve como stock normal,
+            pero no cuenta como plata invertida.
           </span>
         </span>
       </label>

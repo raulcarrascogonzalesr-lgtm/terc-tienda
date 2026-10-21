@@ -34,16 +34,10 @@ export function ProductCard({ product }: { product: Product }) {
           Grado {product.grade}
           <span className="hidden sm:inline"> · {GRADE_SHORT[product.grade]}</span>
         </span>
-        {product.on_demand ? (
-          <span className="absolute bottom-3 left-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-pine shadow-sm">
-            A pedido
-          </span>
-        ) : (
-          product.stock === 1 && (
+        {product.stock === 1 && (
           <span className="absolute bottom-3 left-3 rounded-full bg-pine px-2.5 py-1 text-[11px] font-semibold text-white">
             ¡Última unidad!
           </span>
-          )
         )}
       </Link>
       <div className="flex flex-1 flex-col gap-1 p-4">
