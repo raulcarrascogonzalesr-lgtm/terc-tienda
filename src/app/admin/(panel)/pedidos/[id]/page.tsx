@@ -27,7 +27,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
   return (
     <section className="space-y-6">
-      <Link href="/admin" className="text-sm text-brand underline">
+      <Link href="/admin/pedidos" className="text-sm text-brand underline">
         ← Volver a pedidos
       </Link>
       <h1 className="text-2xl font-bold">Pedido del {formatDateTime(order.created_at)}</h1>

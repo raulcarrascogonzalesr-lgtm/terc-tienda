@@ -44,6 +44,7 @@ export async function updateOrder(id: string, form: FormData) {
   if (error) throw error;
 
   revalidatePath("/admin");
+  revalidatePath("/admin/pedidos");
   revalidatePath(`/admin/pedidos/${id}`);
   revalidatePath("/", "layout");
 }

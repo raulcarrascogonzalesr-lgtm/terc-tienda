@@ -15,6 +15,9 @@ export default async function PanelLayout({ children }: { children: React.ReactN
       <nav className="flex flex-wrap items-center gap-4 bg-white rounded-xl border border-black/10 px-4 py-3 text-sm">
         <span className="font-bold">Panel</span>
         <Link href="/admin" className="font-medium hover:text-brand">
+          Resumen
+        </Link>
+        <Link href="/admin/pedidos" className="font-medium hover:text-brand">
           Pedidos
         </Link>
         <Link href="/admin/productos" className="font-medium hover:text-brand">
