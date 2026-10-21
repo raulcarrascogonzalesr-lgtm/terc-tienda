@@ -4,7 +4,7 @@ import type { Product } from "./types";
 
 // Columnas públicas. El costo del proveedor nunca se envía al navegador.
 const PRODUCT_COLUMNS =
-  "id, slug, name, brand, category, grade, price, stock, battery_health, warranty_months, description, image_url";
+  "id, slug, name, brand, category, grade, price, list_price, stock, battery_health, warranty_months, description, image_url";
 
 export async function listProducts(): Promise<Product[]> {
   const supabase = getPublicClient();

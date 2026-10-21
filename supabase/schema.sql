@@ -145,3 +145,6 @@ create table if not exists settings (
   updated_at timestamptz not null default now()
 );
 alter table settings enable row level security;
+
+-- Precio de un equipo nuevo equivalente, para mostrar cuánto ahorra el cliente.
+alter table products add column if not exists list_price integer check (list_price >= 0);

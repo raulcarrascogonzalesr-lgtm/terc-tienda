@@ -111,6 +111,7 @@ export async function saveProduct(_prev: SaveResult, form: FormData): Promise<Sa
     category: String(form.get("category") ?? "").trim(),
     grade,
     price,
+    list_price: intOrNull(form.get("list_price")),
     cost: intOrNull(form.get("cost")),
     stock,
     battery_health: battery,

@@ -6,16 +6,27 @@
   --brand: #0f766e;
 }
 
+/* Paleta de la tienda: verde oscuro, dorado y menta, sobre un fondo cálido. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-brand: var(--brand);
+  --color-pine: #0c2f2c;
+  --color-pine-700: #0f5f59;
+  --color-gold: #c9b98c;
+  --color-gold-700: #9a8650;
+  --color-mint: #7fc4a8;
+  --color-mint-50: #eaf5f0;
+  --color-paper: #f6f4ef;
+  --color-ink: #14201f;
+  --color-muted: #5f6866;
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 @layer components {
