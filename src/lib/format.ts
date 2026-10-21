@@ -13,3 +13,22 @@ export const GRADE_LABELS = {
   B: "Grado B · detalles leves",
   C: "Grado C · marcas visibles",
 } as const;
+
+export const ORDER_STATUS_LABELS = {
+  pending: "Pendiente de pago",
+  paid: "Pagado",
+  failed: "Pago rechazado",
+  shipped: "Enviado",
+  delivered: "Entregado",
+  cancelled: "Cancelado",
+} as const;
+
+const dateTime = new Intl.DateTimeFormat("es-CL", {
+  dateStyle: "short",
+  timeStyle: "short",
+  timeZone: "America/Santiago",
+});
+
+export function formatDateTime(value: string): string {
+  return dateTime.format(new Date(value));
+}

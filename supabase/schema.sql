@@ -78,3 +78,8 @@ end;
 $$;
 
 revoke execute on function mark_order_paid(uuid, text) from public, anon, authenticated;
+
+-- Carpeta pública para las fotos de productos (las sube el panel de administración).
+insert into storage.buckets (id, name, public)
+values ('productos', 'productos', true)
+on conflict (id) do nothing;
