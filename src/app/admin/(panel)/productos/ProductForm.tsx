@@ -168,6 +168,33 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
         </Field>
       </div>
 
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium">Paquete para el envío</legend>
+        <p className="text-xs text-[#6b716f]">
+          Peso y medidas de la caja ya armada, con plumavit, cargador y cables. Shipit cotiza el envío con estos
+          datos. Si los dejas vacíos, se usa una estimación según la categoría.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Field label="Peso (kg)" hint="Ej: 2,5">
+            <input
+              name="ship_weight_kg"
+              inputMode="decimal"
+              defaultValue={product?.ship_weight_kg?.toString().replace(".", ",") ?? ""}
+              className="input"
+            />
+          </Field>
+          <Field label="Largo (cm)">
+            <input name="ship_length_cm" inputMode="numeric" defaultValue={product?.ship_length_cm ?? ""} className="input" />
+          </Field>
+          <Field label="Ancho (cm)">
+            <input name="ship_width_cm" inputMode="numeric" defaultValue={product?.ship_width_cm ?? ""} className="input" />
+          </Field>
+          <Field label="Alto (cm)">
+            <input name="ship_height_cm" inputMode="numeric" defaultValue={product?.ship_height_cm ?? ""} className="input" />
+          </Field>
+        </div>
+      </fieldset>
+
       <Field label="Descripción">
         <textarea
           name="description"

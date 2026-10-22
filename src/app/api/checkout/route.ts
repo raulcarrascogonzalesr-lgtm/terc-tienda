@@ -77,10 +77,7 @@ export async function POST(request: Request) {
   let shipping: { zone: string; label: string; price: number };
   if (commune) {
     // El precio del envío también se vuelve a cotizar aquí, nunca se toma del navegador.
-    const options = await quoteShipping(
-      commune.id,
-      lines.map((l) => ({ category: l.product.category, quantity: l.quantity })),
-    );
+    const options = await quoteShipping(commune.id, lines);
     const option = options.find((o) => o.courier === body.shipping?.courier);
     if (!option) {
       return NextResponse.json(

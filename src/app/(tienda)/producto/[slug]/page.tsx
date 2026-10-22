@@ -8,6 +8,7 @@ import { OfferCountdown } from "@/components/OfferCountdown";
 import { ProductGallery } from "@/components/ProductGallery";
 import { CONDITION, formatCLP, offer, savings } from "@/lib/format";
 import { getProductBySlug } from "@/lib/products";
+import { boxFor } from "@/lib/shipping";
 import { SITE, whatsappLink } from "@/lib/site";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -23,6 +24,7 @@ export default async function ProductPage({ params }: Props) {
 
   const sale = offer(product);
   const off = savings(product);
+  const box = boxFor(product);
   const whatsapp = whatsappLink(`Hola, me interesa el ${product.name}. ¿Me pueden dar más información?`);
   const trust: { icon: IconName; text: string }[] = [
     { icon: "shield", text: `${product.warranty_months} meses de garantía TERC` },
@@ -171,6 +173,15 @@ export default async function ProductPage({ params }: Props) {
             <div className="grid grid-cols-[140px_1fr] gap-3 px-5 py-3">
               <dt className="text-muted">Garantía</dt>
               <dd className="text-ink">{product.warranty_months} meses</dd>
+            </div>
+            <div className="grid grid-cols-[140px_1fr] gap-3 px-5 py-3">
+              <dt className="text-muted">Paquete de envío</dt>
+              <dd className="text-ink">
+                {box.weight.toLocaleString("es-CL")} kg · {box.length} × {box.width} × {box.height} cm
+                <span className="block text-xs text-muted mt-0.5">
+                  Aproximado, con caja y protección. El costo del envío se calcula en el carrito según tu comuna.
+                </span>
+              </dd>
             </div>
             <div className="grid grid-cols-[140px_1fr] gap-3 px-5 py-3">
               <dt className="text-muted">Disponibles</dt>

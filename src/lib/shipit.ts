@@ -82,7 +82,7 @@ export async function findCommune(id: number): Promise<Commune | null> {
 // Si Shipit falla o no llega a esa comuna, se ofrece la tarifa fija de la zona.
 export async function quoteShipping(
   destinyId: number,
-  lines: { category: string; quantity: number }[],
+  lines: Parameters<typeof packageFor>[0],
 ): Promise<ShippingOption[]> {
   const communes = await getCommunes();
   const destiny = communes?.find((c) => c.id === destinyId);
@@ -103,7 +103,7 @@ const plain = (text: string) => text.normalize("NFD").replace(/[\u0300-\u036f]/g
 async function shipitRates(
   communes: Commune[],
   destiny: Commune,
-  lines: { category: string; quantity: number }[],
+  lines: Parameters<typeof packageFor>[0],
 ): Promise<ShippingOption[]> {
   const origin =
     communes.find((c) => plain(c.name) === ORIGIN_COMMUNE) ??
