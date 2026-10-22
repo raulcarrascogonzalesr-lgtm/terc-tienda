@@ -1,3 +1,4 @@
+import { Analytics } from "@/components/Analytics";
 import { CartProvider } from "@/components/CartProvider";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
@@ -28,6 +29,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
         <Footer categories={categories} />
       </div>
       <WhatsAppButton />
+      <Analytics />
     </CartProvider>
   );
 }

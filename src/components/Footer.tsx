@@ -56,6 +56,11 @@ export function Footer({ categories }: { categories: string[] }) {
             <li className="flex items-center gap-2">
               <StoreIcon name="card" className="w-4 h-4" /> Pagos seguros con Mercado Pago
             </li>
+            <li>
+              <Link href="/privacidad" className="flex items-center gap-2 hover:text-white">
+                <StoreIcon name="shield" className="w-4 h-4" /> Privacidad y cookies
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
