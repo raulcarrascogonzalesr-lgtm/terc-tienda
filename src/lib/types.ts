@@ -98,3 +98,20 @@ export type Campaign = {
   active: boolean;
   created_at: string;
 };
+
+// Solicitud de "Empresas y cotizaciones". Solo la ve el panel.
+export type QuoteKind = "volumen" | "arriendo" | "otro";
+export type QuoteStatus = "nueva" | "respondida" | "cerrada";
+
+export type Quote = {
+  id: string;
+  created_at: string;
+  name: string;
+  company: string | null;
+  email: string;
+  phone: string | null;
+  kind: QuoteKind;
+  quantity: number | null;
+  message: string;
+  status: QuoteStatus;
+};

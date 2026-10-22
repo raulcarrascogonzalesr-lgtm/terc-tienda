@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { storeIsOpen } from "@/lib/store-status";
 import { formatCLP, formatDateTime, ORDER_STATUS_LABELS } from "@/lib/format";
-import { loadBusiness } from "./data";
+import { countNewQuotes, loadBusiness } from "./data";
 import {
   campaignStats,
   cashBalance,
@@ -23,9 +23,10 @@ export const dynamic = "force-dynamic";
 const VERDICT_TONE = { bien: "good", ojo: "warn", pierde: "bad", "sin-datos": "muted" } as const;
 
 export default async function HomePage() {
-  const [{ orders, products, movements, campaigns }, open] = await Promise.all([
+  const [{ orders, products, movements, campaigns }, open, newQuotes] = await Promise.all([
     loadBusiness(),
     storeIsOpen(),
+    countNewQuotes(),
   ]);
   const months = lastMonths(6);
   const thisMonth = months[months.length - 1];
@@ -130,13 +131,20 @@ export default async function HomePage() {
         </Card>
       )}
 
-      {(toShip.length > 0 || lowStock.some((p) => p.stock === 0)) && (
+      {(toShip.length > 0 || newQuotes > 0 || lowStock.some((p) => p.stock === 0)) && (
         <div className="flex flex-wrap gap-2">
           {toShip.length > 0 && (
             <Link href="/admin/pedidos">
               <Badge tone="warn">
                 {toShip.length} {toShip.length === 1 ? "pedido pagado" : "pedidos pagados"} por
                 despachar
+              </Badge>
+            </Link>
+          )}
+          {newQuotes > 0 && (
+            <Link href="/admin/cotizaciones">
+              <Badge tone="warn">
+                {newQuotes} {newQuotes === 1 ? "cotización nueva" : "cotizaciones nuevas"} por responder
               </Badge>
             </Link>
           )}

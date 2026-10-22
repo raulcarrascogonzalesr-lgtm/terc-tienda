@@ -44,6 +44,11 @@ export function Footer({ categories }: { categories: string[] }) {
               </Link>
             </li>
             <li>
+              <Link href="/empresas" className="flex items-center gap-2 hover:text-white">
+                <StoreIcon name="checklist" className="w-4 h-4" /> Empresas y cotizaciones
+              </Link>
+            </li>
+            <li>
               <a href={`mailto:${SITE.email}`} className="flex items-center gap-2 hover:text-white">
                 <StoreIcon name="mail" className="w-4 h-4" /> {SITE.email}
               </a>

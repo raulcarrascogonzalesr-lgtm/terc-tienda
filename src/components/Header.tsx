@@ -124,6 +124,12 @@ export function Header({
               >
                 Por qué TERC
               </Link>
+              <Link
+                href="/empresas"
+                className="shrink-0 rounded-full px-3 py-1.5 font-medium text-pine-700 hover:bg-mint-50"
+              >
+                Empresas y cotizaciones
+              </Link>
             </div>
           </nav>
         )}

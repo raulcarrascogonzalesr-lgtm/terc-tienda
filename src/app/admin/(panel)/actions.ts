@@ -4,9 +4,9 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin";
-import { ORDER_STATUS_LABELS } from "@/lib/format";
+import { ORDER_STATUS_LABELS, QUOTE_STATUS_LABELS } from "@/lib/format";
 import { getAdminClient } from "@/lib/supabase";
-import type { OrderStatus } from "@/lib/types";
+import type { OrderStatus, QuoteStatus } from "@/lib/types";
 import { CHANNEL_LABELS, EXPENSE_CATEGORIES, INCOME_CATEGORIES, OTHER_OUTFLOWS } from "./finance";
 
 function db() {
@@ -457,4 +457,13 @@ export async function setStoreOpen(open: boolean) {
     .upsert({ key: "store_open", value: String(open), updated_at: new Date().toISOString() });
   if (error) throw error;
   revalidatePath("/", "layout");
+}
+
+export async function updateQuoteStatus(id: string, form: FormData) {
+  await requireAdmin();
+  const status = String(form.get("status")) as QuoteStatus;
+  if (!(status in QUOTE_STATUS_LABELS)) throw new Error("Estado no válido");
+  const { error } = await db().from("quotes").update({ status }).eq("id", id);
+  if (error) throw error;
+  revalidatePath("/admin", "layout");
 }
