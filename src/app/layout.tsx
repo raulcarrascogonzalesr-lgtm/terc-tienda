@@ -12,6 +12,8 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
+  // Para que la imagen al compartir (opengraph-image.png) use la dirección real de la tienda.
+  metadataBase: new URL("https://terc.cl"),
   title: "TERC | Tecnología reacondicionada",
   description:
     "Equipos reacondicionados con garantía, revisados y listos para usar. Envíos a todo Chile.",

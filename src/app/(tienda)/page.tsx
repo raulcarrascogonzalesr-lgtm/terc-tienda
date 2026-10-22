@@ -177,7 +177,7 @@ function BrandSlide({
 }) {
   return (
     <div className="relative flex h-full items-center overflow-hidden bg-pine px-7 pb-12 pt-8 text-white sm:px-16">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_40%,rgba(201,185,140,0.2),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_40%,rgba(179,162,106,0.2),transparent_60%)]" />
       <StoreIcon
         name={icon}
         className="absolute -right-6 top-1/2 hidden h-72 w-72 -translate-y-1/2 text-white/[0.07] sm:block"

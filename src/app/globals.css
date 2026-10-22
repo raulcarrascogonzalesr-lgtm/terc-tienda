@@ -2,8 +2,8 @@
 
 :root {
   --background: #f7f7f5;
-  --foreground: #1c1c1c;
-  --brand: #0f766e;
+  --foreground: #0a2a2a;
+  --brand: #288868;
 }
 
 /* Paleta oficial de TERC (identidad V1): verde profundo, dorado y verde hoja, sobre un fondo cálido.
@@ -50,13 +50,13 @@ body {
 @layer components {
   /* Panel de gestión: estilo sobrio, líneas finas y números alineados. */
   .input {
-    @apply w-full rounded-lg border border-[#d8d6cf] bg-white px-3 py-2.5 text-[15px] text-[#14201f] placeholder:text-black/35 transition focus:border-[#0f5f59] focus:outline-none focus:ring-4 focus:ring-[#0f5f59]/10;
+    @apply w-full rounded-lg border border-[#d8d6cf] bg-white px-3 py-2.5 text-[15px] text-[#0a2a2a] placeholder:text-black/35 transition focus:border-[#288868] focus:outline-none focus:ring-4 focus:ring-[#288868]/10;
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-[#0f5f59] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0b4a45] disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-[#288868] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1f6d53] disabled:opacity-50;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-[#d8d6cf] bg-white px-4 py-2.5 text-sm font-medium text-[#14201f] transition hover:border-[#b5b2a8] hover:bg-[#fafaf8];
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-[#d8d6cf] bg-white px-4 py-2.5 text-sm font-medium text-[#0a2a2a] transition hover:border-[#b5b2a8] hover:bg-[#fafaf8];
   }
   .eyebrow {
     @apply text-[11px] font-semibold uppercase tracking-[0.09em] text-[#6b716f];

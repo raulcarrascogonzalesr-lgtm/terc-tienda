@@ -119,7 +119,7 @@ export default async function SettlementPage({
             <p className="text-[#6b716f]">
               {r.vat.carryOut > 0 ? "A favor para el próximo mes" : "A traspasar a Wiremax"}
             </p>
-            <p className="font-semibold text-lg text-[#0f5f59]">
+            <p className="font-semibold text-lg text-[#288868]">
               {formatCLP(r.vat.carryOut > 0 ? r.vat.carryOut : r.vat.toPay)}
             </p>
           </div>

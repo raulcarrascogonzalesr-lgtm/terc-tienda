@@ -101,7 +101,7 @@ export default async function HomePage() {
                   className={`flex items-start gap-3 rounded-lg border p-4 transition ${
                     step.done
                       ? "border-[#e4e2dc] bg-[#fafaf8]"
-                      : "border-[#e4e2dc] hover:border-[#0f5f59]"
+                      : "border-[#e4e2dc] hover:border-[#288868]"
                   }`}
                 >
                   <span
@@ -183,24 +183,24 @@ export default async function HomePage() {
 
       <Link
         href="/admin/iva"
-        className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 rounded-xl border border-[#e4e2dc] bg-white px-5 py-4 text-sm transition hover:border-[#0f5f59]"
+        className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 rounded-xl border border-[#e4e2dc] bg-white px-5 py-4 text-sm transition hover:border-[#288868]"
       >
         <span className="flex items-center gap-3 font-medium">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f3f2ee] text-[#0c2f2c]">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f3f2ee] text-[#0a2a2a]">
             <Icon path={ICONS.iva} className="w-4 h-4" />
           </span>
           IVA estimado de {monthLabel(thisMonth)}
         </span>
         <span className="flex flex-wrap gap-x-6 gap-y-1 tabular-nums text-[#6b716f]">
           <span>
-            Ventas <span className="font-semibold text-[#14201f]">{formatCLP(vat.debit)}</span>
+            Ventas <span className="font-semibold text-[#0a2a2a]">{formatCLP(vat.debit)}</span>
           </span>
           <span>
-            Facturas <span className="font-semibold text-[#14201f]">−{formatCLP(vat.credit)}</span>
+            Facturas <span className="font-semibold text-[#0a2a2a]">−{formatCLP(vat.credit)}</span>
           </span>
           <span>
             {vat.carryOut > 0 ? "A favor " : "A traspasar a Wiremax "}
-            <span className="font-semibold text-[#0f5f59]">
+            <span className="font-semibold text-[#288868]">
               {formatCLP(vat.carryOut > 0 ? vat.carryOut : vat.toPay)}
             </span>
           </span>
@@ -248,7 +248,7 @@ export default async function HomePage() {
                 <Link
                   key={p.id}
                   href={`/admin/productos/${p.id}`}
-                  className="flex justify-between gap-3 hover:text-[#0f5f59]"
+                  className="flex justify-between gap-3 hover:text-[#288868]"
                 >
                   <span className="min-w-0 truncate">{p.name}</span>
                   <span className={p.stock === 0 ? "text-[#b3362a]" : "text-[#6b716f]"}>
@@ -266,7 +266,7 @@ export default async function HomePage() {
           {activeCampaigns.length === 0 ? (
             <p className="text-sm text-[#6b716f]">
               Aún no hay campañas.{" "}
-              <Link href="/admin/campanas" className="text-[#0f5f59] underline">
+              <Link href="/admin/campanas" className="text-[#288868] underline">
                 Crea la primera
               </Link>
               .
@@ -302,7 +302,7 @@ export default async function HomePage() {
                 <li key={o.id}>
                   <Link
                     href={`/admin/pedidos/${o.id}`}
-                    className="flex flex-col sm:flex-row sm:justify-between gap-x-3 hover:text-[#0f5f59]"
+                    className="flex flex-col sm:flex-row sm:justify-between gap-x-3 hover:text-[#288868]"
                   >
                     <span className="min-w-0 truncate">
                       {formatDateTime(o.created_at)} · {o.customer.name}

@@ -42,7 +42,7 @@ export default function WhyTercPage() {
   return (
     <div className="shell pt-6 pb-16 space-y-6">
       <section className="relative overflow-hidden rounded-3xl bg-pine px-7 py-12 sm:px-12 sm:py-16 text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_40%,rgba(127,196,168,0.18),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_40%,rgba(61,181,133,0.18),transparent_60%)]" />
         <Mark
           className="absolute right-6 top-1/2 hidden w-[250px] -translate-y-1/2 opacity-90 sm:block"
           ink="rgba(255,255,255,0.08)"
@@ -72,7 +72,7 @@ export default function WhyTercPage() {
       </ul>
 
       <section className="rounded-3xl bg-white border border-black/[0.06] p-8 sm:p-12">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-700">Cómo funciona TERC</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-pine-700">Cómo funciona TERC</p>
         <h2 className="mt-1 max-w-xl text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
           La calidad del primer día, al precio de la segunda vida.
         </h2>
