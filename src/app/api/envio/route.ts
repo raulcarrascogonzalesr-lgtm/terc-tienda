@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   const lines = body.items.flatMap((i) => {
     const product = products.find((p) => p.id === String(i.productId));
     const quantity = Math.max(1, Math.floor(Number(i.quantity)) || 1);
-    return product ? [{ category: product.category, quantity }] : [];
+    return product ? [{ product, quantity }] : [];
   });
   return NextResponse.json({ options: await quoteShipping(communeId, lines) });
 }

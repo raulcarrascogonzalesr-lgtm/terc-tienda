@@ -19,6 +19,11 @@ export type Product = {
   description: string;
   image_url: string | null;
   images: string[]; // fotos extra, en el orden en que se muestran
+  // Paquete listo para despachar (con caja, plumavit y cables), para cotizar el envío.
+  ship_weight_kg: number | null;
+  ship_length_cm: number | null;
+  ship_width_cm: number | null;
+  ship_height_cm: number | null;
 };
 
 // El carrito guarda una copia del nombre y precio solo para mostrarlos.

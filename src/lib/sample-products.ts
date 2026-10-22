@@ -21,6 +21,10 @@ export const SAMPLE_PRODUCTS: Product[] = [
     description: "Equipo revisado en 30 puntos, liberado para cualquier compañía. Incluye cable de carga.",
     image_url: null,
     images: [],
+    ship_weight_kg: null,
+    ship_length_cm: null,
+    ship_width_cm: null,
+    ship_height_cm: null,
   },
   {
     id: "demo-2",
@@ -40,6 +44,10 @@ export const SAMPLE_PRODUCTS: Product[] = [
     description: "Notebook empresarial con Windows 11 Pro, teclado en español y cargador original.",
     image_url: null,
     images: [],
+    ship_weight_kg: null,
+    ship_length_cm: null,
+    ship_width_cm: null,
+    ship_height_cm: null,
   },
   {
     id: "demo-3",
@@ -59,6 +67,10 @@ export const SAMPLE_PRODUCTS: Product[] = [
     description: "Pantalla sin rayas, pequeñas marcas en el marco. Funcionamiento 100% probado.",
     image_url: null,
     images: [],
+    ship_weight_kg: null,
+    ship_length_cm: null,
+    ship_width_cm: null,
+    ship_height_cm: null,
   },
   {
     id: "demo-4",
@@ -78,5 +90,9 @@ export const SAMPLE_PRODUCTS: Product[] = [
     description: "Ideal para estudio y trabajo. Se entrega restaurado de fábrica.",
     image_url: null,
     images: [],
+    ship_weight_kg: null,
+    ship_length_cm: null,
+    ship_width_cm: null,
+    ship_height_cm: null,
   },
 ];

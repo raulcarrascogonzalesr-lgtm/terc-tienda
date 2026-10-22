@@ -1,3 +1,5 @@
+import type { Product } from "./types";
+
 // Tarifas de envío fijas mientras se despacha a mano.
 // Ajustar según las cotizaciones de Blue Express / Starken / Chilexpress.
 export const SHIPPING_ZONES = {
@@ -12,23 +14,36 @@ export function isShippingZone(value: unknown): value is ShippingZone {
 }
 
 // Comuna desde donde TERC despacha (en mayúsculas y sin tildes). Shipit cotiza entre
-// esta comuna y la del cliente. Provisoria hasta confirmar el punto de retiro con Shipit.
+// esta comuna y la del cliente. Los paquetes se dejan en una sucursal Starken de Santiago.
 export const ORIGIN_COMMUNE = "SANTIAGO";
 
-// Medidas aproximadas de la caja según el tipo de equipo (cm y kg), para cotizar con Shipit.
-type Box = { length: number; width: number; height: number; weight: number };
+export type Box = { length: number; width: number; height: number; weight: number }; // cm y kg
+
+// Peso y medidas del paquete listo para despachar, con caja, plumavit y cables.
+type Packable = Pick<Product, "category" | "ship_weight_kg" | "ship_length_cm" | "ship_width_cm" | "ship_height_cm">;
+
+// Si el producto no tiene sus medidas cargadas, se usa una estimación por categoría.
 const BOXES: Record<string, Box> = {
   Celulares: { length: 20, width: 12, height: 8, weight: 0.7 },
   Tablets: { length: 32, width: 24, height: 8, weight: 1.3 },
   Notebooks: { length: 45, width: 33, height: 10, weight: 3 },
+  Monitores: { length: 65, width: 45, height: 18, weight: 6.5 },
+  Computadores: { length: 50, width: 40, height: 22, weight: 7.5 },
+  "All-in-One": { length: 70, width: 52, height: 25, weight: 11 },
 };
-const DEFAULT_BOX: Box = { length: 30, width: 25, height: 10, weight: 1.5 };
+const DEFAULT_BOX: Box = { length: 40, width: 30, height: 15, weight: 3 };
+
+export function boxFor(product: Packable): Box {
+  const { ship_length_cm: length, ship_width_cm: width, ship_height_cm: height, ship_weight_kg: weight } = product;
+  if (length && width && height && weight) return { length, width, height, weight };
+  return BOXES[product.category] ?? DEFAULT_BOX;
+}
 
 // Un paquete con todo el pedido: las cajas van una encima de otra.
-export function packageFor(lines: { category: string; quantity: number }[]): Box {
+export function packageFor(lines: { product: Packable; quantity: number }[]): Box {
   const parcel = { length: 0, width: 0, height: 0, weight: 0 };
-  for (const { category, quantity } of lines) {
-    const box = BOXES[category] ?? DEFAULT_BOX;
+  for (const { product, quantity } of lines) {
+    const box = boxFor(product);
     parcel.length = Math.max(parcel.length, box.length);
     parcel.width = Math.max(parcel.width, box.width);
     parcel.height += box.height * quantity;

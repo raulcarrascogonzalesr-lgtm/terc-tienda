@@ -60,6 +60,12 @@ function slugify(text: string): string {
     .slice(0, 80);
 }
 
+// Kilos con decimales: acepta "2,5" o "2.5".
+function kgOrNull(value: FormDataEntryValue | null): number | null {
+  const n = Number(String(value ?? "").trim().replace(",", "."));
+  return String(value ?? "").trim() !== "" && Number.isFinite(n) && n > 0 ? Math.round(n * 10) / 10 : null;
+}
+
 function intOrNull(value: FormDataEntryValue | null): number | null {
   const text = String(value ?? "").replace(/[.$\s]/g, "");
   if (text === "") return null;
@@ -123,8 +129,14 @@ export async function saveProduct(_prev: SaveResult, form: FormData): Promise<Sa
     on_demand: form.get("on_demand") === "on",
     supplier: String(form.get("supplier") ?? "").trim() || null,
     supplier_sku: String(form.get("supplier_sku") ?? "").trim() || null,
+    ship_weight_kg: kgOrNull(form.get("ship_weight_kg")),
+    ship_length_cm: intOrNull(form.get("ship_length_cm")),
+    ship_width_cm: intOrNull(form.get("ship_width_cm")),
+    ship_height_cm: intOrNull(form.get("ship_height_cm")),
   };
   if (!values.brand || !values.category) return { error: "Faltan la marca o la categoría" };
+  const box = [values.ship_length_cm, values.ship_width_cm, values.ship_height_cm] as (number | null)[];
+  if (box.some((n) => n !== null && n <= 0)) return { error: "Las medidas del paquete deben ser mayores que 0" };
   if (values.offer_ends_at && !((values.compare_price as number | null) && (values.compare_price as number) > price)) {
     return { error: "Para una oferta con fecha, pon el precio de antes (mayor que el precio actual)" };
   }
