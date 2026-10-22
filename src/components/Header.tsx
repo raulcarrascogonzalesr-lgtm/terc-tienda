@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useCart } from "./CartProvider";
 import { StoreIcon } from "./icons";
 import { Logo } from "./Logo";
@@ -36,14 +37,26 @@ export function Header({
   limitedOffers: boolean; // alguna oferta tiene fecha de término
 }) {
   const { count } = useCart();
+  // Al bajar, la franja de arriba se va con la página y el menú queda fijo, más compacto y con sombra.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   return (
-    <header className="sticky top-0 z-40">
+    <>
       {offerPercent > 0 ? (
-        <Link href="/?ofertas=1#equipos" className="block bg-sale text-[13px] font-semibold text-white">
+        <Link
+          href="/?ofertas=1#equipos"
+          className="block bg-sale text-[13px] font-semibold text-white"
+        >
           <div className="shell h-9 flex items-center justify-center gap-2">
             <StoreIcon name="tag" className="w-4 h-4" />
             <span>
-              {limitedOffers ? "Solo por tiempo limitado: " : ""}ofertas de hasta −{offerPercent}%
+              {limitedOffers ? "Solo por tiempo limitado: " : ""}ofertas de
+              hasta −{offerPercent}%
             </span>
             <span className="hidden sm:flex items-center gap-1 underline underline-offset-2">
               Ver ofertas <StoreIcon name="arrow" className="w-3.5 h-3.5" />
@@ -69,71 +82,80 @@ export function Header({
         </div>
       )}
 
-      <div className="bg-white/95 backdrop-blur border-b border-black/[0.06]">
-        <div className="shell h-16 flex items-center gap-6">
-          <Link href="/" aria-label="TERC, ir al inicio" className="shrink-0">
-            <Logo className="h-14 w-auto" />
-          </Link>
-          <SearchForm className="hidden md:block flex-1 max-w-xl mx-auto" />
-          <Link
-            href="/carrito"
-            aria-label={`Carrito, ${count} productos`}
-            className="relative ml-auto md:ml-0 flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-ink hover:bg-paper"
-          >
-            <StoreIcon name="cart" className="w-[22px] h-[22px]" />
-            <span className="hidden sm:inline">Carrito</span>
-            {count > 0 && (
-              <span className="absolute -top-0.5 left-6 min-w-5 h-5 px-1 rounded-full bg-gold text-pine text-[11px] font-bold flex items-center justify-center">
-                {count}
-              </span>
-            )}
-          </Link>
-        </div>
-        <div className="md:hidden px-4 pb-3">
-          <SearchForm />
-        </div>
-        {categories.length > 0 && (
-          <nav aria-label="Categorías" className="border-t border-black/[0.06]">
-            <div className="shell h-11 flex items-center gap-1 overflow-x-auto text-sm">
-              <Link
-                href="/#equipos"
-                className="shrink-0 rounded-full px-3 py-1.5 font-medium text-ink hover:bg-paper"
-              >
-                Todos
-              </Link>
-              {offerPercent > 0 && (
-                <Link
-                  href="/?ofertas=1#equipos"
-                  className="shrink-0 rounded-full px-3 py-1.5 font-semibold text-sale hover:bg-sale-50"
-                >
-                  Ofertas
-                </Link>
+      <header
+        className={`sticky top-0 z-40 transition-shadow duration-300 ${scrolled ? "shadow-lg shadow-pine/[0.07]" : ""}`}
+      >
+        <div className="bg-white/95 backdrop-blur border-b border-black/[0.06]">
+          <div className="shell h-16 flex items-center gap-6">
+            <Link href="/" aria-label="TERC, ir al inicio" className="shrink-0">
+              <Logo
+                className={`h-14 w-auto origin-left transition-transform duration-300 ${scrolled ? "scale-[0.86]" : ""}`}
+              />
+            </Link>
+            <SearchForm className="hidden md:block flex-1 max-w-xl mx-auto" />
+            <Link
+              href="/carrito"
+              aria-label={`Carrito, ${count} productos`}
+              className="relative ml-auto md:ml-0 flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-ink hover:bg-paper"
+            >
+              <StoreIcon name="cart" className="w-[22px] h-[22px]" />
+              <span className="hidden sm:inline">Carrito</span>
+              {count > 0 && (
+                <span className="absolute -top-0.5 left-6 min-w-5 h-5 px-1 rounded-full bg-gold text-pine text-[11px] font-bold flex items-center justify-center">
+                  {count}
+                </span>
               )}
-              {categories.map((c) => (
+            </Link>
+          </div>
+          <div className="md:hidden px-4 pb-3">
+            <SearchForm />
+          </div>
+          {categories.length > 0 && (
+            <nav
+              aria-label="Categorías"
+              className="border-t border-black/[0.06]"
+            >
+              <div className="shell h-11 flex items-center gap-1 overflow-x-auto text-sm">
                 <Link
-                  key={c}
-                  href={`/?categoria=${encodeURIComponent(c)}#equipos`}
-                  className="shrink-0 rounded-full px-3 py-1.5 text-muted hover:bg-paper hover:text-ink"
+                  href="/#equipos"
+                  className="shrink-0 rounded-full px-3 py-1.5 font-medium text-ink hover:bg-paper"
                 >
-                  {c}
+                  Todos
                 </Link>
-              ))}
-              <Link
-                href="/por-que-terc"
-                className="ml-auto shrink-0 rounded-full px-3 py-1.5 text-muted hover:bg-paper hover:text-ink"
-              >
-                Por qué TERC
-              </Link>
-              <Link
-                href="/empresas"
-                className="shrink-0 rounded-full px-3 py-1.5 font-medium text-pine-700 hover:bg-mint-50"
-              >
-                Empresas y cotizaciones
-              </Link>
-            </div>
-          </nav>
-        )}
-      </div>
-    </header>
+                {offerPercent > 0 && (
+                  <Link
+                    href="/?ofertas=1#equipos"
+                    className="shrink-0 rounded-full px-3 py-1.5 font-semibold text-sale hover:bg-sale-50"
+                  >
+                    Ofertas
+                  </Link>
+                )}
+                {categories.map((c) => (
+                  <Link
+                    key={c}
+                    href={`/?categoria=${encodeURIComponent(c)}#equipos`}
+                    className="shrink-0 rounded-full px-3 py-1.5 text-muted hover:bg-paper hover:text-ink"
+                  >
+                    {c}
+                  </Link>
+                ))}
+                <Link
+                  href="/por-que-terc"
+                  className="ml-auto shrink-0 rounded-full px-3 py-1.5 text-muted hover:bg-paper hover:text-ink"
+                >
+                  Por qué TERC
+                </Link>
+                <Link
+                  href="/empresas"
+                  className="shrink-0 rounded-full px-3 py-1.5 font-medium text-pine-700 hover:bg-mint-50"
+                >
+                  Empresas y cotizaciones
+                </Link>
+              </div>
+            </nav>
+          )}
+        </div>
+      </header>
+    </>
   );
 }

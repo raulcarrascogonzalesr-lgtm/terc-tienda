@@ -2,6 +2,7 @@ import { CartProvider } from "@/components/CartProvider";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { PreparingBanner } from "@/components/PreparingBanner";
+import { ScrollReveal } from "@/components/ScrollReveal";
 import { UtmCapture } from "@/components/UtmCapture";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { offer } from "@/lib/format";
@@ -19,6 +20,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
   return (
     <CartProvider storeOpen={open}>
       <UtmCapture />
+      <ScrollReveal />
       <div className="min-h-screen flex flex-col bg-paper text-ink">
         {!open && <PreparingBanner />}
         <Header categories={categories} offerPercent={offerPercent} limitedOffers={limitedOffers} />

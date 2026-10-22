@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { StoreIcon } from "@/components/icons";
+import { Terqui } from "@/components/Terqui";
 import { QUOTE_KIND_LABELS } from "@/lib/format";
 import type { QuoteKind } from "@/lib/types";
 import { submitQuote } from "./actions";
@@ -15,9 +16,7 @@ export function QuoteForm({ kind }: { kind: QuoteKind }) {
   if (state?.ok) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-3xl bg-white p-10 text-center ring-1 ring-black/[0.06]">
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-mint-50 text-pine-700">
-          <StoreIcon name="check" className="w-7 h-7" />
-        </span>
+        <Terqui pose="listo" className="w-36 h-36" />
         <h3 className="text-xl font-bold text-ink">¡Recibimos tu solicitud!</h3>
         <p className="max-w-sm text-sm text-muted">
           Te contactamos dentro de un día hábil para ver los detalles y enviarte una cotización.
