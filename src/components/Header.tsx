@@ -72,7 +72,7 @@ export function Header({
       <div className="bg-white/95 backdrop-blur border-b border-black/[0.06]">
         <div className="shell h-16 flex items-center gap-6">
           <Link href="/" aria-label="TERC, ir al inicio" className="shrink-0">
-            <Logo className="h-11 sm:h-12 w-auto" />
+            <Logo className="h-14 w-auto" />
           </Link>
           <SearchForm className="hidden md:block flex-1 max-w-xl mx-auto" />
           <Link

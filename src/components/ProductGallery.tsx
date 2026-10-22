@@ -18,7 +18,7 @@ function TrustSlide({ product }: { product: Product }) {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(127,196,168,0.25),transparent_60%)]" />
       <Mark className="absolute -bottom-10 -right-10 w-64 opacity-[0.08]" ink="#ffffff" />
       <div className="relative flex items-center gap-3">
-        <Mark className="w-9 sm:w-12" ink="#ffffff" />
+        <Mark className="w-9 sm:w-12" ink="#ffffff" technical />
         <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold sm:text-xs">
           Compra con respaldo
         </span>
@@ -108,7 +108,7 @@ export function ProductGallery({ product, badges }: { product: Product; badges?:
               <img src={view} alt="" className="h-full w-full object-contain bg-white" />
             ) : (
               <span className="flex h-full w-full items-center justify-center bg-[#eeece6]">
-                <Mark className="w-8 opacity-60" ink="#0a2a2a" />
+                <Mark className="w-8 opacity-60" ink="#0a2a2a" technical />
               </span>
             )}
           </button>
