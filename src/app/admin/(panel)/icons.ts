@@ -6,6 +6,7 @@ export const ICONS = {
   productos: "M4 5h16v11H4zM2 19h20M10 16v3M14 16v3",
   finanzas: "M3 7h18v12H3zM3 11h18M7 15h3M16 3l-4 4-4-4",
   resultados: "M4 20V10M10 20V4M16 20v-7M22 20H2",
+  metricas: "M3 17l6-6 4 4 8-8M15 7h6v6",
   campanas: "M3 10v4h4l6 5V5L7 10zM17 8a5 5 0 0 1 0 8M20 5a9 9 0 0 1 0 14",
   liquidacion: "M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6",
   mas: "M12 5v14M5 12h14",
