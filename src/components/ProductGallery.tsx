@@ -63,7 +63,7 @@ export function ProductGallery({ product, badges }: { product: Product; badges?:
         ) : current ? (
           <div className={`aspect-square w-full ${PHOTO_BACKDROP}`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={current} alt={product.name} className="h-full w-full object-contain p-[7%] mix-blend-multiply" />
+            <img src={current} alt={product.name} className="h-full w-full object-contain p-[3%] mix-blend-multiply" />
           </div>
         ) : (
           <ProductImage product={{ ...product, image_url: null }} />

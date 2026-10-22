@@ -22,7 +22,7 @@ export function ProductImage({ product }: { product: Product }) {
       <img
         src={product.image_url}
         alt={product.name}
-        className="h-full w-full object-contain p-[11%] mix-blend-multiply"
+        className="h-full w-full object-contain p-[4%] mix-blend-multiply"
       />
     </div>
   );
