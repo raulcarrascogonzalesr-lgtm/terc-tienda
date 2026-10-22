@@ -14,6 +14,7 @@ export const SITE = {
   metaPixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "1115169581270114",
   ga4Id: process.env.NEXT_PUBLIC_GA4_ID ?? "G-R8D4875YZB",
   metaDomainVerification: "csaape7gjsgl1d5q9kdd6mt9jbhgo4",
+  googleSiteVerification: "HNgqIST4xzO92revokklqWle_20whgkNMxarTI1ngCU", // Search Console
 };
 
 export function whatsappLink(message: string): string | null {
