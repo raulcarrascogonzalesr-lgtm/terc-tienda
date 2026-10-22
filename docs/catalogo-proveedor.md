@@ -86,3 +86,25 @@ Las ofertas solo las decide Raúl: nunca se ponen solas al cargar la lista.
 - La tienda muestra "Imagen referencial" en las fotos de productos a pedido.
 - Descripción: 2 o 3 frases en español, con datos verificables del fabricante
   (pantalla, procesador, memoria, batería). Nada inventado.
+
+## Peso y medidas para el envío
+
+- Cada producto lleva el peso y las medidas del **paquete ya armado**, no del equipo solo:
+  `ship_weight_kg` (kg, un decimal), `ship_length_cm`, `ship_width_cm` y `ship_height_cm` (cm, enteros).
+  Shipit cotiza el envío con esos datos.
+- Criterio: peso del fabricante + caja, plumavit, cargador y cables (más o menos 1 a 2,5 kg más)
+  y unos 8 a 10 cm más por lado. Mejor pasarse un poco que quedarse corto.
+- Rangos de referencia (lo que se cargó en `supabase/envio-medidas.sql`):
+
+  | Categoría | Peso | Caja (cm) |
+  |---|---|---|
+  | Celulares | 0,6 kg | 20 × 12 × 8 |
+  | Tablets | 1,2 kg | 33 × 25 × 8 |
+  | Notebooks 13–14" | 2,5 a 3,0 kg | 42–45 × 32–33 × 10 |
+  | Monitores 17–23" | 4,2 a 7,0 kg | 48–64 × 37–44 × 15–17 |
+  | Mini PC (Micro, Tiny) | 2,5 kg | 30 × 25 × 12 |
+  | PC de escritorio SFF | 6,5 a 7,4 kg | 45 × 40 × 20 |
+  | All-in-One 22–24" | 9,0 a 9,5 kg | 68 × 50 × 22 |
+
+- Si se dejan vacías, la tienda usa una estimación por categoría (`boxFor` en
+  `src/lib/shipping.ts`), pero es menos precisa: siempre llenarlas.
