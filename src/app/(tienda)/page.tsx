@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CutoutImage } from "@/components/CutoutImage";
 import { DiscountSticker } from "@/components/DiscountSticker";
 import { StoreIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
@@ -98,20 +99,26 @@ function ProductSlide({ product }: { product: Product }) {
         </div>
       </div>
       <div className="relative hidden sm:block">
-        <div className="relative mx-auto aspect-square max-w-[300px]">
-          <div className="h-full w-full overflow-hidden rounded-3xl bg-white shadow-2xl shadow-black/30">
-            {product.image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={product.image_url} alt={product.name} className="h-full w-full object-contain p-3" />
-            ) : (
-              <div className="flex h-full flex-col items-center justify-center gap-4 bg-gradient-to-br from-[#f1efe8] to-[#e6ebe7]">
-                <Mark className="w-2/5" />
-                <span className="text-xs font-semibold uppercase tracking-[0.22em] text-pine/60">
-                  {product.brand}
-                </span>
-              </div>
-            )}
-          </div>
+        <div className="relative mx-auto aspect-square max-w-[360px]">
+          {product.image_url ? (
+            // El equipo sin fondo, flotando sobre un brillo verde y con su sombra en el "piso".
+            <div className="relative h-full w-full">
+              <div className="absolute inset-x-0 inset-y-[8%] rounded-full bg-[radial-gradient(ellipse_at_50%_55%,rgba(61,181,133,0.38),rgba(61,181,133,0.1)_45%,transparent_70%)]" />
+              <div className="absolute inset-x-[14%] bottom-[9%] h-5 rounded-[50%] bg-black/55 blur-xl" />
+              <CutoutImage
+                src={product.image_url}
+                alt={product.name}
+                className="relative h-full w-full scale-110 drop-shadow-[0_24px_22px_rgba(0,0,0,0.45)]"
+              />
+            </div>
+          ) : (
+            <div className="flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-[#f1efe8] to-[#e6ebe7] shadow-2xl shadow-black/30">
+              <Mark className="w-2/5" />
+              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-pine/60">
+                {product.brand}
+              </span>
+            </div>
+          )}
           {deal && (
             <DiscountSticker
               percent={deal.percent}

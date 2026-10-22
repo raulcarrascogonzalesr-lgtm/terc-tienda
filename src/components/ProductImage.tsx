@@ -1,6 +1,8 @@
 import type { Product } from "@/lib/types";
 import { Mark } from "./Mark";
 
+export const PHOTO_BACKDROP = "bg-gradient-to-b from-[#f6f4ef] to-[#ebede8]";
+
 export function ProductImage({ product }: { product: Product }) {
   if (!product.image_url) {
     // Mientras el equipo no tenga foto, se muestra un fondo de la marca con el nombre del fabricante.
@@ -13,12 +15,15 @@ export function ProductImage({ product }: { product: Product }) {
       </div>
     );
   }
+  // Todas las fotos sobre el mismo fondo suave: el blanco de la foto se funde con él (multiply).
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={product.image_url}
-      alt={product.name}
-      className="aspect-square w-full object-contain bg-white"
-    />
+    <div className={`aspect-square w-full ${PHOTO_BACKDROP}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={product.image_url}
+        alt={product.name}
+        className="h-full w-full object-contain p-[11%] mix-blend-multiply"
+      />
+    </div>
   );
 }
