@@ -9,6 +9,12 @@ import { offer } from "@/lib/format";
 import { listProducts } from "@/lib/products";
 import { storeIsOpen } from "@/lib/store-status";
 
+// Las páginas fijas de la tienda (carrito, Por qué TERC, Empresas) se rehacen cada minuto.
+// En el hosting corren varios procesos y el aviso de "actualizar" del panel le llega solo a
+// uno, así que sin esto una página podía quedarse con el estado viejo (por ejemplo, el carrito
+// seguía diciendo "Estamos preparando la tienda" después de abrirla).
+export const revalidate = 60;
+
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
   const [products, open] = await Promise.all([listProducts(), storeIsOpen()]);
   const categories = [...new Set(products.map((p) => p.category))].sort();
