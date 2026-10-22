@@ -59,7 +59,7 @@ export default function WhyTercPage() {
         </div>
       </section>
 
-      <ul className="grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-2xl border border-black/[0.06] bg-black/[0.06]">
+      <ul data-reveal className="grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-2xl border border-black/[0.06] bg-black/[0.06]">
         {TRUST.map((t) => (
           <li key={t.title} className="flex gap-3 bg-white p-5">
             <StoreIcon name={t.icon} className="w-6 h-6 text-pine-700" />
@@ -71,7 +71,7 @@ export default function WhyTercPage() {
         ))}
       </ul>
 
-      <section className="rounded-3xl bg-white border border-black/[0.06] p-8 sm:p-12">
+      <section data-reveal className="rounded-3xl bg-white border border-black/[0.06] p-8 sm:p-12">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-pine-700">Cómo funciona TERC</p>
         <h2 className="mt-1 max-w-xl text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
           La calidad del primer día, al precio de la segunda vida.
@@ -103,7 +103,7 @@ export default function WhyTercPage() {
         </div>
       </section>
 
-      <section className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-pine-700 px-8 py-10 text-white sm:flex-row sm:items-center sm:px-12">
+      <section data-reveal className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-pine-700 px-8 py-10 text-white sm:flex-row sm:items-center sm:px-12">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">¿No sabes cuál elegir?</h2>
           <p className="mt-1 text-white/75">Cuéntanos para qué lo necesitas y te recomendamos el equipo ideal.</p>

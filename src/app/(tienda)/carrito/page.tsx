@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "@/components/CartProvider";
+import { Terqui, TerquiLoader } from "@/components/Terqui";
 import { formatCLP } from "@/lib/format";
 import { SHIPPING_ZONES, type ShippingZone } from "@/lib/shipping";
 import { UTM_MAX_AGE_MS, UTM_STORAGE_KEY } from "@/lib/utm";
@@ -22,12 +23,24 @@ export default function CartPage() {
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
+  // Si vuelve atrás desde Mercado Pago, el navegador restaura la página tal cual: se quita la pantalla de carga.
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => e.persisted && setSending(false);
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
+  }, []);
+
   if (items.length === 0) {
     return (
-      <div className="shell py-12 space-y-4">
-        <h1 className="text-2xl font-bold">Tu carrito está vacío</h1>
-        <Link href="/" className="text-brand underline">
-          Ver productos
+      <div className="shell flex flex-col items-center py-14 text-center">
+        <Terqui pose="apunta" className="w-44 h-44" />
+        <h1 className="mt-2 text-2xl font-bold text-ink">Tu carrito está vacío</h1>
+        <p className="mt-2 text-muted">Todavía no eliges tu equipo. Terqui te ayuda a encontrar uno.</p>
+        <Link
+          href="/#equipos"
+          className="mt-6 inline-flex items-center gap-2 rounded-full bg-pine px-6 py-3 text-sm font-semibold text-white transition hover:bg-pine-700"
+        >
+          Ver equipos
         </Link>
       </div>
     );
@@ -63,6 +76,12 @@ export default function CartPage() {
 
   return (
     <div className="shell py-8 grid lg:grid-cols-[1fr_380px] gap-8">
+      {sending && (
+        <TerquiLoader
+          overlay
+          messages={["Preparando tu pedido…", "Conectando con Mercado Pago…", "Un segundo más"]}
+        />
+      )}
       <section className="space-y-4">
         <h1 className="text-2xl font-bold">Carrito</h1>
         {items.map((item) => (

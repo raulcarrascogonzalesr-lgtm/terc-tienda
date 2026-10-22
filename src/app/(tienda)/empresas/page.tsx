@@ -64,9 +64,11 @@ export default async function BusinessPage({ searchParams }: Props) {
       </header>
 
       <section className="grid gap-4 md:grid-cols-3">
-        {SERVICES.map((s) => (
+        {SERVICES.map((s, i) => (
           <a
             key={s.kind}
+            data-reveal
+            style={{ "--d": `${i * 80}ms` } as React.CSSProperties}
             href={`?tipo=${s.kind}#cotizar`}
             className="group rounded-2xl bg-white p-5 ring-1 ring-black/[0.06] transition hover:ring-pine-700/30"
           >
@@ -82,7 +84,7 @@ export default async function BusinessPage({ searchParams }: Props) {
         ))}
       </section>
 
-      <section id="cotizar" className="grid scroll-mt-40 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+      <section id="cotizar" data-reveal className="grid scroll-mt-40 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
         <div className="space-y-4">
           <h2 className="text-2xl font-bold tracking-tight text-ink">Pide tu cotización</h2>
           <p className="text-muted">

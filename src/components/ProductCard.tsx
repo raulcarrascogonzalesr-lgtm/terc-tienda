@@ -24,7 +24,7 @@ export function ProductCard({ product }: { product: Product }) {
             label={sale ? "dcto." : "vs. nuevo"}
             tone={sale ? "sale" : "gold"}
             size="sm"
-            className="absolute left-3 top-3"
+            className="stamp absolute left-3 top-3"
           />
         )}
         <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-pine shadow-sm">

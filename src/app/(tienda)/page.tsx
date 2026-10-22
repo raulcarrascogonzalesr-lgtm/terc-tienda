@@ -197,6 +197,9 @@ function BrandSlide({
   );
 }
 
+// Retraso de la animación de entrada, para que una fila aparezca en cascada.
+const delay = (ms: number) => ({ "--d": `${ms}ms` }) as React.CSSProperties;
+
 export default async function HomePage({ searchParams }: Props) {
   const params = await searchParams;
   const q = params.q ?? "";
@@ -260,7 +263,7 @@ export default async function HomePage({ searchParams }: Props) {
     <div className="pb-16">
       {!filtering && (
         <section className="shell pt-5 grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-          <div className="h-[420px] lg:h-[460px] min-w-0">
+          <div className="rise h-[420px] lg:h-[460px] min-w-0">
             <PromoCarousel>
               {featured.map((p) => (
                 <ProductSlide key={p.id} product={p} />
@@ -284,7 +287,7 @@ export default async function HomePage({ searchParams }: Props) {
             </PromoCarousel>
           </div>
 
-          <div className="grid min-w-0 grid-cols-2 gap-3 sm:gap-4 lg:grid-rows-2">
+          <div className="rise grid min-w-0 grid-cols-2 gap-3 sm:gap-4 lg:grid-rows-2" style={delay(120)}>
             {offers.length > 0 && (
               <Link
                 href="/?ofertas=1#equipos"
@@ -315,9 +318,11 @@ export default async function HomePage({ searchParams }: Props) {
 
       <section className="shell pt-4">
         <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {BENEFITS.map((b) => (
+          {BENEFITS.map((b, i) => (
             <li
               key={b.title}
+              data-reveal
+              style={delay(i * 80)}
               className="flex items-center gap-3 rounded-2xl bg-white border border-black/[0.06] px-3 py-3 sm:px-4 sm:py-3.5"
             >
               <span className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-mint-50 text-pine-700">
@@ -335,7 +340,7 @@ export default async function HomePage({ searchParams }: Props) {
       {!filtering && offers.length > 0 && (
         <section className="mt-12 bg-gradient-to-b from-sale-50 to-paper py-10">
           <div className="shell">
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+            <div data-reveal className="mb-6 flex flex-wrap items-end justify-between gap-4">
               <div>
                 <span className="inline-flex items-center gap-1.5 rounded-md bg-sale px-2.5 py-1 text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
                   <StoreIcon name="tag" className="w-4 h-4" /> Ofertas irresistibles
@@ -358,7 +363,7 @@ export default async function HomePage({ searchParams }: Props) {
             </div>
             <div className="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-4 xl:grid-cols-5">
               {shownOffers.map((p, i) => (
-                <div key={p.id} className={`w-[70%] shrink-0 snap-start sm:w-auto ${i === 4 ? "sm:hidden xl:block" : ""} ${i === 3 ? "sm:hidden lg:block" : ""}`}>
+                <div key={p.id} data-reveal style={delay(i * 80)} className={`w-[70%] shrink-0 snap-start sm:w-auto ${i === 4 ? "sm:hidden xl:block" : ""} ${i === 3 ? "sm:hidden lg:block" : ""}`}>
                   <ProductCard product={p} />
                 </div>
               ))}
@@ -368,7 +373,7 @@ export default async function HomePage({ searchParams }: Props) {
       )}
 
       <section id="equipos" className="shell pt-12 scroll-mt-40">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+        <div data-reveal className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
               {onlyOffers ? "Ofertas" : categoria || (q ? `Resultados para “${q}”` : "Todos los equipos")}
@@ -435,15 +440,17 @@ export default async function HomePage({ searchParams }: Props) {
           </div>
         ) : (
           <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
-            {filtered.map((p) => (
-              <ProductCard key={p.id} product={p} />
+            {filtered.map((p, i) => (
+              <div key={p.id} data-reveal style={delay((i % 5) * 70)}>
+                <ProductCard product={p} />
+              </div>
             ))}
           </div>
         )}
       </section>
 
       {!filtering && (
-        <section className="shell pt-14">
+        <section data-reveal className="shell pt-14">
           <Link
             href="/por-que-terc"
             className="group flex flex-col items-start justify-between gap-4 rounded-3xl bg-white border border-black/[0.06] px-8 py-8 transition hover:shadow-lg sm:flex-row sm:items-center sm:px-12"
