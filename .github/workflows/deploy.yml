@@ -48,10 +48,14 @@ jobs:
           # En cPanel (CloudLinux) node_modules es un enlace administrado por el panel:
           # las dependencias se instalan con el botón "Ejecutar NPM Install", no se suben.
           rm -rf .next/standalone/node_modules
-          # Passenger (el que corre Node.js en cPanel) reinicia la app al ver este archivo nuevo.
-          mkdir -p .next/standalone/tmp
-          date > .next/standalone/tmp/restart.txt
+          # El aviso de reinicio va en una carpeta aparte y se sube al final (ver más abajo).
+          mkdir -p .next/reinicio/tmp
+          date > .next/reinicio/tmp/restart.txt
 
+      # La subida va en dos partes. Si el aviso de reinicio llega mientras todavía se están
+      # subiendo los archivos, el servidor arranca con una mezcla de archivos viejos y nuevos
+      # y las páginas dan error 500 hasta el siguiente reinicio. Por eso primero se suben
+      # todos los archivos (sin tocar tmp/) y recién después el aviso.
       - name: Subir por FTP
         # Mientras no estén cargados los datos FTP, el flujo solo comprueba que la tienda compila.
         if: ${{ github.event_name != 'pull_request' && env.FTP_SERVER != '' }}
@@ -62,3 +66,46 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: .next/standalone/
           server-dir: ./
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            tmp/**
+
+      - name: Reiniciar la tienda
+        if: ${{ github.event_name != 'pull_request' && env.FTP_SERVER != '' }}
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: .next/reinicio/
+          server-dir: ./
+          state-name: .ftp-deploy-reinicio.json
+
+      # Después de publicar, se abre la tienda para ver que responde. Si da error,
+      # se reinicia una vez más y se vuelve a revisar; si sigue mal, el flujo queda en rojo.
+      - name: Revisar que la tienda responde
+        id: revisar
+        if: ${{ github.event_name != 'pull_request' && env.FTP_SERVER != '' }}
+        continue-on-error: true
+        run: bash .github/scripts/revisar-tienda.sh "${{ vars.NEXT_PUBLIC_SITE_URL || 'https://terc.cl' }}"
+
+      - name: Preparar otro reinicio
+        if: ${{ steps.revisar.outcome == 'failure' }}
+        run: date > .next/reinicio/tmp/restart.txt
+
+      - name: Reiniciar la tienda otra vez
+        if: ${{ steps.revisar.outcome == 'failure' }}
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: .next/reinicio/
+          server-dir: ./
+          state-name: .ftp-deploy-reinicio.json
+
+      - name: Revisar otra vez
+        if: ${{ steps.revisar.outcome == 'failure' }}
+        run: bash .github/scripts/revisar-tienda.sh "${{ vars.NEXT_PUBLIC_SITE_URL || 'https://terc.cl' }}"
