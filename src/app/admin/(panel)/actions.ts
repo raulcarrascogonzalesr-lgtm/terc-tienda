@@ -318,11 +318,11 @@ export async function addMovement(_prev: MovementResult, form: FormData): Promis
     if (productId) {
       const { data: product } = await db()
         .from("products")
-        .select("cost, stock, on_demand")
+        .select("cost, stock")
         .eq("id", productId)
         .maybeSingle();
       if (!product) return { error: "El producto no existe" };
-      if (product.stock < 1 && !product.on_demand) return { error: "Ese producto no tiene stock" };
+      if (product.stock < 1) return { error: "Ese producto no tiene stock" };
       unitCost = product.cost;
     } else {
       unitCost = intOrNull(form.get("unit_cost"));
@@ -369,13 +369,8 @@ export async function addMovement(_prev: MovementResult, form: FormData): Promis
 }
 
 async function changeStock(productId: string, delta: number) {
-  const { data } = await db()
-    .from("products")
-    .select("stock, on_demand")
-    .eq("id", productId)
-    .maybeSingle();
-  // Los productos a pedido no tienen stock propio que subir o bajar.
-  if (!data || data.on_demand) return;
+  const { data } = await db().from("products").select("stock").eq("id", productId).maybeSingle();
+  if (!data) return;
   await db()
     .from("products")
     .update({ stock: Math.max(data.stock + delta, 0) })

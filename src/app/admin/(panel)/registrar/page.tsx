@@ -25,7 +25,7 @@ export default async function RegisterPage({
       <RegisterWizard
         campaigns={campaigns.filter((c) => c.active)}
         products={products
-          .filter((p) => p.stock > 0 || p.on_demand)
+          .filter((p) => p.stock > 0)
           .map((p) => ({ id: p.id, name: p.name, stock: p.stock, onDemand: p.on_demand }))}
         today={today}
         cash={cashBalance(orders, movements)}

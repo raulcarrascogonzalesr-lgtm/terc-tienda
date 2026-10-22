@@ -70,9 +70,10 @@ export default async function ProductsPage() {
                       : `${formatCLP(margin)} (${priceNet ? Math.round((margin / priceNet) * 100) : 0}%)`}
                   </td>
                   <td
-                    className={`p-3 text-right whitespace-nowrap ${p.stock === 0 && !p.on_demand ? "text-[#b3362a]" : ""}`}
+                    className={`p-3 text-right whitespace-nowrap ${p.stock === 0 ? "text-[#b3362a]" : ""}`}
                   >
-                    {p.on_demand ? "A pedido" : p.stock}
+                    {p.stock}
+                    {p.on_demand && <span className="block text-xs text-[#6b716f]">del proveedor</span>}
                   </td>
                   <td className="p-3">{p.active ? "Sí" : "No"}</td>
                   <td className="px-3 py-1.5">
@@ -95,7 +96,7 @@ export default async function ProductsPage() {
         </table>
       </div>
       <p className="text-sm text-[#6b716f]">
-        En la tienda solo aparecen los productos visibles y con stock o a pedido. El costo nunca se muestra al
+        En la tienda solo aparecen los productos visibles y con stock. Los del proveedor no cuentan como plata invertida. El costo nunca se muestra al
         cliente. El margen compara el precio sin IVA con el costo sin IVA.
       </p>
     </section>

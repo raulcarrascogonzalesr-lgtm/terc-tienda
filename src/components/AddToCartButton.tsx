@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { maxUnits } from "@/lib/format";
 import type { Product } from "@/lib/types";
 import { useCart } from "./CartProvider";
 import { StoreIcon } from "./icons";
@@ -11,7 +10,7 @@ export function AddToCartButton({ product, compact = false }: { product: Product
   const { add, canBuy } = useCart();
   const [added, setAdded] = useState(false);
 
-  const max = maxUnits(product);
+  const max = product.stock;
   if (max <= 0) {
     return <p className="text-red-700 font-medium">Agotado</p>;
   }

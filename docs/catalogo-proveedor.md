@@ -3,12 +3,17 @@
 Reglas que se usan cada vez que llega la lista de precios del proveedor.
 Si una regla cambia (por ejemplo, el margen), se cambia aquí y vale desde la próxima lista.
 
-## Productos a pedido
+## Productos del proveedor
 
-- Los productos de la lista **no son stock propio**: se guardan con `on_demand = true` y `stock = 0`.
-- Se pueden comprar aunque el stock sea 0 (hasta 5 por compra) y no cuentan como plata invertida.
-- En la tienda aparecen como "A pedido, sujeto a disponibilidad del proveedor".
-- El plazo extra de despacho está en `src/lib/site.ts` (`onDemandLeadTime`).
+- Los productos de la lista **no son stock propio**: se guardan con `on_demand = true`.
+- `stock` = la cantidad disponible que trae la lista del proveedor (columna CANT).
+  El cliente la ve como stock normal: **la tienda no muestra "a pedido"** (decisión de Raúl,
+  porque da menos confianza). Si CANT es 0, el producto deja de aparecer solo.
+- Cada venta descuenta del stock, igual que un equipo propio; la lista del día siguiente
+  lo vuelve a dejar en la cantidad real del proveedor.
+- Para el panel siguen siendo "del proveedor": no cuentan como plata invertida.
+- La ficha sí informa el plazo de despacho (`onDemandLeadTime` en `src/lib/site.ts`) y
+  "Imagen referencial" en las fotos, porque la Ley del Consumidor exige informarlos bien.
 - Cada producto guarda `supplier` (nombre del proveedor) y `supplier_sku` (su código en la lista).
   Ese par identifica al producto de un día para otro.
 
@@ -42,7 +47,7 @@ No se calcula un total de "si vendiera todo": son productos a pedido, así que e
 
 - No se borran: se ocultan (`active = false`). Así los pedidos antiguos siguen intactos
   y, si el producto vuelve a la lista, se reactiva con el mismo enlace.
-- Solo se ocultan productos del mismo proveedor y que sean a pedido. Nunca se tocan los
+- Solo se ocultan productos del mismo proveedor (`on_demand = true`). Nunca se tocan los
   equipos con stock propio.
 
 ## Fotos y descripciones

@@ -6,7 +6,8 @@ export const SITE = {
   email: "contacto@terc.cl",
   company: "Wiremax Telecomunicaciones SpA",
   slogan: "Segunda vida, primera calidad",
-  // Plazo extra de los productos a pedido, que se piden al proveedor después de la compra.
+  // Plazo de despacho de los productos del proveedor (se piden después de la compra).
+  // La ley exige informarlo, aunque la tienda no los muestre como "a pedido".
   onDemandLeadTime: "3 a 5 días hábiles",
 };
 

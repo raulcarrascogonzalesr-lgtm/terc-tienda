@@ -12,7 +12,7 @@ export type Product = {
   list_price: number | null; // precio de un equipo nuevo equivalente, para mostrar el ahorro
   compare_price: number | null; // precio anterior de TERC cuando el equipo está en oferta
   stock: number;
-  on_demand: boolean; // a pedido: no es stock propio, depende de la disponibilidad del proveedor
+  on_demand: boolean; // del proveedor: el stock es lo que él informa, no es inversión propia (el cliente no lo ve)
   battery_health: number | null; // porcentaje, si aplica
   warranty_months: number;
   description: string;

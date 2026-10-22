@@ -25,13 +25,6 @@ export function offer(product: { price: number; compare_price: number | null }) 
   return discount(product.price, product.compare_price);
 }
 
-// Los productos a pedido se pueden comprar aunque no haya stock propio, hasta este máximo.
-const ON_DEMAND_MAX = 5;
-
-export function maxUnits(product: { stock: number; on_demand: boolean }): number {
-  return product.on_demand ? Math.max(product.stock, ON_DEMAND_MAX) : product.stock;
-}
-
 export const GRADE_LABELS = {
   A: "Grado A · como nuevo",
   B: "Grado B · detalles leves",
