@@ -2,6 +2,7 @@ import Link from "next/link";
 import { DiscountSticker } from "@/components/DiscountSticker";
 import { StoreIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
+import { Terqui } from "@/components/Terqui";
 import { OfferCountdown } from "@/components/OfferCountdown";
 import { PriceTag } from "@/components/PriceTag";
 import { ProductCard } from "@/components/ProductCard";
@@ -430,7 +431,8 @@ export default async function HomePage({ searchParams }: Props) {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="mt-6 rounded-2xl border border-dashed border-black/15 bg-white p-10 text-center">
+          <div className="mt-6 flex flex-col items-center rounded-2xl border border-dashed border-black/15 bg-white p-10 text-center">
+            <Terqui pose="duda" className="mb-2 h-32 w-32" />
             <p className="font-medium text-ink">
               {filtering ? "No encontramos equipos con esa búsqueda." : "Pronto tendremos equipos disponibles."}
             </p>
@@ -453,12 +455,14 @@ export default async function HomePage({ searchParams }: Props) {
         <section data-reveal className="shell pt-14">
           <Link
             href="/por-que-terc"
-            className="group flex flex-col items-start justify-between gap-4 rounded-3xl bg-white border border-black/[0.06] px-8 py-8 transition hover:shadow-lg sm:flex-row sm:items-center sm:px-12"
+            className="group relative flex flex-col items-start justify-between gap-4 rounded-3xl bg-white border border-black/[0.06] px-8 py-8 transition hover:shadow-lg sm:flex-row sm:items-center sm:px-12"
           >
+            {/* Terqui colgado del borde de la tarjeta, columpiándose. */}
+            <Terqui pose="colgando" className="pointer-events-none absolute -top-[8px] right-3 h-28 w-28 sm:right-56" />
             <div className="flex items-center gap-5">
               <Mark className="hidden w-20 sm:block" />
               <div>
-                <p className="text-xl font-semibold text-ink">¿Por qué comprar reacondicionado en TERC?</p>
+                <p className="pr-20 text-xl font-semibold text-ink sm:pr-0">¿Por qué comprar reacondicionado en TERC?</p>
                 <p className="mt-1 text-sm text-muted">
                   Cómo revisamos cada equipo, qué significa cada grado y cómo funciona la garantía.
                 </p>
