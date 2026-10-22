@@ -6,8 +6,6 @@ import { DiscountSticker } from "./DiscountSticker";
 import { StoreIcon } from "./icons";
 import { ProductImage } from "./ProductImage";
 
-export const GRADE_SHORT = { A: "Como nuevo", B: "Detalles leves", C: "Marcas visibles" } as const;
-
 export function ProductCard({ product }: { product: Product }) {
   const sale = offer(product);
   const vsNew = savings(product);
@@ -27,10 +25,6 @@ export function ProductCard({ product }: { product: Product }) {
             className="stamp absolute left-3 top-3"
           />
         )}
-        <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-pine shadow-sm">
-          Grado {product.grade}
-          <span className="hidden sm:inline"> · {GRADE_SHORT[product.grade]}</span>
-        </span>
         {product.stock <= 3 && (
           <span className="absolute bottom-3 left-3 rounded-full bg-pine px-2.5 py-1 text-[11px] font-semibold text-white">
             {product.stock === 1 ? "¡Última unidad!" : `¡Quedan ${product.stock}!`}

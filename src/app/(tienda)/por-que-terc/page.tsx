@@ -7,7 +7,7 @@ import { SITE, whatsappLink } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Por qué TERC | Tecnología reacondicionada",
-  description: "Cómo revisamos cada equipo, qué significa cada grado y cómo funciona la garantía de TERC.",
+  description: "Cómo revisamos cada equipo, cómo describimos su estado y cómo funciona la garantía de TERC.",
 };
 
 const TRUST: { icon: IconName; title: string; text: string }[] = [
@@ -32,10 +32,12 @@ const STEPS = [
   },
 ];
 
-const GRADES = [
-  { grade: "A", title: "Como nuevo", text: "Sin marcas visibles a simple vista. Se ve y funciona como uno nuevo." },
-  { grade: "B", title: "Detalles leves", text: "Pequeños roces o rayitas que no afectan en nada su funcionamiento." },
-  { grade: "C", title: "Marcas visibles", text: "Marcas de uso evidentes, funcionamiento perfecto y el mejor precio." },
+const CONDITIONS = [
+  { title: "Excelente estado", text: "Sin marcas visibles a simple vista. Se ve y funciona como uno nuevo." },
+  {
+    title: "Detalles estéticos leves",
+    text: "Puede tener pequeños roces o rayitas en la carcasa que no afectan en nada su funcionamiento.",
+  },
 ];
 
 export default function WhyTercPage() {
@@ -91,14 +93,15 @@ export default function WhyTercPage() {
         </ol>
 
         <div className="mt-12 border-t border-black/[0.06] pt-10">
-          <h3 className="font-semibold text-ink">¿Qué significa cada grado?</h3>
-          <div className="mt-5 grid gap-3 md:grid-cols-3">
-            {GRADES.map((g) => (
-              <div key={g.grade} className="rounded-2xl bg-paper p-5">
-                <p className="text-sm font-semibold text-pine">
-                  Grado {g.grade} · {g.title}
-                </p>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted">{g.text}</p>
+          <h3 className="font-semibold text-ink">¿Cómo describimos el estado de cada equipo?</h3>
+          <p className="mt-1.5 text-sm text-muted">
+            Todos los equipos están revisados y 100% operativos. Lo único que cambia es cómo se ven.
+          </p>
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            {CONDITIONS.map((c) => (
+              <div key={c.title} className="rounded-2xl bg-paper p-5">
+                <p className="text-sm font-semibold text-pine">{c.title}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted">{c.text}</p>
               </div>
             ))}
           </div>
