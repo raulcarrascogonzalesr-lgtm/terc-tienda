@@ -4,7 +4,7 @@ import type { Product } from "@/lib/types";
 import { AddToCartButton } from "./AddToCartButton";
 import { DiscountSticker } from "./DiscountSticker";
 import { StoreIcon } from "./icons";
-import { ProductImage } from "./ProductImage";
+import { HoverPhotos } from "./HoverPhotos";
 
 export function ProductCard({ product }: { product: Product }) {
   const sale = offer(product);
@@ -13,8 +13,8 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-black/[0.06] bg-white transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-pine/10">
       <Link href={href} className="relative block overflow-hidden">
-        <div className="transition duration-500 group-hover:scale-[1.06]">
-          <ProductImage product={product} />
+        <div className="transition duration-500 group-hover:scale-[1.04]">
+          <HoverPhotos product={product} />
         </div>
         {(sale ?? vsNew) && (
           <DiscountSticker
