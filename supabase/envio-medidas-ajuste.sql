@@ -1,0 +1,41 @@
+-- Ajuste del 22-10-2026: pesos reales del fabricante y cajas más justas (unos 2 cm de plumavit por lado).
+-- Reemplaza los valores cargados por envio-medidas.sql. Ejecutar una vez en Supabase > SQL Editor.
+update products set ship_weight_kg = v.kg, ship_length_cm = v.l, ship_width_cm = v.w, ship_height_cm = v.h
+from (values
+  ('notebook-dell-latitude-5430-i7-1255u-16-gb-ssd-512-gb', 2.0, 37, 26, 7),
+  ('notebook-dell-vostro-3400-i5-11a-gen-8-gb-ssd-1-tb', 2.3, 38, 28, 7),
+  ('notebook-hp-elitebook-840-g7-i5-10210u-16-gb-ssd-256-gb', 2.0, 37, 26, 7),
+  ('notebook-hp-elitebook-840-g8-i7-1165g7-16-gb-ssd-512-gb', 2.0, 37, 26, 7),
+  ('notebook-hp-elitebook-830-g7-i7-10510u-8-gb-ssd-256-gb', 1.9, 35, 25, 7),
+  ('notebook-hp-probook-440-g8-i5-1135g7-16-gb-ssd-256-gb', 2.0, 37, 26, 7),
+  ('notebook-hp-probook-440-g7-i5-10210u-8-gb-ssd-256-gb', 2.3, 37, 28, 7),
+  ('notebook-hp-probook-640-g8-i5-1145g7-16-gb-ssd-512-gb', 2.1, 37, 26, 7),
+  ('notebook-dell-latitude-5400-i7-8a-gen-8-gb-ssd-256-gb', 2.2, 37, 26, 7),
+  ('notebook-dell-latitude-5400-i7-8a-gen-8-gb-ssd-256-gb-detalles', 2.2, 37, 26, 7),
+  ('notebook-lenovo-thinkpad-t460-i5-6300u-16-gb-ssd-512-gb-tactil', 2.5, 38, 28, 7),
+  ('lenovo-thinkpad-t480-i5-16gb', 2.2, 38, 28, 7),
+  ('monitor-hp-elitedisplay-s231d-23-con-camara-web', 7.0, 60, 42, 16),
+  ('monitor-hp-p22v-g4-21-5', 3.7, 55, 36, 12),
+  ('monitor-hp-elitedisplay-e190i-18-9', 5.7, 48, 40, 14),
+  ('monitor-hp-p19b-g4-18-5', 3.2, 50, 38, 12),
+  ('monitor-viewsonic-17-vs15826-sin-base', 3.5, 44, 40, 10),
+  ('monitor-hp-v214a-20-7', 3.4, 54, 35, 12),
+  ('pc-hp-prodesk-400-g9-sff-i7-12a-gen-16-gb-512-gb', 5.0, 35, 31, 14),
+  ('pc-hp-prodesk-400-g9-sff-i5-12500-8-gb-256-gb', 5.0, 35, 31, 14),
+  ('pc-hp-elite-sff-800-g9-i5-12500-16-gb-ddr5-1-tb', 5.2, 35, 31, 14),
+  ('pc-hp-prodesk-400-g7-sff-i5-10500-16-gb-ssd-512-gb', 5.2, 35, 31, 14),
+  ('pc-hp-prodesk-400-g4-sff-i7-6a-gen-16-gb-1-tb', 5.4, 35, 31, 14),
+  ('pc-hp-prodesk-600-g4-sff-i5-8500-8-gb-1-tb', 5.8, 35, 31, 14),
+  ('pc-hp-elitedesk-800-g4-sff-i7-8700-16-gb-1-tb', 6.0, 35, 31, 14),
+  ('pc-hp-prodesk-600-g6-sff-i5-10a-gen-8-gb-1-tb', 5.4, 35, 31, 14),
+  ('pc-hp-elitedesk-800-g6-sff-i3-10100-8-gb-1-tb', 5.6, 35, 31, 14),
+  ('mini-pc-dell-optiplex-3000-micro-i5-12a-gen-8-gb-ssd-256-gb', 1.9, 25, 22, 10),
+  ('mini-pc-dell-optiplex-3050-micro-i5-6a-gen-8-gb-ssd-256-gb', 1.9, 25, 22, 10),
+  ('all-in-one-lenovo-v50a-24-i5-10a-gen-16-gb-1-tb', 7.3, 60, 45, 18),
+  ('all-in-one-hp-proone-440-g9-23-8-i5-12500-16-gb-ssd-512-gb', 9.0, 60, 45, 18),
+  ('all-in-one-hp-proone-400-g6-i7-10700-16-gb-ssd-512-gb', 8.8, 60, 45, 18),
+  ('samsung-galaxy-s21-128gb', 0.4, 18, 11, 6),
+  ('iphone-12-128gb-azul', 0.4, 18, 11, 6),
+  ('ipad-9-64gb-wifi', 0.9, 29, 21, 5)
+) as v(slug, kg, l, w, h)
+where products.slug = v.slug;

@@ -24,14 +24,14 @@ type Packable = Pick<Product, "category" | "ship_weight_kg" | "ship_length_cm" |
 
 // Si el producto no tiene sus medidas cargadas, se usa una estimación por categoría.
 const BOXES: Record<string, Box> = {
-  Celulares: { length: 20, width: 12, height: 8, weight: 0.7 },
-  Tablets: { length: 32, width: 24, height: 8, weight: 1.3 },
-  Notebooks: { length: 45, width: 33, height: 10, weight: 3 },
-  Monitores: { length: 65, width: 45, height: 18, weight: 6.5 },
-  Computadores: { length: 50, width: 40, height: 22, weight: 7.5 },
-  "All-in-One": { length: 70, width: 52, height: 25, weight: 11 },
+  Celulares: { length: 18, width: 11, height: 6, weight: 0.4 },
+  Tablets: { length: 29, width: 21, height: 5, weight: 0.9 },
+  Notebooks: { length: 37, width: 27, height: 7, weight: 2.2 },
+  Monitores: { length: 54, width: 38, height: 13, weight: 4.5 },
+  Computadores: { length: 35, width: 31, height: 14, weight: 5.4 },
+  "All-in-One": { length: 60, width: 45, height: 18, weight: 8.5 },
 };
-const DEFAULT_BOX: Box = { length: 40, width: 30, height: 15, weight: 3 };
+const DEFAULT_BOX: Box = { length: 35, width: 30, height: 12, weight: 2.5 };
 
 export function boxFor(product: Packable): Box {
   const { ship_length_cm: length, ship_width_cm: width, ship_height_cm: height, ship_weight_kg: weight } = product;

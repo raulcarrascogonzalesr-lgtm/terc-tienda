@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   description:
     "Equipos reacondicionados con garantía, revisados y listos para usar. Envíos a todo Chile.",
   other: { "facebook-domain-verification": SITE.metaDomainVerification },
+  verification: { google: SITE.googleSiteVerification },
 };
 
 export default function RootLayout({
