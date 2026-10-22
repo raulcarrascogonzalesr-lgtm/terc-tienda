@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { Product } from "@/lib/types";
 import { StoreIcon, type IconName } from "./icons";
 import { Mark } from "./Mark";
-import { ProductImage } from "./ProductImage";
+import { PHOTO_BACKDROP, ProductImage } from "./ProductImage";
 
 // Última "foto" de cada producto: la garantía y respaldo de TERC.
 function TrustSlide({ product }: { product: Product }) {
@@ -61,8 +61,10 @@ export function ProductGallery({ product, badges }: { product: Product; badges?:
         {current === "terc" ? (
           <TrustSlide product={product} />
         ) : current ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={current} alt={product.name} className="aspect-square w-full object-contain bg-white" />
+          <div className={`aspect-square w-full ${PHOTO_BACKDROP}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={current} alt={product.name} className="h-full w-full object-contain p-[7%] mix-blend-multiply" />
+          </div>
         ) : (
           <ProductImage product={{ ...product, image_url: null }} />
         )}
@@ -104,8 +106,10 @@ export function ProductGallery({ product, badges }: { product: Product; badges?:
                 <span className="text-[10px] font-semibold">{product.warranty_months} meses</span>
               </span>
             ) : view ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={view} alt="" className="h-full w-full object-contain bg-white" />
+              <span className={`block h-full w-full ${PHOTO_BACKDROP}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={view} alt="" className="h-full w-full object-contain p-1 mix-blend-multiply" />
+              </span>
             ) : (
               <span className="flex h-full w-full items-center justify-center bg-[#eeece6]">
                 <Mark className="w-8 opacity-60" ink="#0a2a2a" technical />
