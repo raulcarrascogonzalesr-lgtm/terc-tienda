@@ -106,16 +106,11 @@ body {
   }
 }
 
-/* Movimiento al bajar: los bloques con data-reveal entran subiendo suave (ver ScrollReveal.tsx).
+/* Movimiento al bajar: los bloques con data-reveal quedan ocultos hasta que ScrollReveal.tsx
+   los hace entrar subiendo suave (sin tocar sus clases, para no chocar con React).
    --d escalona los elementos de una misma fila. */
-.reveal-on [data-reveal]:not(.is-in) {
-  opacity: 0;
-  transform: translateY(24px);
-}
 .reveal-on [data-reveal] {
-  transition:
-    opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0ms),
-    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0ms);
+  opacity: 0;
 }
 
 /* Entrada de la portada al cargar. */
@@ -129,23 +124,8 @@ body {
   animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) var(--d, 0ms) both;
 }
 
-/* El sello de descuento "salta" cuando su tarjeta aparece. */
-@keyframes stamp {
-  0% {
-    transform: scale(0.4) rotate(-30deg);
-    opacity: 0;
-  }
-  70% {
-    transform: scale(1.12) rotate(-6deg);
-  }
-}
-.reveal-on [data-reveal].is-in .stamp {
-  animation: stamp 0.55s cubic-bezier(0.3, 1.4, 0.5, 1) calc(var(--d, 0ms) + 250ms) both;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .rise,
-  .reveal-on [data-reveal].is-in .stamp {
+  .rise {
     animation: none;
   }
 }
@@ -243,8 +223,97 @@ body {
     transform: translateY(-6px);
   }
 }
+/* Gestos de Terqui: saluda, balancea las piernas, se columpia colgado y ladea la cabeza cuando duda.
+   Los transform-origin están en coordenadas del dibujo (200×200). */
+.terqui-wave {
+  transform-origin: 130px 112px;
+  animation: terqui-wave 3.2s ease-in-out infinite;
+}
+@keyframes terqui-wave {
+  0%,
+  55%,
+  100% {
+    transform: rotate(0);
+  }
+  65%,
+  85% {
+    transform: rotate(-14deg);
+  }
+  75%,
+  95% {
+    transform: rotate(8deg);
+  }
+}
+.terqui-kick-l,
+.terqui-kick-r {
+  animation: terqui-kick 1.6s ease-in-out infinite alternate;
+}
+.terqui-kick-l {
+  transform-origin: 88px 176px;
+}
+.terqui-kick-r {
+  transform-origin: 112px 176px;
+  animation-delay: -0.8s;
+}
+@keyframes terqui-kick {
+  from {
+    transform: rotate(-14deg);
+  }
+  to {
+    transform: rotate(14deg);
+  }
+}
+.terqui-swing {
+  transform-origin: 31% 7%;
+  animation: terqui-swing 2.6s ease-in-out infinite alternate;
+}
+@keyframes terqui-swing {
+  from {
+    transform: rotate(-7deg);
+  }
+  to {
+    transform: rotate(6deg);
+  }
+}
+.terqui-dangle {
+  transform-origin: 100px 176px;
+  animation: terqui-dangle 1.3s ease-in-out infinite alternate;
+}
+@keyframes terqui-dangle {
+  to {
+    transform: rotate(8deg);
+  }
+}
+.terqui-tilt {
+  transform-origin: 50% 90%;
+  animation: terqui-tilt 2.8s ease-in-out infinite;
+}
+@keyframes terqui-tilt {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  40%,
+  60% {
+    transform: rotate(-6deg);
+  }
+}
+/* Terqui asomado en el menú: se esconde un poco y vuelve a asomarse al pasar el mouse. */
+.terqui-peek {
+  transition: transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+a:hover > .terqui-peek {
+  transform: translateY(-3px) rotate(-6deg);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .terqui-blink,
+  .terqui-wave,
+  .terqui-kick-l,
+  .terqui-kick-r,
+  .terqui-swing,
+  .terqui-dangle,
+  .terqui-tilt,
   .terqui-bob,
   .terqui-leaf-l,
   .terqui-leaf-r,

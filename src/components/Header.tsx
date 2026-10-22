@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "./CartProvider";
 import { StoreIcon } from "./icons";
 import { Logo } from "./Logo";
+import { Terqui } from "./Terqui";
 
 function SearchForm({ className = "" }: { className?: string }) {
   return (
@@ -141,8 +142,9 @@ export function Header({
                 ))}
                 <Link
                   href="/por-que-terc"
-                  className="ml-auto shrink-0 rounded-full px-3 py-1.5 text-muted hover:bg-paper hover:text-ink"
+                  className="ml-auto flex shrink-0 items-center gap-1 rounded-full py-1.5 pl-1 pr-3 text-muted hover:bg-paper hover:text-ink"
                 >
+                  <Terqui pose="apunta" crop="asoma" className="terqui-peek -my-3 h-11 w-auto" />
                   Por qué TERC
                 </Link>
                 <Link

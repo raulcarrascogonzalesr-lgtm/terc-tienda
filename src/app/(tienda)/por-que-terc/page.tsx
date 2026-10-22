@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
+import { Terqui } from "@/components/Terqui";
 import { SITE, whatsappLink } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -47,6 +48,7 @@ export default function WhyTercPage() {
           className="absolute right-6 top-1/2 hidden w-[250px] -translate-y-1/2 opacity-90 sm:block"
           ink="rgba(255,255,255,0.08)"
         />
+        <Terqui pose="hola" className="absolute bottom-0 right-[22%] hidden h-44 w-44 lg:block" />
         <div className="relative max-w-lg space-y-4">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-gold">{SITE.slogan}</p>
           <h1 className="text-4xl sm:text-5xl font-semibold leading-[1.05] tracking-tight">
