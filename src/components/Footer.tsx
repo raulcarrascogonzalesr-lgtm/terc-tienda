@@ -9,7 +9,7 @@ export function Footer({ categories }: { categories: string[] }) {
     <footer className="bg-pine text-white/75">
       <div className="shell py-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-4 lg:col-span-2">
-          <Logo variant="light" className="h-12 w-auto" />
+          <Logo variant="light" className="h-16 w-auto" />
           <p className="max-w-sm text-sm leading-relaxed">
             Tecnología reacondicionada, revisada uno por uno y con garantía. {SITE.slogan}.
           </p>

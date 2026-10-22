@@ -46,7 +46,6 @@ export default function WhyTercPage() {
         <Mark
           className="absolute right-6 top-1/2 hidden w-[250px] -translate-y-1/2 opacity-90 sm:block"
           ink="rgba(255,255,255,0.08)"
-          stroke={2}
         />
         <div className="relative max-w-lg space-y-4">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-gold">{SITE.slogan}</p>
