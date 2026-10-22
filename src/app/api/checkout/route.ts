@@ -4,6 +4,7 @@ import { Preference } from "mercadopago";
 import { getAdminUser } from "@/lib/admin";
 import { getMercadoPagoClient } from "@/lib/mercadopago";
 import { getProductsByIds } from "@/lib/products";
+import { findCommune, quoteShipping } from "@/lib/shipit";
 import { isShippingZone, SHIPPING_ZONES } from "@/lib/shipping";
 import { storeIsOpen } from "@/lib/store-status";
 import { getAdminClient } from "@/lib/supabase";
@@ -11,7 +12,8 @@ import { sanitizeUtm } from "@/lib/utm";
 
 type CheckoutBody = {
   items?: { productId?: unknown; quantity?: unknown }[];
-  shippingZone?: unknown;
+  shippingZone?: unknown; // tarifas fijas, cuando Shipit no está disponible
+  shipping?: { communeId?: unknown; courier?: unknown }; // envío cotizado con Shipit
   customer?: Record<string, unknown>;
   utm?: unknown;
 };
@@ -30,12 +32,19 @@ export async function POST(request: Request) {
   if (!body || !Array.isArray(body.items) || body.items.length === 0) {
     return NextResponse.json({ error: "El carrito está vacío" }, { status: 400 });
   }
-  if (!isShippingZone(body.shippingZone)) {
-    return NextResponse.json({ error: "Zona de envío no válida" }, { status: 400 });
+  // Con Shipit, la región y la comuna salen de la comuna elegida en la lista.
+  const commune = body.shipping ? await findCommune(Number(body.shipping.communeId)) : null;
+  if (body.shipping ? !commune : !isShippingZone(body.shippingZone)) {
+    return NextResponse.json({ error: "Elige la comuna de envío" }, { status: 400 });
   }
 
   const customer: Record<string, string> = {};
+  if (commune) {
+    customer.region = commune.region;
+    customer.comuna = commune.name;
+  }
   for (const field of CUSTOMER_FIELDS) {
+    if (customer[field]) continue;
     const value = body.customer?.[field];
     if (typeof value !== "string" || value.trim() === "") {
       return NextResponse.json({ error: "Faltan datos de envío" }, { status: 400 });
@@ -65,7 +74,30 @@ export async function POST(request: Request) {
     lines.push({ product, quantity: item.quantity });
   }
 
-  const shipping = SHIPPING_ZONES[body.shippingZone];
+  let shipping: { zone: string; label: string; price: number };
+  if (commune) {
+    // El precio del envío también se vuelve a cotizar aquí, nunca se toma del navegador.
+    const options = await quoteShipping(
+      commune.id,
+      lines.map((l) => ({ category: l.product.category, quantity: l.quantity })),
+    );
+    const option = options.find((o) => o.courier === body.shipping?.courier);
+    if (!option) {
+      return NextResponse.json(
+        { error: "El precio del envío cambió. Vuelve a elegir cómo quieres recibirlo." },
+        { status: 409 },
+      );
+    }
+    customer.commune_id = String(commune.id);
+    shipping = {
+      zone: isShippingZone(option.courier) ? option.courier : `shipit:${option.courier}`,
+      label: `${option.label} a ${commune.name}`,
+      price: option.price,
+    };
+  } else {
+    const zone = body.shippingZone as keyof typeof SHIPPING_ZONES;
+    shipping = { zone, ...SHIPPING_ZONES[zone] };
+  }
   const subtotal = lines.reduce((sum, l) => sum + l.product.price * l.quantity, 0);
   const orderId = randomUUID();
 
@@ -82,7 +114,7 @@ export async function POST(request: Request) {
       id: orderId,
       status: "pending",
       customer,
-      shipping_zone: body.shippingZone,
+      shipping_zone: shipping.zone,
       shipping_cost: shipping.price,
       subtotal,
       total: subtotal + shipping.price,
@@ -122,7 +154,7 @@ export async function POST(request: Request) {
           currency_id: "CLP",
         })),
         {
-          id: `envio-${body.shippingZone}`,
+          id: `envio-${shipping.zone}`,
           title: `Envío ${shipping.label}`,
           quantity: 1,
           unit_price: shipping.price,

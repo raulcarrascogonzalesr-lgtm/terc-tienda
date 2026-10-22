@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/components/CartProvider";
 import { Terqui, TerquiLoader } from "@/components/Terqui";
 import { formatCLP } from "@/lib/format";
-import { SHIPPING_ZONES, type ShippingZone } from "@/lib/shipping";
 import { UTM_MAX_AGE_MS, UTM_STORAGE_KEY } from "@/lib/utm";
+import { ShippingPicker, type ShippingChoice } from "./ShippingPicker";
 
 function readUtm(): unknown {
   try {
@@ -19,7 +19,7 @@ function readUtm(): unknown {
 
 export default function CartPage() {
   const { items, total, setQuantity, remove, canBuy } = useCart();
-  const [zone, setZone] = useState<ShippingZone>("rm");
+  const [shippingChoice, setShippingChoice] = useState<ShippingChoice | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
@@ -46,10 +46,11 @@ export default function CartPage() {
     );
   }
 
-  const shipping = SHIPPING_ZONES[zone].price;
+  const shipping = shippingChoice?.price ?? null;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!shippingChoice) return;
     setError(null);
     setSending(true);
     const form = new FormData(e.currentTarget);
@@ -59,7 +60,7 @@ export default function CartPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
-          shippingZone: zone,
+          ...shippingChoice.payload,
           customer: Object.fromEntries(form.entries()),
           utm: readUtm(),
         }),
@@ -118,28 +119,13 @@ export default function CartPage() {
         <Field name="name" label="Nombre completo" autoComplete="name" />
         <Field name="email" label="Correo" type="email" autoComplete="email" />
         <Field name="phone" label="Teléfono" type="tel" autoComplete="tel" />
-        <label className="block text-sm">
-          Zona de envío
-          <select
-            value={zone}
-            onChange={(e) => setZone(e.target.value as ShippingZone)}
-            className="mt-1 w-full border border-black/20 rounded px-3 py-2"
-          >
-            {Object.entries(SHIPPING_ZONES).map(([key, z]) => (
-              <option key={key} value={key}>
-                {z.label} ({formatCLP(z.price)})
-              </option>
-            ))}
-          </select>
-        </label>
-        <Field name="region" label="Región" />
-        <Field name="comuna" label="Comuna" />
+        <ShippingPicker items={items} onChange={setShippingChoice} />
         <Field name="address" label="Dirección" autoComplete="street-address" />
 
         <dl className="text-sm space-y-1 border-t border-black/10 pt-4">
           <Row label="Productos" value={formatCLP(total)} />
-          <Row label="Envío" value={formatCLP(shipping)} />
-          <Row label="Total" value={formatCLP(total + shipping)} bold />
+          <Row label="Envío" value={shipping === null ? "Elige tu comuna" : formatCLP(shipping)} />
+          <Row label="Total" value={formatCLP(total + (shipping ?? 0))} bold />
         </dl>
 
         {error && <p className="text-sm text-red-700">{error}</p>}
@@ -150,7 +136,7 @@ export default function CartPage() {
         )}
         <button
           type="submit"
-          disabled={sending || !canBuy}
+          disabled={sending || !canBuy || !shippingChoice}
           className="w-full bg-brand text-white font-medium rounded-lg px-6 py-3 hover:opacity-90 disabled:opacity-50"
         >
           {sending ? "Redirigiendo..." : "Pagar con Mercado Pago"}

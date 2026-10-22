@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatCLP, formatDateTime, ORDER_STATUS_LABELS } from "@/lib/format";
-import { SHIPPING_ZONES, isShippingZone } from "@/lib/shipping";
+import { shippingLabel } from "@/lib/shipping";
 import { updateOrder } from "../../actions";
 import { getOrder } from "../../data";
 import { PageHeader } from "../../ui";
@@ -22,9 +22,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const order = await getOrder(id);
   if (!order) notFound();
 
-  const zone = isShippingZone(order.shipping_zone)
-    ? SHIPPING_ZONES[order.shipping_zone].label
-    : order.shipping_zone;
+  const zone = shippingLabel(order.shipping_zone);
 
   return (
     <section className="space-y-6">
