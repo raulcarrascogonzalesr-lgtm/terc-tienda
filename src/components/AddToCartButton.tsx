@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { trackAddToCart } from "@/lib/analytics";
 import type { Product } from "@/lib/types";
 import { useCart } from "./CartProvider";
 import { StoreIcon } from "./icons";
@@ -43,6 +44,7 @@ export function AddToCartButton({ product, compact = false }: { product: Product
           maxQuantity: max,
         });
         setAdded(true);
+        trackAddToCart({ id: product.id, name: product.name, price: product.price, quantity: 1, category: product.category });
       }}
       className={
         compact

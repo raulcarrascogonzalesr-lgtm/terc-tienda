@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "@/components/CartProvider";
 import { Terqui, TerquiLoader } from "@/components/Terqui";
+import { trackBeginCheckout } from "@/lib/analytics";
 import { formatCLP } from "@/lib/format";
 import { UTM_MAX_AGE_MS, UTM_STORAGE_KEY } from "@/lib/utm";
 import { ShippingPicker, type ShippingChoice } from "./ShippingPicker";
@@ -53,6 +54,7 @@ export default function CartPage() {
     if (!shippingChoice) return;
     setError(null);
     setSending(true);
+    trackBeginCheckout(items.map((i) => ({ id: i.productId, name: i.name, price: i.price, quantity: i.quantity })));
     const form = new FormData(e.currentTarget);
     try {
       const res = await fetch("/api/checkout", {
