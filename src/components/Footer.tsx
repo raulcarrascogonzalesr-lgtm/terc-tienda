@@ -7,7 +7,7 @@ export function Footer({ categories }: { categories: string[] }) {
   const whatsapp = whatsappLink("Hola, tengo una consulta sobre TERC");
   return (
     <footer className="bg-pine text-white/75">
-      <div className="max-w-6xl mx-auto px-4 py-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="shell py-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-4 lg:col-span-2">
           <Logo variant="light" className="h-12 w-auto" />
           <p className="max-w-sm text-sm leading-relaxed">
@@ -55,7 +55,7 @@ export function Footer({ categories }: { categories: string[] }) {
         </div>
       </div>
       <div className="border-t border-white/10">
-        <div className="max-w-6xl mx-auto px-4 py-5 text-xs text-white/55 flex flex-col sm:flex-row gap-2 sm:justify-between">
+        <div className="shell py-5 text-xs text-white/55 flex flex-col sm:flex-row gap-2 sm:justify-between">
           <p>
             TERC es una marca de {SITE.company}. Tus boletas y facturas salen a nombre de Wiremax.
           </p>

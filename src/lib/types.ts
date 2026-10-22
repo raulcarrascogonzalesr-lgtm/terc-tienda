@@ -11,6 +11,7 @@ export type Product = {
   price: number; // en pesos chilenos, sin decimales
   list_price: number | null; // precio de un equipo nuevo equivalente, para mostrar el ahorro
   compare_price: number | null; // precio anterior de TERC cuando el equipo está en oferta
+  offer_ends_at: string | null; // último día de la oferta (AAAA-MM-DD, hora de Chile), si tiene
   stock: number;
   on_demand: boolean; // del proveedor: el stock es lo que él informa, no es inversión propia (el cliente no lo ve)
   battery_health: number | null; // porcentaje, si aplica

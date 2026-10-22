@@ -4,8 +4,8 @@
 export function Logo({ className, variant = "dark" }: { className?: string; variant?: "dark" | "light" }) {
   const c =
     variant === "light"
-      ? { ring: "#c9b98c", leaf: "#7fc4a8", ink: "#ffffff" }
-      : { ring: "#b5a26c", leaf: "#2f8f6f", ink: "#0c2f2c" };
+      ? { ring: "#b3a26a", leaf: "#3db585", ink: "#ffffff" }
+      : { ring: "#b3a26a", leaf: "#288868", ink: "#0a2a2a" };
   return (
     <svg
       viewBox="-46 -46 296 96"

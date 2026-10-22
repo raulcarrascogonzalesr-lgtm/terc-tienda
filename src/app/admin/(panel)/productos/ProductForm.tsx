@@ -126,6 +126,17 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
           />
         </Field>
         <Field
+          label="Último día de la oferta"
+          hint="Opcional. Se muestra “Solo por tiempo limitado” con cuenta regresiva. Al pasar ese día, la tienda vuelve sola al precio de antes."
+        >
+          <input
+            type="date"
+            name="offer_ends_at"
+            defaultValue={product?.offer_ends_at ?? ""}
+            className="input"
+          />
+        </Field>
+        <Field
           label="Precio de un equipo nuevo (CLP)"
           hint="Opcional. La tienda muestra cuánto ahorra el cliente."
         >

@@ -26,29 +26,51 @@ function SearchForm({ className = "" }: { className?: string }) {
   );
 }
 
-export function Header({ categories, hasOffers }: { categories: string[]; hasOffers: boolean }) {
+export function Header({
+  categories,
+  offerPercent,
+  limitedOffers,
+}: {
+  categories: string[];
+  offerPercent: number; // mayor descuento en oferta; 0 si no hay ofertas
+  limitedOffers: boolean; // alguna oferta tiene fecha de término
+}) {
   const { count } = useCart();
   return (
     <header className="sticky top-0 z-40">
-      <div className="bg-pine text-[13px] text-white/85">
-        <div className="max-w-6xl mx-auto px-4 h-9 flex items-center justify-center gap-6">
-          <span className="flex items-center gap-1.5">
-            <StoreIcon name="shield" className="w-4 h-4 text-gold" />
-            Todos los equipos con garantía
-          </span>
-          <span className="hidden sm:flex items-center gap-1.5">
-            <StoreIcon name="truck" className="w-4 h-4 text-gold" />
-            Envíos a todo Chile
-          </span>
-          <span className="hidden md:flex items-center gap-1.5">
-            <StoreIcon name="card" className="w-4 h-4 text-gold" />
-            Paga en cuotas con Mercado Pago
-          </span>
+      {offerPercent > 0 ? (
+        <Link href="/?ofertas=1#equipos" className="block bg-sale text-[13px] font-semibold text-white">
+          <div className="shell h-9 flex items-center justify-center gap-2">
+            <StoreIcon name="tag" className="w-4 h-4" />
+            <span>
+              {limitedOffers ? "Solo por tiempo limitado: " : ""}ofertas de hasta −{offerPercent}%
+            </span>
+            <span className="hidden sm:flex items-center gap-1 underline underline-offset-2">
+              Ver ofertas <StoreIcon name="arrow" className="w-3.5 h-3.5" />
+            </span>
+          </div>
+        </Link>
+      ) : (
+        <div className="bg-pine text-[13px] text-white/85">
+          <div className="shell h-9 flex items-center justify-center gap-6">
+            <span className="flex items-center gap-1.5">
+              <StoreIcon name="shield" className="w-4 h-4 text-gold" />
+              Todos los equipos con garantía
+            </span>
+            <span className="hidden sm:flex items-center gap-1.5">
+              <StoreIcon name="truck" className="w-4 h-4 text-gold" />
+              Envíos a todo Chile
+            </span>
+            <span className="hidden md:flex items-center gap-1.5">
+              <StoreIcon name="card" className="w-4 h-4 text-gold" />
+              Paga en cuotas con Mercado Pago
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="bg-white/95 backdrop-blur border-b border-black/[0.06]">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-6">
+        <div className="shell h-16 flex items-center gap-6">
           <Link href="/" aria-label="TERC, ir al inicio" className="shrink-0">
             <Logo className="h-11 sm:h-12 w-auto" />
           </Link>
@@ -72,14 +94,14 @@ export function Header({ categories, hasOffers }: { categories: string[]; hasOff
         </div>
         {categories.length > 0 && (
           <nav aria-label="Categorías" className="border-t border-black/[0.06]">
-            <div className="max-w-6xl mx-auto px-4 h-11 flex items-center gap-1 overflow-x-auto text-sm">
+            <div className="shell h-11 flex items-center gap-1 overflow-x-auto text-sm">
               <Link
                 href="/#equipos"
                 className="shrink-0 rounded-full px-3 py-1.5 font-medium text-ink hover:bg-paper"
               >
                 Todos
               </Link>
-              {hasOffers && (
+              {offerPercent > 0 && (
                 <Link
                   href="/?ofertas=1#equipos"
                   className="shrink-0 rounded-full px-3 py-1.5 font-semibold text-sale hover:bg-sale-50"

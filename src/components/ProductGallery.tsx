@@ -108,7 +108,7 @@ export function ProductGallery({ product, badges }: { product: Product; badges?:
               <img src={view} alt="" className="h-full w-full object-contain bg-white" />
             ) : (
               <span className="flex h-full w-full items-center justify-center bg-[#eeece6]">
-                <Mark className="w-8 opacity-60" ink="#0c2f2c" />
+                <Mark className="w-8 opacity-60" ink="#0a2a2a" />
               </span>
             )}
           </button>

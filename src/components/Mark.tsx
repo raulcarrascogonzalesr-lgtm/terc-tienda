@@ -1,9 +1,9 @@
 // Símbolo de TERC (anillo, T y hoja) para usar como adorno.
 export function Mark({
   className,
-  ring = "#c9b98c",
-  leaf = "#7fc4a8",
-  ink = "#0c2f2c",
+  ring = "#b3a26a",
+  leaf,
+  ink = "#0a2a2a",
   stroke = 4,
 }: {
   className?: string;
@@ -12,6 +12,8 @@ export function Mark({
   ink?: string;
   stroke?: number;
 }) {
+  // Sobre fondo oscuro (letras blancas) la hoja usa el verde claro de la marca.
+  leaf ??= ink === "#ffffff" ? "#3db585" : "#288868";
   return (
     <svg viewBox="-46 -46 124 92" className={className} aria-hidden>
       <circle

@@ -6,22 +6,24 @@
   --brand: #0f766e;
 }
 
-/* Paleta de la tienda: verde oscuro, dorado y menta, sobre un fondo cálido. */
+/* Paleta oficial de TERC (identidad V1): verde profundo, dorado y verde hoja, sobre un fondo cálido.
+   El dorado nunca va como texto sobre blanco (contraste 2.4:1): solo en fondos oscuros o como detalle. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-brand: var(--brand);
-  --color-pine: #0c2f2c;
-  --color-pine-700: #0f5f59;
-  --color-gold: #c9b98c;
+  --color-pine: #0a2a2a; /* verde profundo */
+  --color-pine-700: #288868; /* verde hoja: botones y enlaces */
+  --color-gold: #b3a26a; /* dorado */
   --color-gold-700: #9a8650;
-  --color-mint: #7fc4a8;
+  --color-mint: #3db585; /* verde hoja sobre fondo oscuro */
   --color-mint-50: #eaf5f0;
   --color-paper: #f6f4ef;
-  --color-ink: #14201f;
+  --color-ink: #0a2a2a;
   --color-sale: #c8442a;
   --color-sale-50: #fcebe6;
   --color-muted: #5f6866;
+  --font-display: var(--font-montserrat), var(--font-inter), system-ui, sans-serif;
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -29,6 +31,20 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Contenedor de la tienda: ancho amplio, como las grandes tiendas, con márgenes cómodos. */
+@utility shell {
+  @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 xl:px-10;
+}
+
+/* Títulos en Montserrat, como el logo; el texto sigue en Inter. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
 }
 
 @layer components {
