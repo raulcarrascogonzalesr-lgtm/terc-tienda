@@ -87,13 +87,13 @@ export default async function CashPage({
             <Link
               key={key}
               href={`/admin/registrar?tipo=${key}`}
-              className="flex items-center gap-3 rounded-xl border border-[#e4e2dc] bg-white px-4 py-3.5 text-sm font-medium transition hover:border-[#0f5f59]"
+              className="flex items-center gap-3 rounded-xl border border-[#e4e2dc] bg-white px-4 py-3.5 text-sm font-medium transition hover:border-[#288868]"
             >
               <span
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                   INTENTS[key].kind === "ingreso"
                     ? "bg-[#e6f2ea] text-[#0a6b38]"
-                    : "bg-[#f3f2ee] text-[#0c2f2c]"
+                    : "bg-[#f3f2ee] text-[#0a2a2a]"
                 }`}
               >
                 <Icon path={INTENTS[key].icon} className="w-[18px] h-[18px]" />
@@ -114,7 +114,7 @@ export default async function CashPage({
           </div>
           <div className="h-2 rounded-full bg-[#efede8] overflow-hidden">
             <div
-              className="h-full bg-[#0f5f59] rounded-full"
+              className="h-full bg-[#288868] rounded-full"
               style={{ width: `${Math.min(100, (loan.repaid / loan.received) * 100)}%` }}
             />
           </div>
@@ -200,7 +200,7 @@ export default async function CashPage({
                 Entró <span className="font-semibold text-[#0a6b38]">{formatCLP(monthIn)}</span>
               </span>
               <span className="text-[#6b716f]">
-                Salió <span className="font-semibold text-[#14201f]">{formatCLP(monthOut)}</span>
+                Salió <span className="font-semibold text-[#0a2a2a]">{formatCLP(monthOut)}</span>
               </span>
             </div>
           </>

@@ -15,7 +15,7 @@ function TrustSlide({ product }: { product: Product }) {
   ];
   return (
     <div className="relative flex aspect-square w-full flex-col justify-between overflow-hidden bg-pine px-14 py-6 text-white sm:px-16 sm:py-10">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(127,196,168,0.25),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(61,181,133,0.25),transparent_60%)]" />
       <Mark className="absolute -bottom-10 -right-10 w-64 opacity-[0.08]" ink="#ffffff" />
       <div className="relative flex items-center gap-3">
         <Mark className="w-9 sm:w-12" ink="#ffffff" technical />
