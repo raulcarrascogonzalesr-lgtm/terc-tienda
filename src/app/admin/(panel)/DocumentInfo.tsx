@@ -22,7 +22,7 @@ export function DocumentInfo({ movement: m }: { movement: Movement }) {
           href={`/admin/documento/${m.id}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-[#0f5f59] hover:underline print:hidden"
+          className="inline-flex items-center gap-1 text-[#288868] hover:underline print:hidden"
         >
           <Icon path={ICONS.archivo} className="w-3.5 h-3.5" />
           Ver

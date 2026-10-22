@@ -35,7 +35,7 @@ export default async function OrdersPage() {
                   className="border-b border-[#efede8] last:border-0 hover:bg-[#fafaf8]"
                 >
                   <td className="p-3 whitespace-nowrap">
-                    <Link href={`/admin/pedidos/${o.id}`} className="text-[#0f5f59] underline">
+                    <Link href={`/admin/pedidos/${o.id}`} className="text-[#288868] underline">
                       {formatDateTime(o.created_at)}
                     </Link>
                   </td>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/admin";
 import { logout } from "../login/actions";
 import { AdminNav } from "./AdminNav";
+import { Logo } from "@/components/Logo";
 import { MarkAdminBrowser } from "./MarkAdminBrowser";
 import { ICONS } from "./icons";
 import { Icon } from "./ui";
@@ -22,17 +23,17 @@ const today = new Intl.DateTimeFormat("es-CL", {
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   const user = await requireAdmin();
   return (
-    <div className="lg:flex min-h-screen lg:bg-[linear-gradient(to_right,#0c2f2c_16rem,transparent_16rem)] print:bg-none">
+    <div className="lg:flex min-h-screen lg:bg-[linear-gradient(to_right,#0a2a2a_16rem,transparent_16rem)] print:bg-none">
       <MarkAdminBrowser />
-      <aside className="print:hidden bg-[#0c2f2c] text-white lg:w-64 lg:shrink-0 lg:sticky lg:top-0 lg:h-screen flex flex-col gap-4 lg:gap-8 p-4 lg:p-5">
+      <aside className="print:hidden bg-[#0a2a2a] text-white lg:w-64 lg:shrink-0 lg:sticky lg:top-0 lg:h-screen flex flex-col gap-4 lg:gap-8 p-4 lg:p-5">
         <div className="flex items-center justify-between gap-3">
-          <Link href="/admin" className="flex items-baseline gap-2">
-            <span className="text-xl font-bold tracking-[0.18em]">TERC</span>
-            <span className="text-[11px] uppercase tracking-[0.14em] text-white/45">Gestión</span>
+          <Link href="/admin" className="flex items-end gap-2" aria-label="Panel de gestión TERC">
+            <Logo variant="light" className="h-14 w-auto" />
+            <span className="pb-1 text-[11px] uppercase tracking-[0.14em] text-white/45">Gestión</span>
           </Link>
           <Link
             href="/admin/registrar"
-            className="lg:hidden inline-flex items-center gap-1.5 rounded-md bg-white text-[#0c2f2c] px-3 py-1.5 text-sm font-semibold"
+            className="lg:hidden inline-flex items-center gap-1.5 rounded-md bg-white text-[#0a2a2a] px-3 py-1.5 text-sm font-semibold"
           >
             <Icon path={ICONS.mas} className="w-4 h-4" />
             Registrar
@@ -40,7 +41,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         </div>
         <Link
           href="/admin/registrar"
-          className="hidden lg:flex items-center justify-center gap-2 rounded-lg bg-white text-[#0c2f2c] px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:bg-[#f1efe8]"
+          className="hidden lg:flex items-center justify-center gap-2 rounded-lg bg-white text-[#0a2a2a] px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:bg-[#f1efe8]"
         >
           <Icon path={ICONS.mas} className="w-4 h-4" />
           Registrar movimiento
@@ -77,11 +78,11 @@ export default async function PanelLayout({ children }: { children: React.ReactN
             <a href={GUIDE_URL} target="_blank" rel="noopener noreferrer">
               Guía
             </a>
-            <Link href="/" className="hover:text-[#14201f]">
+            <Link href="/" className="hover:text-[#0a2a2a]">
               Ver tienda ↗
             </Link>
             <form action={logout}>
-              <button type="submit" className="hover:text-[#14201f]">
+              <button type="submit" className="hover:text-[#0a2a2a]">
                 Salir
               </button>
             </form>

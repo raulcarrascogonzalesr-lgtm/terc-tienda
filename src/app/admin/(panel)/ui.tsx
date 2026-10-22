@@ -16,7 +16,7 @@ export function PageHeader({
     <header className="flex flex-wrap items-end justify-between gap-4 pb-6 mb-2 border-b border-[#e4e2dc]">
       <div className="min-w-0">
         {eyebrow && <p className="eyebrow mb-1.5">{eyebrow}</p>}
-        <h1 className="text-[26px] sm:text-[30px] font-semibold tracking-tight text-[#14201f] first-letter:uppercase">
+        <h1 className="text-[26px] sm:text-[30px] font-semibold tracking-tight text-[#0a2a2a] first-letter:uppercase">
           {title}
         </h1>
         {subtitle && <p className="text-sm text-[#6b716f] mt-1.5 max-w-2xl">{subtitle}</p>}
@@ -41,7 +41,7 @@ export function Card({
     <section className={`bg-white rounded-xl border border-[#e4e2dc] p-5 sm:p-6 ${className}`}>
       {(title || action) && (
         <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-          {title && <h2 className="text-[15px] font-semibold text-[#14201f]">{title}</h2>}
+          {title && <h2 className="text-[15px] font-semibold text-[#0a2a2a]">{title}</h2>}
           {action}
         </div>
       )}
@@ -83,7 +83,7 @@ export function Stat({
     </>
   );
   const className = `block rounded-xl p-5 ${
-    brand ? "bg-[#0c2f2c] text-white" : "bg-white border border-[#e4e2dc] text-[#14201f]"
+    brand ? "bg-[#0a2a2a] text-white" : "bg-white border border-[#e4e2dc] text-[#0a2a2a]"
   } ${href ? "transition hover:border-[#b5b2a8]" : ""}`;
   return href ? (
     <Link href={href} className={className}>
@@ -135,12 +135,12 @@ export function Tip({ title, children }: { title?: string; children: React.React
     <div className="flex gap-3 rounded-lg border border-[#e4e2dc] bg-[#f8f7f3] p-4 text-sm text-[#3b4442]">
       <span
         aria-hidden
-        className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0f5f59] text-[11px] font-bold text-white"
+        className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#288868] text-[11px] font-bold text-white"
       >
         i
       </span>
       <div className="space-y-1">
-        {title && <p className="font-semibold text-[#14201f]">{title}</p>}
+        {title && <p className="font-semibold text-[#0a2a2a]">{title}</p>}
         <div>{children}</div>
       </div>
     </div>

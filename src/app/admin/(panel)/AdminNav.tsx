@@ -53,7 +53,7 @@ export function AdminNav() {
                 }`}
               >
                 {active && (
-                  <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-[#c9b98c] hidden lg:block" />
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-[#b3a26a] hidden lg:block" />
                 )}
                 <Icon path={link.icon} className="w-[18px] h-[18px]" />
                 {link.label}

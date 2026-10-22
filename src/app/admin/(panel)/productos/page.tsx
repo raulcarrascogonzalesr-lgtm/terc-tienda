@@ -55,7 +55,7 @@ export default async function ProductsPage() {
                   className="border-b border-[#efede8] last:border-0 hover:bg-[#fafaf8]"
                 >
                   <td className="p-3">
-                    <Link href={`/admin/productos/${p.id}`} className="text-[#0f5f59] underline">
+                    <Link href={`/admin/productos/${p.id}`} className="text-[#288868] underline">
                       {p.name}
                     </Link>
                   </td>
@@ -82,7 +82,7 @@ export default async function ProductsPage() {
                         href={`/admin/productos/${p.id}`}
                         title="Editar producto"
                         aria-label={`Editar ${p.name}`}
-                        className="rounded-lg p-1.5 text-[#6b716f] transition hover:bg-[#eef5f3] hover:text-[#0f5f59]"
+                        className="rounded-lg p-1.5 text-[#6b716f] transition hover:bg-[#eef5f3] hover:text-[#288868]"
                       >
                         <Icon path={ICONS.editar} className="w-[18px] h-[18px]" />
                       </Link>

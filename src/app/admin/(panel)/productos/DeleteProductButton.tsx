@@ -45,10 +45,10 @@ export function DeleteProductButton({ id, name }: { id: string; name: string }) 
             className="w-full max-w-sm rounded-xl bg-white p-6 text-left shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 id={`borrar-${id}`} className="text-lg font-semibold text-[#14201f]">
+            <h2 id={`borrar-${id}`} className="text-lg font-semibold text-[#0a2a2a]">
               ¿Estás seguro que quieres eliminar este producto?
             </h2>
-            <p className="mt-2 text-sm text-[#14201f]">
+            <p className="mt-2 text-sm text-[#0a2a2a]">
               <strong>{name}</strong> se borrará de la tienda y del panel. Esto no se puede deshacer.
             </p>
             <p className="mt-2 text-sm text-[#6b716f]">

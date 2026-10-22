@@ -59,13 +59,13 @@ function Steps({ step }: { step: number }) {
               className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
                 state === "next"
                   ? "border border-[#d8d6cf] text-[#6b716f]"
-                  : "bg-[#0f5f59] text-white"
+                  : "bg-[#288868] text-white"
               }`}
             >
               {state === "done" ? <Icon path={ICONS.check} className="w-3.5 h-3.5" /> : n}
             </span>
             <span
-              className={`hidden sm:inline ${state === "now" ? "font-semibold text-[#14201f]" : "text-[#6b716f]"}`}
+              className={`hidden sm:inline ${state === "now" ? "font-semibold text-[#0a2a2a]" : "text-[#6b716f]"}`}
             >
               {name}
             </span>
@@ -88,7 +88,7 @@ function Field({
 }) {
   return (
     <label className="block space-y-1.5">
-      <span className="text-sm font-medium text-[#14201f]">{label}</span>
+      <span className="text-sm font-medium text-[#0a2a2a]">{label}</span>
       {children}
       {hint && <span className="block text-xs text-[#6b716f]">{hint}</span>}
     </label>
@@ -99,7 +99,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   return (
     <div className="flex justify-between gap-6 py-3 border-b border-[#efede8] last:border-0 text-sm">
       <dt className="text-[#6b716f] shrink-0">{label}</dt>
-      <dd className="text-right font-medium text-[#14201f] min-w-0 break-words">{children}</dd>
+      <dd className="text-right font-medium text-[#0a2a2a] min-w-0 break-words">{children}</dd>
     </div>
   );
 }
@@ -234,7 +234,7 @@ export function RegisterWizard({
           <h2 className="text-xl font-semibold">Movimiento guardado</h2>
           <p className="text-sm text-[#6b716f]">
             {config.options[sub]?.label} por {formatCLP(value)}. Tu caja ahora es de{" "}
-            <span className="font-semibold text-[#14201f]">{formatCLP(cash)}</span>.
+            <span className="font-semibold text-[#0a2a2a]">{formatCLP(cash)}</span>.
           </p>
         </div>
         {intent === "compra" && (
@@ -302,20 +302,20 @@ export function RegisterWizard({
                   key={key}
                   type="button"
                   onClick={() => choose(key)}
-                  className={`group text-left bg-white rounded-xl border p-5 transition hover:border-[#0f5f59] hover:shadow-sm focus:outline-none focus:ring-4 focus:ring-[#0f5f59]/10 ${
-                    intent === key ? "border-[#0f5f59]" : "border-[#e4e2dc]"
+                  className={`group text-left bg-white rounded-xl border p-5 transition hover:border-[#288868] hover:shadow-sm focus:outline-none focus:ring-4 focus:ring-[#288868]/10 ${
+                    intent === key ? "border-[#288868]" : "border-[#e4e2dc]"
                   }`}
                 >
                   <div className="flex items-start gap-4">
                     <span
                       className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${
-                        incoming ? "bg-[#e6f2ea] text-[#0a6b38]" : "bg-[#f3f2ee] text-[#0c2f2c]"
+                        incoming ? "bg-[#e6f2ea] text-[#0a6b38]" : "bg-[#f3f2ee] text-[#0a2a2a]"
                       }`}
                     >
                       <Icon path={item.icon} className="w-[22px] h-[22px]" />
                     </span>
                     <span className="space-y-1">
-                      <span className="block font-semibold text-[#14201f]">{item.title}</span>
+                      <span className="block font-semibold text-[#0a2a2a]">{item.title}</span>
                       <span className="block text-sm text-[#6b716f]">{item.text}</span>
                       <span
                         className={`inline-block pt-1 text-xs font-medium ${incoming ? "text-[#0a6b38]" : "text-[#8a5a00]"}`}
@@ -341,7 +341,7 @@ export function RegisterWizard({
             className="max-w-2xl bg-white rounded-xl border border-[#e4e2dc] divide-y divide-[#efede8]"
           >
             <div className="flex items-center gap-3 p-5 sm:p-6">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#f3f2ee] text-[#0c2f2c]">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#f3f2ee] text-[#0a2a2a]">
                 <Icon path={config.icon} />
               </span>
               <div className="min-w-0 flex-1">
@@ -351,7 +351,7 @@ export function RegisterWizard({
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="text-sm text-[#0f5f59] hover:underline"
+                className="text-sm text-[#288868] hover:underline"
               >
                 Cambiar
               </button>
@@ -371,7 +371,7 @@ export function RegisterWizard({
                       aria-pressed={sub === key}
                       className={`text-left rounded-lg border px-4 py-3 transition ${
                         sub === key
-                          ? "border-[#0f5f59] bg-[#f0f7f6] ring-1 ring-[#0f5f59]"
+                          ? "border-[#288868] bg-[#f0f7f6] ring-1 ring-[#288868]"
                           : "border-[#e4e2dc] hover:border-[#b5b2a8]"
                       }`}
                     >
@@ -517,7 +517,7 @@ export function RegisterWizard({
                         }}
                         className={`rounded-lg border px-3 py-2.5 text-sm transition ${
                           docType === o
-                            ? "border-[#0f5f59] bg-[#f0f7f6] font-semibold text-[#0c2f2c] ring-1 ring-[#0f5f59]"
+                            ? "border-[#288868] bg-[#f0f7f6] font-semibold text-[#0a2a2a] ring-1 ring-[#288868]"
                             : "border-[#e4e2dc] hover:border-[#b5b2a8]"
                         }`}
                       >
@@ -580,7 +580,7 @@ export function RegisterWizard({
                           type="file"
                           accept="image/*,application/pdf"
                           onChange={onFile}
-                          className="block w-full text-sm text-[#6b716f] file:mr-3 file:rounded-md file:border file:border-[#d8d6cf] file:bg-white file:px-3 file:py-2 file:text-sm file:font-medium file:text-[#14201f] hover:file:bg-[#fafaf8]"
+                          className="block w-full text-sm text-[#6b716f] file:mr-3 file:rounded-md file:border file:border-[#d8d6cf] file:bg-white file:px-3 file:py-2 file:text-sm file:font-medium file:text-[#0a2a2a] hover:file:bg-[#fafaf8]"
                         />
                         {file?.error && (
                           <span className="block text-xs text-[#b3362a]">{file.error}</span>
@@ -701,7 +701,7 @@ export function RegisterWizard({
               <p className="eyebrow">Vas a registrar</p>
               <p
                 className={`text-[34px] font-semibold tracking-tight tabular-nums mt-1 ${
-                  config.kind === "ingreso" ? "text-[#0a6b38]" : "text-[#14201f]"
+                  config.kind === "ingreso" ? "text-[#0a6b38]" : "text-[#0a2a2a]"
                 }`}
               >
                 {config.kind === "ingreso" ? "+" : "−"}
