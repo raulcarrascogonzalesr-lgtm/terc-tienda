@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Montserrat } from "next/font/google";
+import { SITE } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
   title: "TERC | Tecnología reacondicionada",
   description:
     "Equipos reacondicionados con garantía, revisados y listos para usar. Envíos a todo Chile.",
+  other: { "facebook-domain-verification": SITE.metaDomainVerification },
 };
 
 export default function RootLayout({

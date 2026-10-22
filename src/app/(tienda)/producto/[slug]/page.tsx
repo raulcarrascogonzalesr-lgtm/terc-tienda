@@ -6,6 +6,7 @@ import { DiscountSticker } from "@/components/DiscountSticker";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
 import { OfferCountdown } from "@/components/OfferCountdown";
 import { ProductGallery } from "@/components/ProductGallery";
+import { TrackView } from "@/components/TrackView";
 import { CONDITION, formatCLP, offer, savings } from "@/lib/format";
 import { getProductBySlug } from "@/lib/products";
 import { boxFor } from "@/lib/shipping";
@@ -43,6 +44,7 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div className="shell py-6 sm:py-10">
+      <TrackView item={{ id: product.id, name: product.name, price: product.price, quantity: 1, category: product.category }} />
       <nav aria-label="Ruta" className="mb-6 text-sm text-muted">
         <Link href="/" className="hover:text-ink">
           Inicio
