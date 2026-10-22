@@ -4,20 +4,13 @@ import { notFound } from "next/navigation";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { DiscountSticker } from "@/components/DiscountSticker";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
-import { GRADE_SHORT } from "@/components/ProductCard";
 import { OfferCountdown } from "@/components/OfferCountdown";
 import { ProductGallery } from "@/components/ProductGallery";
-import { formatCLP, GRADE_LABELS, offer, savings } from "@/lib/format";
+import { CONDITION, formatCLP, offer, savings } from "@/lib/format";
 import { getProductBySlug } from "@/lib/products";
 import { SITE, whatsappLink } from "@/lib/site";
 
 type Props = { params: Promise<{ slug: string }> };
-
-const GRADE_TEXT = {
-  A: "Sin marcas visibles a simple vista. Se ve y funciona como uno nuevo.",
-  B: "Pequeños roces o rayitas que no afectan en nada su funcionamiento.",
-  C: "Marcas de uso evidentes, funcionamiento perfecto y el mejor precio.",
-} as const;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug((await params).slug);
@@ -81,9 +74,6 @@ export default async function ProductPage({ params }: Props) {
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full bg-mint-50 px-3 py-1 text-xs font-semibold text-pine">
                 Reacondicionado
-              </span>
-              <span className="rounded-full bg-paper px-3 py-1 text-xs font-semibold text-pine">
-                Grado {product.grade} · {GRADE_SHORT[product.grade]}
               </span>
               {product.stock <= 3 && (
                 <span className="rounded-full bg-pine px-3 py-1 text-xs font-semibold text-white">
@@ -163,8 +153,10 @@ export default async function ProductPage({ params }: Props) {
             <div className="grid grid-cols-[140px_1fr] gap-3 px-5 py-3">
               <dt className="text-muted">Estado</dt>
               <dd className="text-ink">
-                {GRADE_LABELS[product.grade]}
-                <span className="block text-xs text-muted mt-0.5">{GRADE_TEXT[product.grade]}</span>
+                {CONDITION[product.grade].label}
+                <span className="block text-xs text-muted mt-0.5">
+                  {CONDITION[product.grade].text} Revisado y 100% operativo.
+                </span>
               </dd>
             </div>
             {product.battery_health !== null && (

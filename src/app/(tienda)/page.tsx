@@ -7,7 +7,7 @@ import { OfferCountdown } from "@/components/OfferCountdown";
 import { PriceTag } from "@/components/PriceTag";
 import { ProductCard } from "@/components/ProductCard";
 import { PromoCarousel } from "@/components/PromoCarousel";
-import { formatCLP, GRADE_LABELS, offer, savings } from "@/lib/format";
+import { formatCLP, offer, savings } from "@/lib/format";
 import { listProducts } from "@/lib/products";
 import type { Product } from "@/lib/types";
 
@@ -78,9 +78,8 @@ function ProductSlide({ product }: { product: Product }) {
             {product.name}
           </h2>
           <p className="mt-2 text-sm text-white/70">
-            {GRADE_LABELS[product.grade]}
-            {product.battery_health !== null && ` · Batería ${product.battery_health}%`}
-            {` · ${product.warranty_months} meses de garantía`}
+            {product.battery_health !== null && `Batería ${product.battery_health}% · `}
+            {`${product.warranty_months} meses de garantía`}
           </p>
         </div>
         <PriceTag
@@ -464,7 +463,7 @@ export default async function HomePage({ searchParams }: Props) {
               <div>
                 <p className="pr-20 text-xl font-semibold text-ink sm:pr-0">¿Por qué comprar reacondicionado en TERC?</p>
                 <p className="mt-1 text-sm text-muted">
-                  Cómo revisamos cada equipo, qué significa cada grado y cómo funciona la garantía.
+                  Cómo revisamos cada equipo, cómo describimos su estado y cómo funciona la garantía.
                 </p>
               </div>
             </div>

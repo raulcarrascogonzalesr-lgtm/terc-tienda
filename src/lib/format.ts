@@ -36,6 +36,15 @@ export function shortDate(date: string): string {
   return `${day}/${month}`;
 }
 
+// Cómo ve el cliente el estado del equipo: sin letras, porque un "Grado C" asusta y todos
+// los equipos funcionan al 100%. B y C se muestran igual.
+export const CONDITION = {
+  A: { label: "Excelente estado", text: "Sin marcas visibles a simple vista." },
+  B: { label: "Detalles estéticos leves", text: "Puede tener pequeños roces o rayitas que no afectan en nada su funcionamiento." },
+  C: { label: "Detalles estéticos leves", text: "Puede tener pequeños roces o rayitas que no afectan en nada su funcionamiento." },
+} as const;
+
+// Grados para el panel de administración.
 export const GRADE_LABELS = {
   A: "Grado A · como nuevo",
   B: "Grado B · detalles leves",
