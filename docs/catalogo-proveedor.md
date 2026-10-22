@@ -92,19 +92,21 @@ Las ofertas solo las decide Raúl: nunca se ponen solas al cargar la lista.
 - Cada producto lleva el peso y las medidas del **paquete ya armado**, no del equipo solo:
   `ship_weight_kg` (kg, un decimal), `ship_length_cm`, `ship_width_cm` y `ship_height_cm` (cm, enteros).
   Shipit cotiza el envío con esos datos.
-- Criterio: peso del fabricante + caja, plumavit, cargador y cables (más o menos 1 a 2,5 kg más)
-  y unos 8 a 10 cm más por lado. Mejor pasarse un poco que quedarse corto.
-- Rangos de referencia (lo que se cargó en `supabase/envio-medidas.sql`):
+- Criterio: peso real del equipo según la ficha del fabricante (con base, si la trae) + cargador y cables
+  + caja y plumavit justos (0,3 a 0,9 kg). Caja = medidas del equipo + unos 4 cm (2 cm de plumavit por lado).
+  No exagerar: los couriers cobran por el peso real o por el volumen (largo × ancho × alto / 4000),
+  el que sea mayor, así que una caja grande encarece el envío aunque pese poco.
+- Rangos de referencia (lo que se cargó en `supabase/envio-medidas-ajuste.sql`):
 
   | Categoría | Peso | Caja (cm) |
   |---|---|---|
-  | Celulares | 0,6 kg | 20 × 12 × 8 |
-  | Tablets | 1,2 kg | 33 × 25 × 8 |
-  | Notebooks 13–14" | 2,5 a 3,0 kg | 42–45 × 32–33 × 10 |
-  | Monitores 17–23" | 4,2 a 7,0 kg | 48–64 × 37–44 × 15–17 |
-  | Mini PC (Micro, Tiny) | 2,5 kg | 30 × 25 × 12 |
-  | PC de escritorio SFF | 6,5 a 7,4 kg | 45 × 40 × 20 |
-  | All-in-One 22–24" | 9,0 a 9,5 kg | 68 × 50 × 22 |
+  | Celulares | 0,4 kg | 18 × 11 × 6 |
+  | Tablets | 0,9 kg | 29 × 21 × 5 |
+  | Notebooks 13–14" | 1,9 a 2,5 kg | 35–38 × 25–28 × 7 |
+  | Monitores 17–23" | 3,2 a 7,0 kg | 44–60 × 35–42 × 10–16 |
+  | Mini PC (Micro, Tiny) | 1,9 kg | 25 × 22 × 10 |
+  | PC de escritorio SFF | 5,0 a 6,0 kg | 35 × 31 × 14 |
+  | All-in-One 22–24" | 7,3 a 9,0 kg | 60 × 45 × 18 |
 
 - Si se dejan vacías, la tienda usa una estimación por categoría (`boxFor` en
   `src/lib/shipping.ts`), pero es menos precisa: siempre llenarlas.
