@@ -25,6 +25,17 @@ export function offer(product: { price: number; compare_price: number | null }) 
   return discount(product.price, product.compare_price);
 }
 
+// Fecha de hoy en Chile, como AAAA-MM-DD (igual que offer_ends_at).
+export function todayInChile(now = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(now);
+}
+
+// "2026-10-31" → "31/10".
+export function shortDate(date: string): string {
+  const [, month, day] = date.split("-");
+  return `${day}/${month}`;
+}
+
 export const GRADE_LABELS = {
   A: "Grado A · como nuevo",
   B: "Grado B · detalles leves",

@@ -113,6 +113,7 @@ export async function saveProduct(_prev: SaveResult, form: FormData): Promise<Sa
     price,
     list_price: intOrNull(form.get("list_price")),
     compare_price: intOrNull(form.get("compare_price")),
+    offer_ends_at: String(form.get("offer_ends_at") ?? "").trim() || null,
     cost: intOrNull(form.get("cost")),
     stock,
     battery_health: battery,
@@ -124,6 +125,9 @@ export async function saveProduct(_prev: SaveResult, form: FormData): Promise<Sa
     supplier_sku: String(form.get("supplier_sku") ?? "").trim() || null,
   };
   if (!values.brand || !values.category) return { error: "Faltan la marca o la categoría" };
+  if (values.offer_ends_at && !((values.compare_price as number | null) && (values.compare_price as number) > price)) {
+    return { error: "Para una oferta con fecha, pon el precio de antes (mayor que el precio actual)" };
+  }
 
   // Fotos extra: enlaces (uno por línea) más los archivos que se suban.
   const links = String(form.get("images") ?? "")

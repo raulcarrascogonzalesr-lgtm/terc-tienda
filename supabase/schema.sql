@@ -177,3 +177,8 @@ grant select (images) on products to anon, authenticated;
 drop policy if exists "Estado de la tienda" on settings;
 create policy "Estado de la tienda" on settings for select using (key = 'store_open');
 grant select (key, value) on settings to anon, authenticated;
+
+-- Último día de una oferta (hora de Chile). Al pasar, la tienda vuelve sola al precio de antes.
+-- Ejecutar una vez en Supabase > SQL Editor (no borra nada si se repite).
+alter table products add column if not exists offer_ends_at date;
+grant select (offer_ends_at) on products to anon, authenticated;

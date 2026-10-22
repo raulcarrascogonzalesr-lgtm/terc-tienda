@@ -5,7 +5,7 @@ import { StoreIcon } from "./icons";
 export function PreparingBanner() {
   return (
     <div className="bg-gold text-pine">
-      <div className="max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-sm">
+      <div className="shell py-2.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-sm">
         <StoreIcon name="leaf" className="w-4 h-4" />
         <strong className="font-semibold">Estamos preparando la tienda.</strong>
         <span>

@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCartButton } from "@/components/AddToCartButton";
+import { DiscountSticker } from "@/components/DiscountSticker";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
 import { GRADE_SHORT } from "@/components/ProductCard";
+import { OfferCountdown } from "@/components/OfferCountdown";
 import { ProductGallery } from "@/components/ProductGallery";
 import { formatCLP, GRADE_LABELS, offer, savings } from "@/lib/format";
 import { getProductBySlug } from "@/lib/products";
@@ -45,7 +47,7 @@ export default async function ProductPage({ params }: Props) {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 sm:py-10">
+    <div className="shell py-6 sm:py-10">
       <nav aria-label="Ruta" className="mb-6 text-sm text-muted">
         <Link href="/" className="hover:text-ink">
           Inicio
@@ -56,23 +58,20 @@ export default async function ProductPage({ params }: Props) {
         </Link>
       </nav>
 
-      <div className="grid gap-8 lg:gap-12 md:grid-cols-2">
+      <div className="grid gap-8 lg:gap-14 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         <div className="relative self-start">
           <ProductGallery
             product={product}
             badges={
-              <div className="absolute left-4 top-4 flex flex-col items-start gap-2">
-                {sale && (
-                  <span className="rounded-md bg-sale px-3 py-1 text-sm font-bold text-white">
-                    Oferta −{sale.percent}%
-                  </span>
-                )}
-                {off && (
-                  <span className="rounded-md bg-gold px-3 py-1 text-xs font-bold text-pine">
-                    −{off.percent}% vs. nuevo
-                  </span>
-                )}
-              </div>
+              (sale ?? off) && (
+                <DiscountSticker
+                  percent={(sale ?? off)!.percent}
+                  label={sale ? "dcto." : "vs. nuevo"}
+                  tone={sale ? "sale" : "gold"}
+                  size="lg"
+                  className="absolute left-4 top-4"
+                />
+              )
             }
           />
         </div>
@@ -86,9 +85,9 @@ export default async function ProductPage({ params }: Props) {
               <span className="rounded-full bg-paper px-3 py-1 text-xs font-semibold text-pine">
                 Grado {product.grade} · {GRADE_SHORT[product.grade]}
               </span>
-              {product.stock === 1 && (
+              {product.stock <= 3 && (
                 <span className="rounded-full bg-pine px-3 py-1 text-xs font-semibold text-white">
-                  Última unidad
+                  {product.stock === 1 ? "¡Última unidad!" : `¡Quedan ${product.stock}!`}
                 </span>
               )}
             </div>
@@ -100,13 +99,27 @@ export default async function ProductPage({ params }: Props) {
             </h1>
           </div>
 
+          {sale && (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-sale px-4 py-3 text-white">
+              <span className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide">
+                <StoreIcon name="tag" className="w-4 h-4" /> Oferta irresistible
+              </span>
+              {product.offer_ends_at && (
+                <span className="flex items-center gap-1.5 text-sm font-semibold">
+                  <StoreIcon name="clock" className="w-4 h-4" />
+                  <OfferCountdown endsOn={product.offer_ends_at} />
+                </span>
+              )}
+            </div>
+          )}
+
           <div className="space-y-1">
             {sale && (
               <p className="text-sm text-muted">
                 Antes <span className="line-through">{formatCLP(sale.before)}</span>
               </p>
             )}
-            <p className={`text-4xl font-bold tracking-tight ${sale ? "text-sale" : "text-ink"}`}>
+            <p className={`font-[family-name:var(--font-display)] text-4xl sm:text-5xl font-bold tracking-tight ${sale ? "text-sale" : "text-ink"}`}>
               {formatCLP(product.price)}
             </p>
             {sale && (

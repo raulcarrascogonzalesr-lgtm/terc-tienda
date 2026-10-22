@@ -31,7 +31,8 @@ Si una regla cambia (por ejemplo, el margen), se cambia aquí y vale desde la pr
 
 - `cost` se guarda siempre **neto** (sin IVA). Si la lista trae precios con IVA, se dividen por 1,19.
 - Si el costo de un producto cambia, el precio se recalcula con estas mismas reglas.
-- `compare_price` (precio "antes") **no se llena solo**: solo si Raúl decide una oferta real.
+- `compare_price` (precio "antes") **no se llena solo**: solo si Raúl decide una oferta real
+  (ver "Ofertas por tiempo limitado").
 
 ### Ganancia por producto (va en el resumen para Raúl)
 
@@ -42,6 +43,23 @@ Para cada producto, una fila con:
 - el precio de la competencia que se usó y dónde.
 
 No se calcula un total de "si vendiera todo": son productos a pedido, así que ese número no es real.
+
+## Ofertas por tiempo limitado
+
+Las ofertas tienen que ser **reales**: la ley del consumidor (SERNAC) castiga un "antes" inventado
+o un "tiempo limitado" que nunca termina. Como el precio parte un poco alto, una oferta real es bajarlo
+por unos días:
+
+- `compare_price` = el precio que **estaba publicado** en la tienda (el de antes).
+- `price` = el precio rebajado.
+- `offer_ends_at` = el último día de la oferta (fecha, hora de Chile).
+
+La tienda muestra entonces el sello grande con el % de descuento, "Oferta irresistible",
+"Solo por tiempo limitado" y la cuenta regresiva. Al pasar ese día, la tienda vuelve **sola** al precio
+de antes (también al pagar). Después, al cargar la lista siguiente, deja `price` en el precio normal
+y `compare_price` y `offer_ends_at` vacíos.
+
+Las ofertas solo las decide Raúl: nunca se ponen solas al cargar la lista.
 
 ## Productos que ya no están en la lista
 

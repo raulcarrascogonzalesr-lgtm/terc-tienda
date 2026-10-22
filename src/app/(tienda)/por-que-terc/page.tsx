@@ -40,7 +40,7 @@ const GRADES = [
 export default function WhyTercPage() {
   const whatsapp = whatsappLink("Hola, quiero ayuda para elegir un equipo");
   return (
-    <div className="max-w-6xl mx-auto px-4 pt-6 pb-16 space-y-6">
+    <div className="shell pt-6 pb-16 space-y-6">
       <section className="relative overflow-hidden rounded-3xl bg-pine px-7 py-12 sm:px-12 sm:py-16 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_40%,rgba(127,196,168,0.18),transparent_60%)]" />
         <Mark
@@ -121,7 +121,7 @@ export default function WhyTercPage() {
           </a>
           <Link
             href="/#equipos"
-            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-gold px-6 py-3 text-sm font-semibold text-pine transition hover:bg-[#d8ca9f]"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-gold px-6 py-3 text-sm font-semibold text-pine transition hover:bg-[#c4b47f]"
           >
             Ver equipos <StoreIcon name="arrow" className="w-4 h-4" />
           </Link>

@@ -11,6 +11,8 @@ const PATHS = {
   leaf: "M5 19c0-8 5-14 14-14 0 9-6 14-14 14zM5 19l8-8",
   battery: "M3 8h15v8H3zM21 11v2M6 11v2M9 11v2",
   mail: "M3 6h18v12H3zM3 7l9 6 9-6",
+  tag: "M3 12V4h8l10 10-8 8zM7.5 8.5h.01",
+  clock: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2",
 } as const;
 
 export type IconName = keyof typeof PATHS;

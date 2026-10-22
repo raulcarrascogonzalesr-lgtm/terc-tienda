@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { formatCLP, offer, savings } from "@/lib/format";
+import { formatCLP, offer, savings, shortDate } from "@/lib/format";
 import type { Product } from "@/lib/types";
 import { AddToCartButton } from "./AddToCartButton";
+import { DiscountSticker } from "./DiscountSticker";
 import { StoreIcon } from "./icons";
 import { ProductImage } from "./ProductImage";
 
@@ -17,26 +18,22 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="transition duration-500 group-hover:scale-[1.03]">
           <ProductImage product={product} />
         </div>
-        <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
-          {sale ? (
-            <span className="rounded-md bg-sale px-2 py-1 text-xs font-bold text-white shadow-sm">
-              −{sale.percent}%
-            </span>
-          ) : (
-            vsNew && (
-              <span className="rounded-md bg-gold px-2 py-1 text-xs font-bold text-pine shadow-sm">
-                −{vsNew.percent}% vs. nuevo
-              </span>
-            )
-          )}
-        </div>
+        {(sale ?? vsNew) && (
+          <DiscountSticker
+            percent={(sale ?? vsNew)!.percent}
+            label={sale ? "dcto." : "vs. nuevo"}
+            tone={sale ? "sale" : "gold"}
+            size="sm"
+            className="absolute left-3 top-3"
+          />
+        )}
         <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-pine shadow-sm">
           Grado {product.grade}
           <span className="hidden sm:inline"> · {GRADE_SHORT[product.grade]}</span>
         </span>
-        {product.stock === 1 && (
+        {product.stock <= 3 && (
           <span className="absolute bottom-3 left-3 rounded-full bg-pine px-2.5 py-1 text-[11px] font-semibold text-white">
-            ¡Última unidad!
+            {product.stock === 1 ? "¡Última unidad!" : `¡Quedan ${product.stock}!`}
           </span>
         )}
       </Link>
@@ -48,6 +45,11 @@ export function ProductCard({ product }: { product: Product }) {
           {product.name}
         </Link>
         <div className="mt-auto pt-3">
+          {sale && (
+            <p className="mb-1 inline-block rounded bg-sale-50 px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-sale">
+              {product.offer_ends_at ? `Oferta hasta el ${shortDate(product.offer_ends_at)}` : "Oferta"}
+            </p>
+          )}
           {sale ? (
             <p className="text-xs text-muted">
               Antes <span className="line-through">{formatCLP(sale.before)}</span>
@@ -59,7 +61,7 @@ export function ProductCard({ product }: { product: Product }) {
               </p>
             )
           )}
-          <p className={`text-xl font-bold tracking-tight ${sale ? "text-sale" : "text-ink"}`}>
+          <p className={`text-2xl font-bold tracking-tight ${sale ? "text-sale" : "text-ink"}`}>
             {formatCLP(product.price)}
           </p>
           {(sale ?? vsNew) && (
