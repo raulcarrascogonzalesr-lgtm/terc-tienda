@@ -12,7 +12,7 @@ export const SITE = {
   // Medición para publicidad. Son IDs públicos (se ven en el código de la página).
   // Se cargan solo si el visitante acepta las cookies. Vacío = desactivado.
   metaPixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "1115169581270114",
-  ga4Id: process.env.NEXT_PUBLIC_GA4_ID ?? "",
+  ga4Id: process.env.NEXT_PUBLIC_GA4_ID ?? "G-R8D4875YZB",
   metaDomainVerification: "csaape7gjsgl1d5q9kdd6mt9jbhgo4",
 };
 
