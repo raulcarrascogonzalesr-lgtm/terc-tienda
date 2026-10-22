@@ -2,6 +2,7 @@
 export const ICONS = {
   inicio: "M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
   pedidos: "M6 2h12l2 5v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7zM4 7h16M9 11a3 3 0 0 0 6 0",
+  cotizaciones: "M4 4h16v12H8l-4 4zM8 9h8M8 12h5",
   productos: "M4 5h16v11H4zM2 19h20M10 16v3M14 16v3",
   finanzas: "M3 7h18v12H3zM3 11h18M7 15h3M16 3l-4 4-4-4",
   resultados: "M4 20V10M10 20V4M16 20v-7M22 20H2",

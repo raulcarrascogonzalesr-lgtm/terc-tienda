@@ -60,3 +60,15 @@ const dateTime = new Intl.DateTimeFormat("es-CL", {
 export function formatDateTime(value: string): string {
   return dateTime.format(new Date(value));
 }
+
+export const QUOTE_KIND_LABELS = {
+  volumen: "Compra por volumen",
+  arriendo: "Arriendo de equipos",
+  otro: "Otro pedido",
+} as const;
+
+export const QUOTE_STATUS_LABELS = {
+  nueva: "Nueva",
+  respondida: "Respondida",
+  cerrada: "Cerrada",
+} as const;

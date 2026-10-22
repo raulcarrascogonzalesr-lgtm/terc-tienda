@@ -1,5 +1,5 @@
 import { getAdminClient } from "@/lib/supabase";
-import type { AdminProduct, Campaign, Movement, Order } from "@/lib/types";
+import type { AdminProduct, Campaign, Movement, Order, Quote } from "@/lib/types";
 
 function db() {
   const supabase = getAdminClient();
@@ -78,4 +78,25 @@ export async function getSettings(): Promise<Record<string, string>> {
   const { data, error } = await db().from("settings").select("key, value");
   if (error) return {}; // la tabla puede no existir todavía
   return Object.fromEntries(data.map((row) => [row.key, row.value]));
+}
+
+// Solicitudes del formulario "Empresas y cotizaciones", las nuevas primero.
+export async function listQuotes(): Promise<Quote[]> {
+  const { data, error } = await db()
+    .from("quotes")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return data as Quote[];
+}
+
+// Cuántas solicitudes faltan por responder, para el aviso del inicio.
+export async function countNewQuotes(): Promise<number> {
+  const { count, error } = await db()
+    .from("quotes")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "nueva");
+  if (error) return 0; // la tabla puede no existir todavía
+  return count ?? 0;
 }
