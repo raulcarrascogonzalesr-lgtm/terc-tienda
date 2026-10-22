@@ -80,7 +80,7 @@ export async function POST(request: Request) {
     const options = await quoteShipping(
       commune.id,
       lines.map((l) => ({ category: l.product.category, quantity: l.quantity })),
-    ).catch(() => []);
+    );
     const option = options.find((o) => o.courier === body.shipping?.courier);
     if (!option) {
       return NextResponse.json(
@@ -89,7 +89,11 @@ export async function POST(request: Request) {
       );
     }
     customer.commune_id = String(commune.id);
-    shipping = { zone: `shipit:${option.courier}`, label: `${option.label} a ${commune.name}`, price: option.price };
+    shipping = {
+      zone: isShippingZone(option.courier) ? option.courier : `shipit:${option.courier}`,
+      label: `${option.label} a ${commune.name}`,
+      price: option.price,
+    };
   } else {
     const zone = body.shippingZone as keyof typeof SHIPPING_ZONES;
     shipping = { zone, ...SHIPPING_ZONES[zone] };

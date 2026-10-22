@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getProductsByIds } from "@/lib/products";
 import { getCommunes, quoteShipping } from "@/lib/shipit";
 
+export const dynamic = "force-dynamic";
+
 // Comunas a las que se puede enviar. communes es null cuando Shipit no está disponible:
 // el carrito usa entonces las tarifas fijas.
 export async function GET() {
@@ -24,11 +26,5 @@ export async function POST(request: Request) {
     const quantity = Math.max(1, Math.floor(Number(i.quantity)) || 1);
     return product ? [{ category: product.category, quantity }] : [];
   });
-  try {
-    const options = await quoteShipping(communeId, lines);
-    return NextResponse.json({ options });
-  } catch (error) {
-    console.error("No se pudo cotizar con Shipit", error);
-    return NextResponse.json({ error: "No pudimos cotizar el envío. Intenta de nuevo." }, { status: 502 });
-  }
+  return NextResponse.json({ options: await quoteShipping(communeId, lines) });
 }

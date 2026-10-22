@@ -1,4 +1,4 @@
-import { courierLabel, ORIGIN_COMMUNE, packageFor, type Commune, type ShippingOption } from "./shipping";
+import { courierLabel, ORIGIN_COMMUNE, packageFor, SHIPPING_ZONES, type Commune, type ShippingOption } from "./shipping";
 import { SAMPLE_COMMUNES, sampleOptions } from "./shipit-sample";
 
 // Conexión con Shipit (https://developers.shipit.cl) para cotizar envíos.
@@ -19,7 +19,7 @@ function sampleMode() {
   return !credentials() && process.env.NODE_ENV !== "production";
 }
 
-async function call(path: string, init?: RequestInit & { next?: { revalidate: number } }) {
+async function call(path: string, init?: RequestInit) {
   const auth = credentials();
   if (!auth) throw new Error("Shipit no está configurado");
   const res = await fetch(`${API}${path}`, {
@@ -30,6 +30,7 @@ async function call(path: string, init?: RequestInit & { next?: { revalidate: nu
       "X-Shipit-Email": auth.email,
       "X-Shipit-Access-Token": auth.token,
     },
+    cache: "no-store",
     signal: AbortSignal.timeout(10_000),
   });
   if (!res.ok) throw new Error(`Shipit respondió ${res.status} en ${path}`);
@@ -46,21 +47,27 @@ function title(text: string) {
     .join(" ");
 }
 
+// La lista de comunas casi no cambia: se guarda en memoria un día (solo si Shipit respondió bien).
+let communesCache: { at: number; list: Commune[] } | null = null;
+
 // Comunas con cobertura, ordenadas por región y nombre. null si Shipit no está disponible.
 export async function getCommunes(): Promise<Commune[] | null> {
   if (sampleMode()) return SAMPLE_COMMUNES;
   if (!credentials()) return null;
+  if (communesCache && Date.now() - communesCache.at < 86_400_000) return communesCache.list;
   try {
-    const data = (await call("/communes", { next: { revalidate: 86_400 } })) as {
+    const data = (await call("/communes")) as {
       id: number;
       name: string;
       is_available?: boolean;
       region?: { name?: string };
     }[];
-    return data
+    const list = data
       .filter((c) => c.is_available !== false && c.region?.name)
       .map((c) => ({ id: c.id, name: title(c.name), region: c.region!.name! }))
       .sort((a, b) => a.region.localeCompare(b.region, "es") || a.name.localeCompare(b.name, "es"));
+    communesCache = { at: Date.now(), list };
+    return list;
   } catch (error) {
     console.error("No se pudieron leer las comunas de Shipit", error);
     return null;
@@ -72,16 +79,35 @@ export async function findCommune(id: number): Promise<Commune | null> {
 }
 
 // Opciones de envío para un pedido, de la más barata a la más cara (una por courier).
+// Si Shipit falla o no llega a esa comuna, se ofrece la tarifa fija de la zona.
 export async function quoteShipping(
   destinyId: number,
   lines: { category: string; quantity: number }[],
 ): Promise<ShippingOption[]> {
   const communes = await getCommunes();
   const destiny = communes?.find((c) => c.id === destinyId);
-  if (!destiny) return [];
+  if (!communes || !destiny) return [];
   if (sampleMode()) return sampleOptions(destiny);
+  try {
+    const options = await shipitRates(communes, destiny, lines);
+    if (options.length > 0) return options;
+  } catch (error) {
+    console.error("No se pudo cotizar con Shipit", error);
+  }
+  const zone = destiny.region.startsWith("Metropolitana") ? "rm" : "regiones";
+  return [{ courier: zone, label: "Envío estándar", price: SHIPPING_ZONES[zone].price, days: null }];
+}
 
-  const origin = communes!.find((c) => c.name.toUpperCase() === ORIGIN_COMMUNE);
+const plain = (text: string) => text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+
+async function shipitRates(
+  communes: Commune[],
+  destiny: Commune,
+  lines: { category: string; quantity: number }[],
+): Promise<ShippingOption[]> {
+  const origin =
+    communes.find((c) => plain(c.name) === ORIGIN_COMMUNE) ??
+    communes.find((c) => plain(c.name) === `${ORIGIN_COMMUNE} CENTRO`);
   if (!origin) throw new Error(`No se encontró la comuna de origen ${ORIGIN_COMMUNE} en Shipit`);
   const data = (await call("/rates", {
     method: "POST",

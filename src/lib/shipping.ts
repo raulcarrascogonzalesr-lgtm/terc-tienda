@@ -11,8 +11,9 @@ export function isShippingZone(value: unknown): value is ShippingZone {
   return typeof value === "string" && value in SHIPPING_ZONES;
 }
 
-// Comuna desde donde TERC despacha. Shipit cotiza entre esta comuna y la del cliente.
-export const ORIGIN_COMMUNE = "LAS CONDES";
+// Comuna desde donde TERC despacha (en mayúsculas y sin tildes). Shipit cotiza entre
+// esta comuna y la del cliente. Provisoria hasta confirmar el punto de retiro con Shipit.
+export const ORIGIN_COMMUNE = "SANTIAGO";
 
 // Medidas aproximadas de la caja según el tipo de equipo (cm y kg), para cotizar con Shipit.
 type Box = { length: number; width: number; height: number; weight: number };
@@ -40,7 +41,7 @@ export function packageFor(lines: { category: string; quantity: number }[]): Box
 export type Commune = { id: number; name: string; region: string };
 
 export type ShippingOption = {
-  courier: string; // identificador del courier en Shipit, ej. "starken"
+  courier: string; // courier en Shipit, ej. "starken"; o "rm"/"regiones" para la tarifa fija
   label: string; // nombre para mostrar, ej. "Starken"
   price: number;
   days: number | null;
