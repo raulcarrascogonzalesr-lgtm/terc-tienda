@@ -2,7 +2,7 @@
 export const SITE = {
   // Número de WhatsApp Business en formato internacional, sin "+" ni espacios (ej: "56912345678").
   // Mientras esté vacío, el botón de WhatsApp no aparece.
-  whatsapp: "",
+  whatsapp: "56936312578",
   email: "contacto@terc.cl",
   company: "Wiremax Telecomunicaciones SpA",
   slogan: "Segunda vida, primera calidad",
