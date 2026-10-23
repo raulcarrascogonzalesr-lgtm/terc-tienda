@@ -34,7 +34,20 @@ export async function POST(request: Request) {
 
   // La función mark_order_paid descuenta stock una sola vez por pedido.
   if (status === "paid") {
-    const { error } = await supabase.rpc("mark_order_paid", {
+    // Solo se da por pagado si Mercado Pago cobró al menos el total del pedido, en pesos.
+    const { data: order } = await supabase.from("orders").select("total").eq("id", orderId).maybeSingle();
+    if (!order) return NextResponse.json({ ignored: true });
+    if (payment.currency_id !== "CLP" || (payment.transaction_amount ?? 0) < order.total) {
+      console.error("El pago no coincide con el total del pedido", {
+        orderId,
+        paymentId: payment.id,
+        cobrado: payment.transaction_amount,
+        moneda: payment.currency_id,
+        total: order.total,
+      });
+      return NextResponse.json({ ignored: true });
+    }
+    const { error }= await supabase.rpc("mark_order_paid", {
       p_order_id: orderId,
       p_payment_id: String(payment.id),
     });
