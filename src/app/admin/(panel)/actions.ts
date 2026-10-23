@@ -479,3 +479,46 @@ export async function updateQuoteStatus(id: string, form: FormData) {
   if (error) throw error;
   revalidatePath("/admin", "layout");
 }
+
+export async function saveExtraCost(_prev: SaveResult, form: FormData): Promise<SaveResult> {
+  await requireAdmin();
+  const name = String(form.get("name") ?? "").trim();
+  if (name.length < 2) return { error: "Falta el nombre (por ejemplo, Caja con logo)" };
+  const amount = intOrNull(form.get("amount")) ?? 0;
+  const rawPercent = String(form.get("percent") ?? "")
+    .trim()
+    .replace("%", "")
+    .replace(",", ".");
+  const percent = rawPercent === "" ? 0 : Number(rawPercent);
+  if (!Number.isFinite(percent) || percent < 0 || percent > 50) {
+    return { error: "Escribe el porcentaje como número, por ejemplo 3,19" };
+  }
+  if (amount <= 0 && percent <= 0) return { error: "Escribe un monto o un porcentaje" };
+
+  const { error } = await db()
+    .from("extra_costs")
+    .insert({
+      name,
+      category: String(form.get("category") ?? "") || null,
+      amount,
+      percent,
+      note: String(form.get("note") ?? "").trim(),
+    });
+  if (error) return { error: error.message };
+  revalidatePath("/admin", "layout");
+  return null;
+}
+
+export async function toggleExtraCost(id: string, active: boolean) {
+  await requireAdmin();
+  const { error } = await db().from("extra_costs").update({ active }).eq("id", id);
+  if (error) throw error;
+  revalidatePath("/admin", "layout");
+}
+
+export async function deleteExtraCost(id: string) {
+  await requireAdmin();
+  const { error } = await db().from("extra_costs").delete().eq("id", id);
+  if (error) throw error;
+  revalidatePath("/admin", "layout");
+}

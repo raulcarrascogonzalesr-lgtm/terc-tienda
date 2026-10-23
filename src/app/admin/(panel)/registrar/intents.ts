@@ -54,7 +54,7 @@ export const INTENTS: Record<
   },
   gasto: {
     title: "Pagué un gasto",
-    text: "Publicidad, envíos, comisiones, hosting, reparaciones y otros gastos del negocio.",
+    text: "Publicidad, envíos, comisiones, cajas, hosting, reparaciones y otros gastos del negocio.",
     icon: ICONS.gasto,
     kind: "egreso",
     docs: "compra",
@@ -64,6 +64,7 @@ export const INTENTS: Record<
       comisiones: { label: "Comisiones", help: "Lo que cobra Mercado Pago o Mercado Libre." },
       garantia: { label: "Garantías y reparaciones", help: "Arreglar o cambiar un equipo." },
       herramientas: { label: "Hosting y servicios", help: "Hosting, dominio, programas." },
+      embalaje: { label: "Cajas y embalaje", help: "Cajas con logo, plumavit, cinta, stickers." },
       otro_gasto: { label: "Otro gasto", help: "Cualquier otro gasto del negocio." },
     },
   },
