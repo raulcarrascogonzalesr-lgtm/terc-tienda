@@ -61,7 +61,7 @@ export const INTENTS: Record<
     options: {
       publicidad: { label: "Publicidad", help: "Anuncios en Instagram, Facebook, Google…" },
       envios: { label: "Envíos", help: "Starken, Chilexpress, Blue Express…" },
-      comisiones: { label: "Comisiones", help: "Lo que cobra Mercado Pago o Mercado Libre." },
+      comisiones: { label: "Comisiones", help: "Lo que cobra Mercado Pago, Transbank (Webpay) o Mercado Libre." },
       garantia: { label: "Garantías y reparaciones", help: "Arreglar o cambiar un equipo." },
       herramientas: { label: "Hosting y servicios", help: "Hosting, dominio, programas." },
       otro_gasto: { label: "Otro gasto", help: "Cualquier otro gasto del negocio." },

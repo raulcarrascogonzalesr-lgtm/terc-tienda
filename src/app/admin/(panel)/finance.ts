@@ -11,7 +11,7 @@ export const INCOME_CATEGORIES = {
 export const EXPENSE_CATEGORIES = {
   publicidad: "Publicidad",
   envios: "Envíos",
-  comisiones: "Comisiones (Mercado Pago, ML)",
+  comisiones: "Comisiones (Mercado Pago, Webpay, ML)",
   garantia: "Garantías y reparaciones",
   herramientas: "Hosting, dominio y servicios",
   otro_gasto: "Otro gasto",
