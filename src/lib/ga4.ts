@@ -1,32 +1,54 @@
 import { createSign } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 
 // Lectura de Google Analytics 4 para el panel (solo lectura).
-// GOOGLE_SERVICE_ACCOUNT_JSON: el archivo .json de la cuenta de servicio, pegado tal cual
-// en las variables de entorno de cPanel. La cuenta debe ser "Lector" en la propiedad.
+// La llave es el archivo .json de la cuenta de servicio, que debe ser "Lector" en la propiedad.
+// Va subido como terc-google.json en la carpeta principal del hosting (fuera de public_html),
+// o pegado en la variable GOOGLE_SERVICE_ACCOUNT_JSON de cPanel, que a veces lo corta.
+const KEY_FILE = process.env.GOOGLE_SERVICE_ACCOUNT_FILE ?? join(homedir(), "terc-google.json");
 const PROPERTY_ID = process.env.GA4_PROPERTY_ID ?? "560387330";
 
 type ServiceAccount = { client_email: string; private_key: string };
 
+function readKeyFile(): string | undefined {
+  try {
+    return readFileSync(KEY_FILE, "utf8");
+  } catch {
+    return undefined;
+  }
+}
+
+function readServiceAccount(): ServiceAccount | string {
+  const fromFile = readKeyFile();
+  const account = fromFile ? parseServiceAccount(fromFile) : null;
+  if (account && typeof account !== "string") return account;
+  const fromEnv = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (fromEnv) return parseServiceAccount(fromEnv);
+  return account ?? "Falta subir terc-google.json a la carpeta principal del hosting.";
+}
+
 // Lee la llave aunque cPanel la haya guardado con saltos de línea reales, entre comillas
 // o con espacios de más. Devuelve el motivo si no se pudo, sin mostrar nada de la llave.
-function readServiceAccount(): ServiceAccount | string {
-  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON?.trim().replace(/^'|'$/g, "");
-  if (!raw) return "La variable GOOGLE_SERVICE_ACCOUNT_JSON no existe o está vacía en cPanel.";
+function parseServiceAccount(text: string): ServiceAccount | string {
+  const raw = text.trim().replace(/^'|'$/g, "");
+  if (!raw) return "La llave de Google está vacía.";
   let parsed: { client_email?: unknown; private_key?: unknown } | null = null;
-  for (const text of [raw, raw.replace(/\r?\n/g, "\\n")]) {
+  for (const candidate of [raw, raw.replace(/\r?\n/g, "\\n")]) {
     try {
-      parsed = JSON.parse(text);
+      parsed = JSON.parse(candidate);
       break;
     } catch {}
   }
   const email = parsed?.client_email ?? raw.match(/"client_email"\s*:\s*"([^"]+)"/)?.[1];
   const key = parsed?.private_key ?? raw.match(/"private_key"\s*:\s*"([^"]+)"/)?.[1];
   if (typeof email !== "string" || typeof key !== "string") {
-    return `GOOGLE_SERVICE_ACCOUNT_JSON está, pero no es el archivo .json completo (tiene ${raw.length} caracteres; el archivo tiene unos 2.300).`;
+    return `La llave de Google no es el archivo .json completo (tiene ${raw.length} caracteres; el archivo tiene unos 2.300).`;
   }
   const pem = key.replace(/\\n/g, "\n");
   if (!pem.includes("BEGIN PRIVATE KEY") || !pem.includes("END PRIVATE KEY")) {
-    return "GOOGLE_SERVICE_ACCOUNT_JSON está, pero la llave privada quedó cortada.";
+    return "La llave privada de Google quedó cortada.";
   }
   return { client_email: email, private_key: pem };
 }
