@@ -1,10 +1,10 @@
-# Revisa una vez por semana (y en cada cambio propuesto) que la tienda en línea no deje
-# nada privado a la vista. Solo lee: no publica ni cambia nada.
+# Revisa una vez por semana que la tienda en línea no deje nada privado a la vista.
+# Solo lee: no publica ni cambia nada. No corre en los PR, porque revisa la tienda ya
+# publicada y no el código del PR; para revisar a pedido, usar "Run workflow" en Actions.
 
 name: Revisión de seguridad
 
 on:
-  pull_request:
   schedule:
     - cron: "0 12 * * 1" # lunes, 9:00 hora de Chile
   workflow_dispatch:
