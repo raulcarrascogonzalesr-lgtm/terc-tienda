@@ -18,13 +18,35 @@ function readUtm(): unknown {
   }
 }
 
+type PaymentMethod = "mercadopago" | "webpay";
+
+const METHOD_LABELS: Record<PaymentMethod, string> = { webpay: "Webpay", mercadopago: "Mercado Pago" };
+const METHOD_HELP: Record<PaymentMethod, string> = {
+  webpay: "Tarjeta de débito, crédito o prepago (Redcompra).",
+  mercadopago: "Tarjeta, cuotas o saldo en Mercado Pago.",
+};
+
 export default function CartPage() {
   const { items, total, setQuantity, remove, canBuy } = useCart();
   const [shippingChoice, setShippingChoice] = useState<ShippingChoice | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const [methods, setMethods] = useState<PaymentMethod[]>(["mercadopago"]);
+  const [method, setMethod] = useState<PaymentMethod>("mercadopago");
 
-  // Si vuelve atrás desde Mercado Pago, el navegador restaura la página tal cual: se quita la pantalla de carga.
+  // Medios de pago activos (Webpay aparece cuando está configurado).
+  useEffect(() => {
+    fetch("/api/checkout")
+      .then((res) => res.json())
+      .then((data: { methods?: PaymentMethod[] }) => {
+        if (!data.methods?.length) return;
+        setMethods(data.methods);
+        setMethod(data.methods[0]);
+      })
+      .catch(() => {});
+  }, []);
+
+  // Si vuelve atrás desde Mercado Pago o Webpay, el navegador restaura la página tal cual: se quita la pantalla de carga.
   useEffect(() => {
     const onShow = (e: PageTransitionEvent) => e.persisted && setSending(false);
     window.addEventListener("pageshow", onShow);
@@ -65,10 +87,25 @@ export default function CartPage() {
           ...shippingChoice.payload,
           customer: Object.fromEntries(form.entries()),
           utm: readUtm(),
+          method,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "No se pudo iniciar el pago");
+      if (data.token) {
+        // Webpay pide llegar con un formulario que lleva el token.
+        const go = document.createElement("form");
+        go.method = "POST";
+        go.action = data.checkoutUrl;
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "token_ws";
+        input.value = data.token;
+        go.appendChild(input);
+        document.body.appendChild(go);
+        go.submit();
+        return;
+      }
       // Mercado Pago entrega una URL de pago; enviamos al cliente ahí.
       window.location.href = data.checkoutUrl;
     } catch (err) {
@@ -82,7 +119,7 @@ export default function CartPage() {
       {sending && (
         <TerquiLoader
           overlay
-          messages={["Preparando tu pedido…", "Conectando con Mercado Pago…", "Un segundo más"]}
+          messages={["Preparando tu pedido…", `Conectando con ${METHOD_LABELS[method]}…`, "Un segundo más"]}
         />
       )}
       <section className="space-y-4">
@@ -130,6 +167,28 @@ export default function CartPage() {
           <Row label="Total" value={formatCLP(total + (shipping ?? 0))} bold />
         </dl>
 
+        {methods.length > 1 && (
+          <fieldset className="text-sm space-y-2 border-t border-black/10 pt-4">
+            <legend className="font-semibold">¿Cómo quieres pagar?</legend>
+            {methods.map((m) => (
+              <label key={m} className="flex items-start gap-2 rounded-lg border border-black/15 px-3 py-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="method"
+                  value={m}
+                  checked={method === m}
+                  onChange={() => setMethod(m)}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="font-medium">{METHOD_LABELS[m]}</span>
+                  <span className="block text-muted">{METHOD_HELP[m]}</span>
+                </span>
+              </label>
+            ))}
+          </fieldset>
+        )}
+
         {error && <p className="text-sm text-red-700">{error}</p>}
         {!canBuy && (
           <p className="text-sm text-muted">
@@ -141,7 +200,7 @@ export default function CartPage() {
           disabled={sending || !canBuy || !shippingChoice}
           className="w-full bg-brand text-white font-medium rounded-lg px-6 py-3 hover:opacity-90 disabled:opacity-50"
         >
-          {sending ? "Redirigiendo..." : "Pagar con Mercado Pago"}
+          {sending ? "Redirigiendo..." : `Pagar con ${METHOD_LABELS[method]}`}
         </button>
       </form>
     </div>

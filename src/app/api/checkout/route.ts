@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { Preference } from "mercadopago";
 import { getAdminUser } from "@/lib/admin";
 import { getMercadoPagoClient } from "@/lib/mercadopago";
+import { createWebpayTransaction, getWebpayConfig } from "@/lib/webpay";
 import { getProductsByIds } from "@/lib/products";
 import { findCommune, quoteShipping } from "@/lib/shipit";
 import { isShippingZone, SHIPPING_ZONES } from "@/lib/shipping";
@@ -16,7 +17,23 @@ type CheckoutBody = {
   shipping?: { communeId?: unknown; courier?: unknown }; // envío cotizado con Shipit
   customer?: Record<string, unknown>;
   utm?: unknown;
+  method?: unknown; // "webpay" o "mercadopago" (por defecto)
 };
+
+type PaymentMethod = "mercadopago" | "webpay";
+
+// Medios de pago que el carrito puede ofrecer. Webpay en modo prueba solo lo ve el administrador.
+async function availableMethods(): Promise<PaymentMethod[]> {
+  const methods: PaymentMethod[] = [];
+  const webpay = getWebpayConfig();
+  if (webpay && (!webpay.isTest || (await getAdminUser()))) methods.push("webpay");
+  if (getMercadoPagoClient()) methods.push("mercadopago");
+  return methods;
+}
+
+export async function GET() {
+  return NextResponse.json({ methods: await availableMethods() });
+}
 
 const CUSTOMER_FIELDS = ["name", "email", "phone", "region", "comuna", "address"] as const;
 
@@ -31,6 +48,10 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as CheckoutBody | null;
   if (!body || !Array.isArray(body.items) || body.items.length === 0) {
     return NextResponse.json({ error: "El carrito está vacío" }, { status: 400 });
+  }
+  const method: PaymentMethod = body.method === "webpay" ? "webpay" : "mercadopago";
+  if (!(await availableMethods()).includes(method)) {
+    return NextResponse.json({ error: "Ese medio de pago no está disponible" }, { status: 503 });
   }
   // Con Shipit, la región y la comuna salen de la comuna elegida en la lista.
   const commune = body.shipping ? await findCommune(Number(body.shipping.communeId)) : null;
@@ -130,6 +151,24 @@ export async function POST(request: Request) {
     }
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
+
+  const webpay = getWebpayConfig();
+  if (method === "webpay" && webpay) {
+    try {
+      const tx = await createWebpayTransaction(webpay, {
+        orderId,
+        amount: subtotal + shipping.price,
+        returnUrl: `${siteUrl}/api/webpay/retorno`,
+      });
+      // Webpay pide enviar al cliente con un formulario (POST) que lleva el token.
+      return NextResponse.json({ checkoutUrl: tx.url, token: tx.token, orderId });
+    } catch (err) {
+      console.error("No se pudo crear la transacción Webpay", err);
+      return NextResponse.json({ error: "No se pudo conectar con Webpay" }, { status: 502 });
+    }
+  }
+
   const mp = getMercadoPagoClient();
   if (!mp) {
     return NextResponse.json(
@@ -138,7 +177,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
   const preference = await new Preference(mp).create({
     body: {
       external_reference: orderId,
