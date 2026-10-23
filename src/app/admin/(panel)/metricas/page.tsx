@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/admin";
 import { formatCLP, todayInChile } from "@/lib/format";
 import { ga4Connected, ga4KeyProblem, getTraffic, type Traffic } from "@/lib/ga4";
 import { getAdSpend, metaAdsConnected, type AdSpend } from "@/lib/meta-ads";
@@ -46,6 +47,7 @@ export default async function MetricsPage({
 }: {
   searchParams: Promise<{ mes?: string }>;
 }) {
+  await requireAdmin();
   const months = lastMonths(6);
   const requested = (await searchParams).mes;
   const month =
