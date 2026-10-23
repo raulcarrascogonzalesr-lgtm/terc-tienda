@@ -18,7 +18,8 @@ echo "1. Candado (HTTPS)"
 redireccion=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 30 "http://${base#https://}/" || echo 000)
 case "$redireccion" in
   30[1278]\ https://*) ok "http:// se manda a https:// ($redireccion)" ;;
-  *) mal "http:// no se manda a https:// (respondió: $redireccion)" ;;
+  # Se arregla en cPanel (Dominios > Force HTTPS Redirect), no en el código: por eso es aviso y no bloquea.
+  *) aviso "http:// no se manda a https:// (respondió: $redireccion). Activar Force HTTPS Redirect en cPanel" ;;
 esac
 
 echo "2. Archivos que nunca deben verse desde internet"
