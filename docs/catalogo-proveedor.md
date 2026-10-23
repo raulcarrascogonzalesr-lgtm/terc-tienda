@@ -19,15 +19,20 @@ Si una regla cambia (por ejemplo, el margen), se cambia aquí y vale desde la pr
 
 ## Precio de venta
 
-1. **Precio de la competencia:** buscar el mismo modelo (misma capacidad y estado) en Chile:
-   Knasta, Mercado Libre y tiendas de reacondicionados. Tomar como referencia el precio
-   más bajo de las tiendas serias (con boleta y garantía), no el de avisos dudosos.
-2. **Precio TERC:** por ahora se parte **entre $10.000 y $20.000 sobre** ese precio competitivo
-   (decisión de Raúl: empezar un poco alto y bajar si se vende lento). Redondear a $…990.
-3. **Margen mínimo:** el precio nunca puede dejar menos ganancia que la regla provisional
-   (costo neto × 1,19 × 1,25). Si la competencia está por debajo de eso, se usa el margen mínimo
-   y se avisa a Raúl en el resumen. El margen definitivo se decide en el hilo de contabilidad.
-4. Si no hay referencias de la competencia, se usa la regla provisional y se marca "sin referencia".
+1. **Precio de la competencia:** buscar el mismo modelo (misma capacidad y estado) en tiendas
+   chilenas de reacondicionados: El Container (elcontainer.cl), Mercado Libre (publicaciones
+   "reacondicionado") y otras tiendas serias (con boleta y garantía), no avisos dudosos.
+   Tomar el precio más bajo de esas tiendas.
+2. **Precio TERC = el mismo precio de la competencia**, redondeado a $…990. Va como **precio base**,
+   no como oferta: `compare_price` queda vacío (decisión de Raúl, 23-10-2026; antes se sumaban
+   $10.000–$20.000).
+3. **Piso:** el precio nunca baja de **costo con IVA × 1,15** (costo neto × 1,19 × 1,15), redondeado
+   hacia arriba a $…990. Si la competencia está por debajo del piso, se usa el piso y se avisa a Raúl
+   en el resumen.
+4. **Costos por venta:** antes de publicar, revisar la ganancia neta ya restando los costos por venta
+   que están en el panel (/admin/costos-extra: caja con logo, embalaje, comisión de pago…). Si con
+   ellos un producto queda con ganancia negativa o casi nula, avisar a Raúl en el resumen con el número.
+5. Si no hay referencias de la competencia, se usa el piso y se marca "sin referencia".
 
 - `cost` se guarda siempre **neto** (sin IVA). Si la lista trae precios con IVA, se dividen por 1,19.
 - Si el costo de un producto cambia, el precio se recalcula con estas mismas reglas.
@@ -39,7 +44,7 @@ Si una regla cambia (por ejemplo, el margen), se cambia aquí y vale desde la pr
 Para cada producto, una fila con:
 
 - precio con IVA, precio neto (precio ÷ 1,19) e IVA a pagar (precio − neto);
-- costo neto y **ganancia neta** (neto − costo) con su % sobre el neto;
+- costo neto, costos por venta y **ganancia neta** (neto − costo − costos por venta) con su % sobre el neto;
 - el precio de la competencia que se usó y dónde.
 
 No se calcula un total de "si vendiera todo": son productos a pedido, así que ese número no es real.
@@ -47,8 +52,8 @@ No se calcula un total de "si vendiera todo": son productos a pedido, así que e
 ## Ofertas por tiempo limitado
 
 Las ofertas tienen que ser **reales**: la ley del consumidor (SERNAC) castiga un "antes" inventado
-o un "tiempo limitado" que nunca termina. Como el precio parte un poco alto, una oferta real es bajarlo
-por unos días:
+o un "tiempo limitado" que nunca termina. Una oferta real es bajar el precio publicado por unos días
+(sin pasar del piso):
 
 - `compare_price` = el precio que **estaba publicado** en la tienda (el de antes).
 - `price` = el precio rebajado.
