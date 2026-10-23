@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import type { Product } from "@/lib/types";
 import { PHOTO_BACKDROP, ProductImage } from "./ProductImage";
 
-const INTERVAL_MS = 1400;
+const INTERVAL_MS = 3200; // tiempo que se queda cada foto
+const FADE_MS = 1600; // duración del fundido entre fotos
 
 // Foto de la tarjeta. Al pasar el mouse, muestra las otras vistas del equipo una tras otra
 // con un fundido suave; al salir, vuelve a la primera. Las otras fotos se descargan
@@ -18,8 +19,8 @@ export function HoverPhotos({ product }: { product: Product }) {
 
   useEffect(() => {
     if (!hovering || photos.length < 2) return;
-    // La primera vista nueva aparece rápido; las siguientes, cada INTERVAL_MS.
-    const first = setTimeout(() => setIndex(1), 450);
+    // La primera vista nueva aparece al rato; las siguientes, cada INTERVAL_MS.
+    const first = setTimeout(() => setIndex(1), 900);
     timer.current = setInterval(() => setIndex((i) => (i + 1) % photos.length), INTERVAL_MS);
     return () => {
       clearTimeout(first);
@@ -48,9 +49,10 @@ export function HoverPhotos({ product }: { product: Product }) {
             key={src}
             src={src}
             alt={i === 0 ? product.name : ""}
-            className={`absolute inset-0 h-full w-full object-contain p-[1.5%] mix-blend-multiply transition-[opacity,transform] duration-700 ease-out ${
-              i === index ? "opacity-100 scale-100" : "opacity-0 scale-[0.97]"
+            className={`absolute inset-0 h-full w-full object-contain p-[1.5%] mix-blend-multiply transition-[opacity,transform] ease-in-out ${
+              i === index ? "opacity-100 scale-100" : "opacity-0 scale-[0.985]"
             }`}
+            style={{ transitionDuration: `${FADE_MS}ms` }}
           />
         ) : null,
       )}
@@ -64,7 +66,7 @@ export function HoverPhotos({ product }: { product: Product }) {
         {photos.map((src, i) => (
           <span
             key={src}
-            className={`h-1.5 rounded-full transition-all duration-500 ${i === index ? "w-4 bg-pine" : "w-1.5 bg-pine/25"}`}
+            className={`h-1.5 rounded-full transition-all duration-1000 ease-in-out ${i === index ? "w-4 bg-pine" : "w-1.5 bg-pine/25"}`}
           />
         ))}
       </div>
