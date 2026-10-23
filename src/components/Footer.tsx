@@ -2,11 +2,13 @@ import Link from "next/link";
 import { SITE, whatsappLink } from "@/lib/site";
 import { StoreIcon, WhatsAppIcon } from "./icons";
 import { Logo } from "./Logo";
+import { TrustStrip } from "./TrustBadges";
 
 export function Footer({ categories }: { categories: string[] }) {
   const whatsapp = whatsappLink("Hola, tengo una consulta sobre TERC");
   return (
     <footer className="bg-pine text-white/75">
+      <TrustStrip />
       <div data-reveal className="shell py-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-4 lg:col-span-2">
           <Logo variant="light" className="h-16 w-auto" />
@@ -52,9 +54,6 @@ export function Footer({ categories }: { categories: string[] }) {
               <a href={`mailto:${SITE.email}`} className="flex items-center gap-2 hover:text-white">
                 <StoreIcon name="mail" className="w-4 h-4" /> {SITE.email}
               </a>
-            </li>
-            <li className="flex items-center gap-2">
-              <StoreIcon name="card" className="w-4 h-4" /> Pagos seguros con Mercado Pago
             </li>
             <li>
               <Link href="/privacidad" className="flex items-center gap-2 hover:text-white">
