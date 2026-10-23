@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatCLP } from "@/lib/format";
-import { listAllProducts } from "../data";
+import { listAllProducts, listExtraCosts } from "../data";
+import { extraCostFor } from "../extra-costs";
 import { netOf } from "../finance";
 import { ICONS } from "../icons";
 import { Icon, PageHeader } from "../ui";
@@ -10,7 +11,7 @@ import { ImportPhotosButton } from "./ImportPhotosButton";
 export const dynamic = "force-dynamic";
 
 export default async function ProductsPage() {
-  const products = await listAllProducts();
+  const [products, extraCosts] = await Promise.all([listAllProducts(), listExtraCosts()]);
   const ours = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/productos/`;
   const isExternal = (url: string | null) => !!url?.startsWith("https://") && !url.startsWith(ours);
   const externalPhotos = products.filter(
@@ -36,6 +37,7 @@ export default async function ProductsPage() {
               <th className="p-3">Grado</th>
               <th className="p-3 text-right">Precio con IVA</th>
               <th className="p-3 text-right">Costo neto</th>
+              <th className="p-3 text-right">Costos por venta</th>
               <th className="p-3 text-right">Margen neto</th>
               <th className="p-3 text-right">Stock</th>
               <th className="p-3">Visible</th>
@@ -46,9 +48,10 @@ export default async function ProductsPage() {
           </thead>
           <tbody>
             {products.map((p) => {
-              // Se compara sin IVA: precio neto menos costo neto.
+              // Se compara sin IVA: precio neto menos costo neto y menos los costos por venta.
               const priceNet = netOf(p.price);
-              const margin = p.cost === null ? null : priceNet - p.cost;
+              const extra = extraCostFor(p.price, p.category, extraCosts);
+              const margin = p.cost === null ? null : priceNet - p.cost - extra;
               return (
                 <tr
                   key={p.id}
@@ -64,7 +67,12 @@ export default async function ProductsPage() {
                   <td className="p-3 text-right whitespace-nowrap">
                     {p.cost === null ? "—" : formatCLP(p.cost)}
                   </td>
-                  <td className="p-3 text-right whitespace-nowrap">
+                  <td className="p-3 text-right whitespace-nowrap text-[#6b716f]">
+                    {extra ? `−${formatCLP(extra)}` : "—"}
+                  </td>
+                  <td
+                    className={`p-3 text-right whitespace-nowrap ${margin !== null && margin < 0 ? "text-[#b3362a]" : ""}`}
+                  >
                     {margin === null
                       ? "—"
                       : `${formatCLP(margin)} (${priceNet ? Math.round((margin / priceNet) * 100) : 0}%)`}
@@ -97,7 +105,11 @@ export default async function ProductsPage() {
       </div>
       <p className="text-sm text-[#6b716f]">
         En la tienda solo aparecen los productos visibles y con stock. Los del proveedor no cuentan como plata invertida. El costo nunca se muestra al
-        cliente. El margen compara el precio sin IVA con el costo sin IVA.
+        cliente. El margen compara el precio sin IVA con el costo sin IVA, y le resta los{" "}
+        <Link href="/admin/costos-extra" className="underline">
+          costos por venta
+        </Link>{" "}
+        (caja, embalaje, comisión).
       </p>
     </section>
   );

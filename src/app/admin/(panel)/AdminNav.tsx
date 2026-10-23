@@ -15,6 +15,7 @@ const GROUPS = [
     links: [
       { href: "/admin/pedidos", label: "Pedidos", icon: ICONS.pedidos },
       { href: "/admin/productos", label: "Productos", icon: ICONS.productos },
+      { href: "/admin/costos-extra", label: "Costos por venta", icon: ICONS.caja },
       { href: "/admin/cotizaciones", label: "Cotizaciones", icon: ICONS.cotizaciones },
       { href: "/admin/metricas", label: "Métricas", icon: ICONS.metricas },
     ],

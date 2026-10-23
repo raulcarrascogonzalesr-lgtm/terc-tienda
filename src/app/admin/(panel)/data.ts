@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin";
 import { getAdminClient } from "@/lib/supabase";
-import type { AdminProduct, Campaign, Movement, Order, Quote } from "@/lib/types";
+import type { AdminProduct, Campaign, ExtraCost, Movement, Order, Quote } from "@/lib/types";
 
 // Estos datos son privados: cada lectura revisa primero que entró el administrador.
 function db() {
@@ -110,4 +110,15 @@ export async function countNewQuotes(): Promise<number> {
     .eq("status", "nueva");
   if (error) return 0; // la tabla puede no existir todavía
   return count ?? 0;
+}
+
+// Costos extra por venta (caja, relleno, comisión…), los de todos los productos primero.
+export async function listExtraCosts(): Promise<ExtraCost[]> {
+  const { data, error } = await db()
+    .from("extra_costs")
+    .select("*")
+    .order("category", { ascending: true, nullsFirst: true })
+    .order("created_at", { ascending: true });
+  if (error) return []; // la tabla puede no existir todavía
+  return (data as ExtraCost[]).map((c) => ({ ...c, percent: Number(c.percent) }));
 }

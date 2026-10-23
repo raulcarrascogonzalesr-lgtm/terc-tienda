@@ -104,6 +104,18 @@ export type Campaign = {
   created_at: string;
 };
 
+// Costo que se repite en cada venta (caja, relleno, comisión…). Solo lo ve el panel.
+export type ExtraCost = {
+  id: string;
+  name: string;
+  category: string | null; // categoría de producto a la que aplica; null = a todos
+  amount: number; // pesos sin IVA por cada equipo vendido
+  percent: number; // % del precio con IVA (por ejemplo, la comisión de pago)
+  note: string;
+  active: boolean;
+  created_at: string;
+};
+
 // Solicitud de "Empresas y cotizaciones". Solo la ve el panel.
 export type QuoteKind = "volumen" | "arriendo" | "otro";
 export type QuoteStatus = "nueva" | "respondida" | "cerrada";

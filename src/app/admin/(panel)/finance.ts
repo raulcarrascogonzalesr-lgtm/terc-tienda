@@ -14,6 +14,7 @@ export const EXPENSE_CATEGORIES = {
   comisiones: "Comisiones (Mercado Pago, Webpay, ML)",
   garantia: "Garantías y reparaciones",
   herramientas: "Hosting, dominio y servicios",
+  embalaje: "Cajas y embalaje",
   otro_gasto: "Otro gasto",
 } as const;
 
