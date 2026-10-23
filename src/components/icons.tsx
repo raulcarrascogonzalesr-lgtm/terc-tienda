@@ -12,6 +12,8 @@ const PATHS = {
   battery: "M3 8h15v8H3zM21 11v2M6 11v2M9 11v2",
   mail: "M3 6h18v12H3zM3 7l9 6 9-6",
   tag: "M3 12V4h8l10 10-8 8zM7.5 8.5h.01",
+  lock: "M6 11h12v10H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3M12 15v2",
+  receipt: "M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6",
   clock: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2",
 } as const;
 

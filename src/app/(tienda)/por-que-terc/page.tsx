@@ -3,6 +3,7 @@ import Link from "next/link";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
 import { Terqui } from "@/components/Terqui";
+import { PaymentLogos } from "@/components/TrustBadges";
 import { SITE, whatsappLink } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -29,6 +30,24 @@ const STEPS = [
   {
     title: "Te llegan con garantía",
     text: "Pagas seguro, lo despachamos a tu casa y quedas cubierto por la garantía de TERC.",
+  },
+];
+
+const SAFE_BUY: { icon: IconName; title: string; text: string }[] = [
+  {
+    icon: "lock",
+    title: "Pagas en Mercado Pago",
+    text: "El pago se hace en la página de Mercado Pago. Nosotros nunca vemos ni guardamos los datos de tu tarjeta.",
+  },
+  {
+    icon: "receipt",
+    title: "Empresa formal",
+    text: `Vende ${SITE.company}. Con cada compra recibes tu boleta o factura.`,
+  },
+  {
+    icon: "shield",
+    title: "Te respondemos nosotros",
+    text: "Si algo falla, lo ves directo con TERC por WhatsApp o correo, sin intermediarios.",
   },
 ];
 
@@ -106,6 +125,31 @@ export default function WhyTercPage() {
             ))}
           </div>
         </div>
+      </section>
+
+      <section data-reveal className="rounded-3xl bg-white border border-black/[0.06] p-8 sm:p-12">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-pine-700">Compra segura</p>
+            <h2 className="mt-1 max-w-xl text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
+              Pagas protegido, con las tarjetas de siempre.
+            </h2>
+          </div>
+          <PaymentLogos className="text-base sm:text-lg" />
+        </div>
+        <ul className="mt-10 grid gap-6 md:grid-cols-3">
+          {SAFE_BUY.map((item) => (
+            <li key={item.title} className="flex gap-4">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-paper text-pine-700">
+                <StoreIcon name={item.icon} className="h-5 w-5" />
+              </span>
+              <div>
+                <h3 className="font-semibold text-ink">{item.title}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-muted">{item.text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section data-reveal className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-pine-700 px-8 py-10 text-white sm:flex-row sm:items-center sm:px-12">
