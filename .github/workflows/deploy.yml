@@ -23,6 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FTP_SERVER: ${{ secrets.FTP_SERVER }}
+      # Se sube por FTPS (cifrado) usando el nombre del servidor que aparece en su certificado;
+      # con el nombre de FTP_SERVER el certificado no calza. Es el mismo servidor.
+      FTPS_HOST: s510.v2nets.com
     steps:
       - uses: actions/checkout@v4
 
@@ -56,12 +59,13 @@ jobs:
       # subiendo los archivos, el servidor arranca con una mezcla de archivos viejos y nuevos
       # y las páginas dan error 500 hasta el siguiente reinicio. Por eso primero se suben
       # todos los archivos (sin tocar tmp/) y recién después el aviso.
-      - name: Subir por FTP
+      - name: Subir por FTPS
         # Mientras no estén cargados los datos FTP, el flujo solo comprueba que la tienda compila.
         if: ${{ github.event_name != 'pull_request' && env.FTP_SERVER != '' }}
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
+          server: ${{ env.FTPS_HOST }}
+          protocol: ftps
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: .next/standalone/
@@ -76,7 +80,8 @@ jobs:
         if: ${{ github.event_name != 'pull_request' && env.FTP_SERVER != '' }}
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
+          server: ${{ env.FTPS_HOST }}
+          protocol: ftps
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: .next/reinicio/
@@ -99,7 +104,8 @@ jobs:
         if: ${{ steps.revisar.outcome == 'failure' }}
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
+          server: ${{ env.FTPS_HOST }}
+          protocol: ftps
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: .next/reinicio/
