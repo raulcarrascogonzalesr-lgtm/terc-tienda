@@ -1,5 +1,5 @@
 import { formatCLP, todayInChile } from "@/lib/format";
-import { ga4Connected, getTraffic, type Traffic } from "@/lib/ga4";
+import { ga4Connected, ga4KeyProblem, getTraffic, type Traffic } from "@/lib/ga4";
 import { getAdSpend, metaAdsConnected, type AdSpend } from "@/lib/meta-ads";
 import { loadBusiness } from "../data";
 import {
@@ -192,7 +192,12 @@ export default async function MetricsPage({
             No se pudo leer Google Analytics: {traffic.error}
           </p>
         ) : !traffic.data ? (
-          <NotConnected what="Google Analytics" connected={ga4Connected()} />
+          <>
+            <NotConnected what="Google Analytics" connected={ga4Connected()} />
+            {ga4KeyProblem() ? (
+              <p className="mt-1 text-sm text-[#b3362a]">{ga4KeyProblem()}</p>
+            ) : null}
+          </>
         ) : (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

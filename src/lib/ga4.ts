@@ -7,20 +7,43 @@ const PROPERTY_ID = process.env.GA4_PROPERTY_ID ?? "560387330";
 
 type ServiceAccount = { client_email: string; private_key: string };
 
-function serviceAccount(): ServiceAccount | null {
-  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  if (!raw) return null;
-  try {
-    const parsed = JSON.parse(raw);
-    if (!parsed.client_email || !parsed.private_key) return null;
-    return { client_email: parsed.client_email, private_key: String(parsed.private_key).replace(/\\n/g, "\n") };
-  } catch {
-    return null;
+// Lee la llave aunque cPanel la haya guardado con saltos de línea reales, entre comillas
+// o con espacios de más. Devuelve el motivo si no se pudo, sin mostrar nada de la llave.
+function readServiceAccount(): ServiceAccount | string {
+  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON?.trim().replace(/^'|'$/g, "");
+  if (!raw) return "La variable GOOGLE_SERVICE_ACCOUNT_JSON no existe o está vacía en cPanel.";
+  let parsed: { client_email?: unknown; private_key?: unknown } | null = null;
+  for (const text of [raw, raw.replace(/\r?\n/g, "\\n")]) {
+    try {
+      parsed = JSON.parse(text);
+      break;
+    } catch {}
   }
+  const email = parsed?.client_email ?? raw.match(/"client_email"\s*:\s*"([^"]+)"/)?.[1];
+  const key = parsed?.private_key ?? raw.match(/"private_key"\s*:\s*"([^"]+)"/)?.[1];
+  if (typeof email !== "string" || typeof key !== "string") {
+    return `GOOGLE_SERVICE_ACCOUNT_JSON está, pero no es el archivo .json completo (tiene ${raw.length} caracteres; el archivo tiene unos 2.300).`;
+  }
+  const pem = key.replace(/\\n/g, "\n");
+  if (!pem.includes("BEGIN PRIVATE KEY") || !pem.includes("END PRIVATE KEY")) {
+    return "GOOGLE_SERVICE_ACCOUNT_JSON está, pero la llave privada quedó cortada.";
+  }
+  return { client_email: email, private_key: pem };
+}
+
+function serviceAccount(): ServiceAccount | null {
+  const account = readServiceAccount();
+  return typeof account === "string" ? null : account;
 }
 
 export function ga4Connected() {
   return serviceAccount() !== null;
+}
+
+// Por qué no se puede usar la llave (null si está bien), para mostrarlo en el panel.
+export function ga4KeyProblem(): string | null {
+  const account = readServiceAccount();
+  return typeof account === "string" ? account : null;
 }
 
 const b64url = (data: string | Buffer) => Buffer.from(data).toString("base64url");
