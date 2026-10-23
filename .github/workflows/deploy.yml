@@ -56,6 +56,20 @@ jobs:
       # subiendo los archivos, el servidor arranca con una mezcla de archivos viejos y nuevos
       # y las páginas dan error 500 hasta el siguiente reinicio. Por eso primero se suben
       # todos los archivos (sin tocar tmp/) y recién después el aviso.
+      # TEMPORAL: comprobar si el servidor acepta FTP cifrado (solo lista la carpeta).
+      - name: Probar FTPS
+        if: ${{ github.event_name == 'pull_request' && env.FTP_SERVER != '' }}
+        env:
+          U: ${{ secrets.FTP_USERNAME }}
+          P: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          echo "Certificado estricto:"
+          curl --ssl-reqd -sS --max-time 30 --list-only "ftp://$FTP_SERVER/" --user "$U:$P" -o /dev/null && echo "OK estricto" || echo "FALLA estricto"
+          echo "Cifrado sin revisar certificado:"
+          curl --ssl-reqd -k -sS --max-time 30 --list-only "ftp://$FTP_SERVER/" --user "$U:$P" -o /dev/null && echo "OK cifrado" || echo "FALLA cifrado"
+          echo "Nombre del certificado:"
+          echo | timeout 20 openssl s_client -starttls ftp -connect "$FTP_SERVER:21" 2>/dev/null | openssl x509 -noout -subject -ext subjectAltName || true
+
       - name: Subir por FTP
         # Mientras no estén cargados los datos FTP, el flujo solo comprueba que la tienda compila.
         if: ${{ github.event_name != 'pull_request' && env.FTP_SERVER != '' }}
