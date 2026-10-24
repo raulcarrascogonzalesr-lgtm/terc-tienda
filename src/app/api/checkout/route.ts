@@ -22,11 +22,11 @@ type CheckoutBody = {
 
 type PaymentMethod = "mercadopago" | "webpay";
 
-// Medios de pago que el carrito puede ofrecer. Webpay en modo prueba solo lo ve el administrador.
+// Medios de pago que el carrito puede ofrecer. Webpay en modo prueba (o con WEBPAY_SOLO_ADMIN) solo lo ve el administrador.
 async function availableMethods(): Promise<PaymentMethod[]> {
   const methods: PaymentMethod[] = [];
   const webpay = getWebpayConfig();
-  if (webpay && (!webpay.isTest || (await getAdminUser()))) methods.push("webpay");
+  if (webpay && (!webpay.adminOnly || (await getAdminUser()))) methods.push("webpay");
   if (getMercadoPagoClient()) methods.push("mercadopago");
   return methods;
 }
