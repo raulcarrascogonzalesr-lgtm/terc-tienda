@@ -214,15 +214,14 @@ export default function CartPage() {
             <Link href="/garantia-y-devoluciones" target="_blank" className="underline">
               política de garantía y devoluciones
             </Link>
-            . Entiendo que compro un equipo <strong>reacondicionado</strong>, no nuevo
+            .
             {cosmeticItems.length > 0 && (
               <>
-                , y que {cosmeticItems.length === 1 ? "el equipo" : "los equipos"}{" "}
+                {" "}Entiendo que {cosmeticItems.length === 1 ? "el equipo" : "los equipos"}{" "}
                 <strong>{cosmeticItems.join(", ")}</strong> {cosmeticItems.length === 1 ? "tiene" : "tienen"}{" "}
-                detalles estéticos leves, como se indica en su ficha
+                detalles estéticos leves, como se indica en su ficha.
               </>
             )}
-            .
           </span>
         </label>
 
