@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- Patrón de TERC: hojas del logo y el anillo abierto. Se usa como máscara (solo importa la forma). -->
+  <g fill="#000">
+    <path d="M0 0 Q-10 -10 -24 -7 Q-13 6 0 0 Z" transform="translate(34,30) rotate(-20) scale(1.1)"/>
+    <path d="M0 0 Q-10 -10 -24 -7 Q-13 6 0 0 Z" transform="translate(104,88) rotate(160) scale(0.9)"/>
+    <path d="M0 0 Q-10 -10 -24 -7 Q-13 6 0 0 Z" transform="translate(52,104) rotate(35) scale(0.7)"/>
+  </g>
+  <path d="M83.4 22.5 A11 11 0 0 1 103 24.7 M103 32.3 A11 11 0 0 1 81.6 29.1" fill="none" stroke="#000" stroke-width="1.6"/>
+  <path d="M13.4 70.5 A11 11 0 0 1 33 72.7 M33 80.3 A11 11 0 0 1 11.6 77.1" fill="none" stroke="#000" stroke-width="1.6"/>
+</svg>

@@ -141,7 +141,7 @@ function CategoryTile({ tile }: { tile: Tile }) {
   return (
     <Link
       href={`/?categoria=${encodeURIComponent(tile.name)}#equipos`}
-      className="group relative flex min-h-40 flex-col justify-between overflow-hidden rounded-3xl border border-black/[0.06] bg-white p-4 sm:p-5 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-pine/10"
+      className="group relative flex min-h-40 flex-col justify-between overflow-hidden rounded-3xl border border-line/[0.06] bg-surface p-4 sm:p-5 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-pine/10"
     >
       <div className="relative z-10">
         <h3 className="text-base sm:text-xl font-bold tracking-tight text-ink">{tile.name}</h3>
@@ -154,12 +154,15 @@ function CategoryTile({ tile }: { tile: Tile }) {
         <span className="block text-base sm:text-xl font-bold tracking-tight text-pine-700">{formatCLP(tile.from)}</span>
       </p>
       {tile.photo ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={tile.photo}
-          alt=""
-          className="absolute -bottom-2 -right-3 h-3/5 w-3/5 object-contain transition duration-500 group-hover:scale-105"
-        />
+        // La foto sobre un círculo verde con hojas de TERC, que asoma desde la esquina.
+        <div className="photo-stage absolute -bottom-[14%] -right-[8%] aspect-square w-[52%] overflow-hidden rounded-full sm:w-[60%]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={tile.photo}
+            alt=""
+            className="absolute inset-0 h-full w-full object-contain p-[12%] pb-[22%] pr-[18%] mix-blend-multiply transition duration-500 group-hover:scale-105"
+          />
+        </div>
       ) : (
         <Mark className="absolute -bottom-3 -right-3 w-2/5 opacity-20" />
       )}
@@ -333,14 +336,15 @@ export default async function HomePage({ searchParams }: Props) {
               key={b.title}
               data-reveal
               style={delay(i * 80)}
-              className="flex items-center gap-3 rounded-2xl bg-white border border-black/[0.06] px-3 py-3 sm:px-4 sm:py-3.5"
+              className="relative flex items-center gap-3 overflow-hidden rounded-2xl bg-pine px-3 py-3 text-white sm:px-4 sm:py-3.5"
             >
-              <span className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-mint-50 text-pine-700">
+              <Mark className="absolute -right-4 -top-3 w-16 opacity-[0.07]" ink="#ffffff" />
+              <span className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-gold">
                 <StoreIcon name={b.icon} className="w-5 h-5" />
               </span>
               <span>
-                <span className="block text-sm font-semibold text-ink">{b.title}</span>
-                <span className="hidden sm:block text-xs text-muted">{b.text}</span>
+                <span className="block text-sm font-semibold">{b.title}</span>
+                <span className="hidden sm:block text-xs text-white/70">{b.text}</span>
               </span>
             </li>
           ))}
@@ -361,7 +365,7 @@ export default async function HomePage({ searchParams }: Props) {
               </div>
               <div className="flex items-center gap-3">
                 {allLimited && (
-                  <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-sale shadow-sm ring-1 ring-sale/20">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-surface px-4 py-2 text-sm font-bold text-sale shadow-sm ring-1 ring-sale/20">
                     <StoreIcon name="clock" className="w-4 h-4" />
                     <OfferCountdown endsOn={firstEnd} />
                   </span>
@@ -403,7 +407,7 @@ export default async function HomePage({ searchParams }: Props) {
           <div className="flex gap-2 overflow-x-auto pb-1">
             <Link
               href={link({ categoria: null, ofertas: null })}
-              className={`shrink-0 rounded-full border px-4 py-1.5 text-sm ${!categoria && !onlyOffers ? "border-pine bg-pine text-white" : "border-black/10 bg-white text-ink hover:border-pine-700/40"}`}
+              className={`shrink-0 rounded-full border px-4 py-1.5 text-sm ${!categoria && !onlyOffers ? "border-pine bg-pine text-white" : "border-line/10 bg-surface text-ink hover:border-pine-700/40"}`}
             >
               Todos
             </Link>
@@ -419,7 +423,7 @@ export default async function HomePage({ searchParams }: Props) {
               <Link
                 key={c}
                 href={link({ categoria: c === categoria ? null : c })}
-                className={`shrink-0 rounded-full border px-4 py-1.5 text-sm ${c === categoria ? "border-pine bg-pine text-white" : "border-black/10 bg-white text-ink hover:border-pine-700/40"}`}
+                className={`shrink-0 rounded-full border px-4 py-1.5 text-sm ${c === categoria ? "border-pine bg-pine text-white" : "border-line/10 bg-surface text-ink hover:border-pine-700/40"}`}
               >
                 {c}
               </Link>
@@ -431,7 +435,7 @@ export default async function HomePage({ searchParams }: Props) {
               <Link
                 key={key}
                 href={link({ orden: key === "recientes" ? null : key })}
-                className={`shrink-0 rounded-full px-3 py-1.5 ${sort === key ? "bg-white font-semibold text-ink ring-1 ring-black/10" : "text-muted hover:text-ink"}`}
+                className={`shrink-0 rounded-full px-3 py-1.5 ${sort === key ? "bg-surface font-semibold text-ink ring-1 ring-line/10" : "text-muted hover:text-ink"}`}
               >
                 {label}
               </Link>
@@ -440,7 +444,7 @@ export default async function HomePage({ searchParams }: Props) {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="mt-6 flex flex-col items-center rounded-2xl border border-dashed border-black/15 bg-white p-10 text-center">
+          <div className="mt-6 flex flex-col items-center rounded-2xl border border-dashed border-line/15 bg-surface p-10 text-center">
             <Terqui pose="duda" className="mb-2 h-32 w-32" />
             <p className="font-medium text-ink">
               {filtering ? "No encontramos equipos con esa búsqueda." : "Pronto tendremos equipos disponibles."}
@@ -464,7 +468,7 @@ export default async function HomePage({ searchParams }: Props) {
         <section data-reveal className="shell pt-14">
           <Link
             href="/por-que-terc"
-            className="group relative flex flex-col items-start justify-between gap-4 rounded-3xl bg-white border border-black/[0.06] px-8 py-8 transition hover:shadow-lg sm:flex-row sm:items-center sm:px-12"
+            className="group relative flex flex-col items-start justify-between gap-4 rounded-3xl bg-gradient-to-r from-mint-50 to-surface border border-pine-700/15 px-8 py-8 transition hover:shadow-lg sm:flex-row sm:items-center sm:px-12"
           >
             {/* Terqui colgado del borde de la tarjeta, columpiándose. */}
             <Terqui pose="colgando" className="pointer-events-none absolute -top-[8px] right-3 h-28 w-28 sm:right-56" />

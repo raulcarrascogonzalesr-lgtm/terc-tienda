@@ -61,7 +61,7 @@ export default function CartPage() {
         <p className="mt-2 text-muted">Terqui lo revisó dos veces y no encontró nada. ¿Le ayudamos a llenarlo?</p>
         <Link
           href="/#equipos"
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-pine px-6 py-3 text-sm font-semibold text-white transition hover:bg-pine-700"
+          className="mt-6 inline-flex items-center gap-2 rounded-full bg-pine px-6 py-3 text-sm font-semibold text-white transition hover:bg-cta"
         >
           Ver equipos
         </Link>
@@ -127,7 +127,7 @@ export default function CartPage() {
         {items.map((item) => (
           <div
             key={item.productId}
-            className="bg-white rounded-xl border border-black/10 p-4 flex flex-wrap items-center gap-4"
+            className="bg-surface rounded-xl border border-line/10 p-4 flex flex-wrap items-center gap-4"
           >
             <Link href={`/producto/${item.slug}`} className="flex-1 min-w-48 font-medium">
               {item.name}
@@ -138,7 +138,7 @@ export default function CartPage() {
               max={item.maxQuantity}
               value={item.quantity}
               onChange={(e) => setQuantity(item.productId, Number(e.target.value))}
-              className="w-16 border border-black/20 rounded px-2 py-1"
+              className="w-16 border border-line/20 rounded px-2 py-1"
               aria-label="Cantidad"
             />
             <span className="w-28 text-right">{formatCLP(item.price * item.quantity)}</span>
@@ -153,7 +153,7 @@ export default function CartPage() {
         ))}
       </section>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-black/10 p-6 space-y-4 h-fit">
+      <form onSubmit={handleSubmit} className="bg-surface rounded-xl border border-line/10 p-6 space-y-4 h-fit">
         <h2 className="text-lg font-semibold">Datos de envío</h2>
         <Field name="name" label="Nombre completo" autoComplete="name" />
         <Field name="email" label="Correo" type="email" autoComplete="email" />
@@ -161,17 +161,17 @@ export default function CartPage() {
         <ShippingPicker items={items} onChange={setShippingChoice} />
         <Field name="address" label="Dirección" autoComplete="street-address" />
 
-        <dl className="text-sm space-y-1 border-t border-black/10 pt-4">
+        <dl className="text-sm space-y-1 border-t border-line/10 pt-4">
           <Row label="Productos" value={formatCLP(total)} />
           <Row label="Envío" value={shipping === null ? "Elige tu comuna" : formatCLP(shipping)} />
           <Row label="Total" value={formatCLP(total + (shipping ?? 0))} bold />
         </dl>
 
         {methods.length > 1 && (
-          <fieldset className="text-sm space-y-2 border-t border-black/10 pt-4">
+          <fieldset className="text-sm space-y-2 border-t border-line/10 pt-4">
             <legend className="font-semibold">¿Cómo quieres pagar?</legend>
             {methods.map((m) => (
-              <label key={m} className="flex items-start gap-2 rounded-lg border border-black/15 px-3 py-2 cursor-pointer">
+              <label key={m} className="flex items-start gap-2 rounded-lg border border-line/15 px-3 py-2 cursor-pointer">
                 <input
                   type="radio"
                   name="method"
@@ -216,7 +216,7 @@ function Field(props: { name: string; label: string; type?: string; autoComplete
         type={props.type ?? "text"}
         autoComplete={props.autoComplete}
         required
-        className="mt-1 w-full border border-black/20 rounded px-3 py-2"
+        className="mt-1 w-full border border-line/20 rounded px-3 py-2"
       />
     </label>
   );

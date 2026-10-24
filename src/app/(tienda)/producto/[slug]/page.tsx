@@ -76,7 +76,7 @@ export default async function ProductPage({ params }: Props) {
         <div className="space-y-6">
           <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-mint-50 px-3 py-1 text-xs font-semibold text-pine">
+              <span className="rounded-full bg-mint-50 px-3 py-1 text-xs font-semibold text-ink">
                 Reacondicionado
               </span>
               {product.stock <= 3 && (
@@ -137,14 +137,14 @@ export default async function ProductPage({ params }: Props) {
                 href={whatsapp}
                 target="_blank"
                 rel="noopener"
-                className="flex w-full items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-6 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-line/10 bg-surface px-6 py-3 text-sm font-semibold text-ink transition hover:bg-paper"
               >
                 <WhatsAppIcon className="w-5 h-5 text-[#25d366]" /> Preguntar por WhatsApp
               </a>
             )}
           </div>
 
-          <ul className="space-y-2.5 rounded-2xl bg-white border border-black/[0.06] p-5">
+          <ul className="space-y-2.5 rounded-2xl bg-mint-50 border border-pine-700/15 p-5">
             {trust.map((t) => (
               <li key={t.text} className="flex items-center gap-3 text-sm text-ink">
                 <StoreIcon name={t.icon} className="w-5 h-5 text-pine-700" />
@@ -153,7 +153,7 @@ export default async function ProductPage({ params }: Props) {
             ))}
           </ul>
 
-          <dl className="divide-y divide-black/[0.06] rounded-2xl bg-white border border-black/[0.06] text-sm">
+          <dl className="divide-y divide-line/[0.06] rounded-2xl bg-surface border border-line/[0.06] text-sm">
             <div className="grid grid-cols-[140px_1fr] gap-3 px-5 py-3">
               <dt className="text-muted">Estado</dt>
               <dd className="text-ink">

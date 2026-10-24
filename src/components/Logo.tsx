@@ -6,7 +6,8 @@ export function Logo({ className, variant = "dark" }: { className?: string; vari
   const c =
     variant === "light"
       ? { ring: "#b3a26a", leaf: "#3db585", ink: "#ffffff", endorse: "#b3a26a" }
-      : { ring: "#b3a26a", leaf: "#288868", ink: "#0a2a2a", endorse: "#288868" };
+      : // Sobre fondo claro; en modo oscuro las variables cambian solas a letras claras.
+        { ring: "#b3a26a", leaf: "var(--pine-700)", ink: "var(--ink)", endorse: "var(--pine-700)" };
   const montserrat = "var(--font-montserrat), Montserrat, sans-serif";
   return (
     <svg viewBox="-6 0 240 112" className={className} role="img" aria-label="TERC, de Wiremax">
@@ -16,10 +17,10 @@ export function Logo({ className, variant = "dark" }: { className?: string; vari
         stroke={c.ring}
         strokeWidth="3"
       />
-      <text x="50" y="82" textAnchor="middle" fontFamily={montserrat} fontWeight="600" fontSize="66" fill={c.ink}>
+      <text x="50" y="82" textAnchor="middle" fontFamily={montserrat} fontWeight="600" fontSize="66" style={{ fill: c.ink }}>
         T
       </text>
-      <path d="M0 0 Q-10 -10 -24 -7 Q-13 6 0 0 Z" transform="translate(25,52)" fill={c.leaf} />
+      <path d="M0 0 Q-10 -10 -24 -7 Q-13 6 0 0 Z" transform="translate(25,52)" style={{ fill: c.leaf }} />
       <text
         x="86"
         y="82"
@@ -27,7 +28,7 @@ export function Logo({ className, variant = "dark" }: { className?: string; vari
         fontWeight="600"
         fontSize="66"
         letterSpacing="1"
-        fill={c.ink}
+        style={{ fill: c.ink }}
       >
         ERC
       </text>
@@ -38,7 +39,7 @@ export function Logo({ className, variant = "dark" }: { className?: string; vari
         fontFamily="var(--font-inter), Inter, sans-serif"
         fontWeight="500"
         fontSize="12"
-        fill={c.endorse}
+        style={{ fill: c.endorse }}
       >
         de Wiremax
       </text>

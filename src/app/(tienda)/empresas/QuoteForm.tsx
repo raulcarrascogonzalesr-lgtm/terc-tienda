@@ -8,14 +8,14 @@ import type { QuoteKind } from "@/lib/types";
 import { submitQuote } from "./actions";
 
 const field =
-  "w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-[15px] text-ink placeholder:text-muted/70 focus:border-pine-700 focus:outline-none focus:ring-4 focus:ring-pine-700/10";
+  "w-full rounded-xl border border-line/10 bg-surface px-4 py-3 text-[15px] text-ink placeholder:text-muted/70 focus:border-pine-700 focus:outline-none focus:ring-4 focus:ring-pine-700/10";
 
 export function QuoteForm({ kind }: { kind: QuoteKind }) {
   const [state, action, pending] = useActionState(submitQuote, null);
 
   if (state?.ok) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-3xl bg-white p-10 text-center ring-1 ring-black/[0.06]">
+      <div className="flex flex-col items-center gap-3 rounded-3xl bg-surface p-10 text-center ring-1 ring-line/[0.06]">
         <Terqui pose="corazon" className="w-36 h-36" />
         <h3 className="text-xl font-bold text-ink">¡Recibimos tu solicitud!</h3>
         <p className="max-w-sm text-sm text-muted">
@@ -26,14 +26,14 @@ export function QuoteForm({ kind }: { kind: QuoteKind }) {
   }
 
   return (
-    <form action={action} className="space-y-4 rounded-3xl bg-white p-6 sm:p-8 ring-1 ring-black/[0.06]">
+    <form action={action} className="space-y-4 rounded-3xl bg-surface p-6 sm:p-8 ring-1 ring-line/[0.06]">
       <fieldset>
         <legend className="mb-2 text-sm font-semibold text-ink">¿Qué necesitas?</legend>
         <div className="grid gap-2 sm:grid-cols-3">
           {Object.entries(QUOTE_KIND_LABELS).map(([value, label]) => (
             <label
               key={value}
-              className="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 px-3 py-2.5 text-sm text-ink has-[:checked]:border-pine-700 has-[:checked]:bg-mint-50 has-[:checked]:font-semibold"
+              className="flex cursor-pointer items-center gap-2 rounded-xl border border-line/10 px-3 py-2.5 text-sm text-ink has-[:checked]:border-pine-700 has-[:checked]:bg-mint-50 has-[:checked]:font-semibold"
             >
               <input type="radio" name="kind" value={value} defaultChecked={value === kind} className="accent-pine-700" />
               {label}
@@ -97,7 +97,7 @@ export function QuoteForm({ kind }: { kind: QuoteKind }) {
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-pine px-7 py-3.5 text-sm font-bold text-white transition hover:bg-pine-700 disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-pine px-7 py-3.5 text-sm font-bold text-white transition hover:bg-cta disabled:opacity-60"
         >
           {pending ? "Enviando…" : "Quiero que me contacten"}
           {!pending && <StoreIcon name="arrow" className="w-4 h-4" />}

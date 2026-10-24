@@ -5,7 +5,7 @@ export function Mark({
   className,
   ring = "#b3a26a",
   leaf,
-  ink = "#0a2a2a",
+  ink = "var(--ink)",
   technical = false,
 }: {
   className?: string;
@@ -15,7 +15,8 @@ export function Mark({
   technical?: boolean;
 }) {
   // Sobre fondo oscuro (T blanca) la hoja usa el verde claro de la marca.
-  leaf ??= ink === "#ffffff" ? "#3db585" : "#288868";
+  // Por defecto la T sigue el color del texto, así también se ve en modo oscuro.
+  leaf ??= ink === "#ffffff" ? "#3db585" : ink === "#0a2a2a" ? "#288868" : "var(--pine-700)";
   return (
     <svg viewBox="-4 5 108 108" className={className} aria-hidden>
       <path
@@ -31,14 +32,14 @@ export function Mark({
         fontFamily="var(--font-montserrat), Montserrat, sans-serif"
         fontWeight={technical ? 700 : 600}
         fontSize={technical ? 70 : 66}
-        fill={ink}
+        style={{ fill: ink }}
       >
         T
       </text>
       <path
         d="M0 0 Q-10 -10 -24 -7 Q-13 6 0 0 Z"
         transform={technical ? "translate(27,52) scale(1.25)" : "translate(25,52)"}
-        fill={leaf}
+        style={{ fill: leaf }}
       />
     </svg>
   );

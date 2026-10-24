@@ -11,7 +11,7 @@ export type ShippingChoice =
   | { price: number; payload: { shipping: { communeId: number; courier: string } } }
   | { price: number; payload: { shippingZone: ShippingZone } };
 
-const field = "mt-1 w-full border border-black/20 rounded px-3 py-2 bg-white";
+const field = "mt-1 w-full border border-line/20 rounded px-3 py-2 bg-surface";
 
 function daysLabel(days: number | null) {
   if (!days) return null;
@@ -169,7 +169,7 @@ export function ShippingPicker({
             options.map((o, i) => (
               <label
                 key={o.courier}
-                className="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 px-3 py-2.5 text-sm has-[:checked]:border-pine-700 has-[:checked]:bg-mint-50"
+                className="flex cursor-pointer items-center gap-3 rounded-xl border border-line/10 px-3 py-2.5 text-sm has-[:checked]:border-pine-700 has-[:checked]:bg-mint-50"
               >
                 <input
                   type="radio"

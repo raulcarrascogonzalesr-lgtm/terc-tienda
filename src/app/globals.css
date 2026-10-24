@@ -1,28 +1,72 @@
 @import "tailwindcss";
 
+/* Paleta oficial de TERC (identidad V1): verde profundo, dorado y verde hoja.
+   El dorado nunca va como texto sobre blanco (contraste 2.4:1): solo en fondos oscuros o como detalle.
+   Los colores que cambian con el modo oscuro son variables: el modo claro está en :root y el oscuro
+   en [data-theme="dark"] (lo activa el botón de sol/luna del encabezado, ver ThemeToggle.tsx).
+   El panel /admin no usa el modo oscuro. */
 :root {
   --background: #f7f7f5;
   --foreground: #0a2a2a;
   --brand: #288868;
+  --page: #e8f2ec; /* fondo de la tienda: verde muy suave, no blanco */
+  --surface: #ffffff; /* tarjetas y cajas */
+  --ink: #0a2a2a;
+  --muted: #56625f;
+  --pine: #0a2a2a; /* franjas verdes oscuras y botones */
+  --pine-700: #288868;
+  --cta: #24805f; /* botón principal (Agregar): verde hoja, con texto blanco legible */
+  --cta-hover: #1b6a4e;
+  --mint-50: #dcefe4;
+  --sale: #c8442a;
+  --sale-50: #fcebe6;
+  --line: #0a2a2a; /* bordes finos (se usan con transparencia) */
+  /* Escenario detrás de las fotos de los equipos. */
+  --stage-1: #f4faf6;
+  --stage-2: #cfe6d9;
+  --stage-leaf: rgba(40, 136, 104, 0.11);
 }
 
-/* Paleta oficial de TERC (identidad V1): verde profundo, dorado y verde hoja, sobre un fondo cálido.
-   El dorado nunca va como texto sobre blanco (contraste 2.4:1): solo en fondos oscuros o como detalle. */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #071817;
+  --surface: #0e2423;
+  --ink: #e4eeea;
+  --muted: #93a8a2;
+  --pine: #12493f;
+  --pine-700: #3cae82;
+  --cta: #23855f;
+  --cta-hover: #2a9a6f;
+  --mint-50: #133a31;
+  --sale: #e5603f;
+  --sale-50: #2c1915;
+  --line: #ffffff;
+  /* Las fotos vienen sobre blanco y se funden con el escenario (multiply): por eso el escenario sigue
+     siendo claro, pero más apagado, como un foco de luz verde sobre la página oscura. */
+  --stage-1: #dcebe2;
+  --stage-2: #9fc7b2;
+  --stage-leaf: rgba(10, 42, 42, 0.12);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-brand: var(--brand);
-  --color-pine: #0a2a2a; /* verde profundo */
-  --color-pine-700: #288868; /* verde hoja: botones y enlaces */
+  --color-pine: var(--pine); /* verde profundo */
+  --color-pine-700: var(--pine-700); /* verde hoja: botones y enlaces */
   --color-gold: #b3a26a; /* dorado */
   --color-gold-700: #9a8650;
   --color-mint: #3db585; /* verde hoja sobre fondo oscuro */
-  --color-mint-50: #eaf5f0;
-  --color-paper: #f6f4ef;
-  --color-ink: #0a2a2a;
-  --color-sale: #c8442a;
-  --color-sale-50: #fcebe6;
-  --color-muted: #5f6866;
+  --color-mint-50: var(--mint-50);
+  --color-cta: var(--cta);
+  --color-cta-hover: var(--cta-hover);
+  --color-paper: var(--page);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-sale: var(--sale);
+  --color-sale-50: var(--sale-50);
+  --color-muted: var(--muted);
   --font-display: var(--font-montserrat), var(--font-inter), system-ui, sans-serif;
   --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
@@ -73,6 +117,37 @@ body {
   .data-table tbody tr:last-child td {
     @apply border-0;
   }
+}
+
+@layer components {
+  /* Escenario de las fotos (tarjetas, ficha y categorías): degradado verde con hojas de TERC.
+     Las fotos van encima con mix-blend-multiply, así su fondo blanco toma este color. */
+  .photo-stage {
+    background-color: var(--stage-1);
+    background-image: radial-gradient(
+      ellipse 75% 65% at 50% 45%,
+      var(--stage-1) 0%,
+      var(--stage-1) 35%,
+      var(--stage-2) 100%
+    );
+    isolation: isolate;
+  }
+  .photo-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--stage-leaf);
+    -webkit-mask: url("/patron-terc.svg") center / 120px 120px;
+    mask: url("/patron-terc.svg") center / 120px 120px;
+    pointer-events: none;
+  }
+}
+
+/* Fondo de la tienda con una franja verde que baja desde arriba. */
+.page-glow {
+  background-image: radial-gradient(ellipse 90% 520px at 50% 0, var(--mint-50), transparent 100%);
+  background-repeat: no-repeat;
 }
 
 /* Botón de WhatsApp: entra suave al cargar y el ícono late un par de veces para llamar la atención. */

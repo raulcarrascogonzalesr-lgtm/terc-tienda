@@ -70,7 +70,7 @@ export default async function BusinessPage({ searchParams }: Props) {
             data-reveal
             style={{ "--d": `${i * 80}ms` } as React.CSSProperties}
             href={`?tipo=${s.kind}#cotizar`}
-            className="group rounded-2xl bg-white p-5 ring-1 ring-black/[0.06] transition hover:ring-pine-700/30"
+            className="group rounded-2xl bg-surface p-5 ring-1 ring-line/[0.06] transition hover:ring-pine-700/30"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-mint-50 text-pine-700">
               <StoreIcon name={s.icon} className="w-5 h-5" />

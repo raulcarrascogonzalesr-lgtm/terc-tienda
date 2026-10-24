@@ -13,7 +13,7 @@ export function PriceTag({
   beforeLabel?: string;
 }) {
   return (
-    <div className="inline-flex items-stretch overflow-hidden rounded-2xl bg-white shadow-lg shadow-black/20">
+    <div className="inline-flex items-stretch overflow-hidden rounded-2xl bg-surface shadow-lg shadow-black/20">
       <div className="px-5 py-3">
         <p className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">{formatCLP(price)}</p>
         {before && (

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SITE, whatsappLink } from "@/lib/site";
 import { StoreIcon, WhatsAppIcon } from "./icons";
 import { Logo } from "./Logo";
+import { ThemeSwitch } from "./ThemeToggle";
 import { TrustStrip } from "./TrustBadges";
 
 export function Footer({ categories }: { categories: string[] }) {
@@ -64,7 +65,8 @@ export function Footer({ categories }: { categories: string[] }) {
         </div>
       </div>
       <div className="border-t border-white/10">
-        <div className="shell py-5 text-xs text-white/55 flex flex-col sm:flex-row gap-2 sm:justify-between">
+        <div className="shell py-5 text-xs text-white/55 flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
+          <ThemeSwitch />
           <p>
             TERC es una marca de {SITE.company}. Tus boletas y facturas salen a nombre de Wiremax.
           </p>

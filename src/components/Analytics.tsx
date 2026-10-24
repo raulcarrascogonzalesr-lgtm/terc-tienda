@@ -59,7 +59,7 @@ export function Analytics() {
         </>
       )}
       {consent === null && (
-        <div className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-xl rounded-2xl border border-black/10 bg-white p-4 text-sm text-ink shadow-xl sm:inset-x-auto sm:left-5">
+        <div className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-xl rounded-2xl border border-line/10 bg-surface p-4 text-sm text-ink shadow-xl sm:inset-x-auto sm:left-5">
           <p>
             Usamos cookies para medir las visitas y mejorar nuestros anuncios.{" "}
             <Link href="/privacidad" className="underline">
@@ -67,10 +67,10 @@ export function Analytics() {
             </Link>
           </p>
           <div className="mt-3 flex gap-2">
-            <button type="button" onClick={() => choose("si")} className="rounded-full bg-pine px-4 py-2 font-semibold text-white hover:bg-pine-700">
+            <button type="button" onClick={() => choose("si")} className="rounded-full bg-pine px-4 py-2 font-semibold text-white hover:bg-cta">
               Aceptar
             </button>
-            <button type="button" onClick={() => choose("no")} className="rounded-full border border-black/15 px-4 py-2 font-semibold hover:bg-black/[0.04]">
+            <button type="button" onClick={() => choose("no")} className="rounded-full border border-line/15 px-4 py-2 font-semibold hover:bg-line/[0.04]">
               Solo las necesarias
             </button>
           </div>

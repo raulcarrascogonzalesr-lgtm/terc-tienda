@@ -32,7 +32,7 @@ export function HoverPhotos({ product }: { product: Product }) {
 
   return (
     <div
-      className={`relative aspect-square w-full ${PHOTO_BACKDROP}`}
+      className={`aspect-square w-full ${PHOTO_BACKDROP}`}
       onMouseEnter={() => {
         setLoaded(true);
         setHovering(true);

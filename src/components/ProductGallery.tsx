@@ -57,7 +57,7 @@ export function ProductGallery({ product, badges }: { product: Product; badges?:
 
   return (
     <div className="space-y-3">
-      <div className="relative overflow-hidden rounded-3xl border border-black/[0.06] bg-white">
+      <div className="relative overflow-hidden rounded-3xl border border-line/[0.06] bg-surface">
         {current === "terc" ? (
           <TrustSlide product={product} />
         ) : current ? (
@@ -70,7 +70,7 @@ export function ProductGallery({ product, badges }: { product: Product; badges?:
         )}
         {current !== "terc" && badges}
         {product.on_demand && current && current !== "terc" && (
-          <span className="absolute bottom-3 right-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] text-muted">
+          <span className="absolute bottom-3 right-3 rounded-full bg-surface/90 px-2.5 py-1 text-[11px] text-muted">
             Imagen referencial
           </span>
         )}
@@ -78,7 +78,7 @@ export function ProductGallery({ product, badges }: { product: Product; badges?:
           type="button"
           onClick={() => go(index - 1)}
           aria-label="Foto anterior"
-          className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-lg text-pine shadow-sm transition hover:bg-white"
+          className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-surface/85 text-lg text-ink shadow-sm transition hover:bg-surface"
         >
           ‹
         </button>
@@ -86,7 +86,7 @@ export function ProductGallery({ product, badges }: { product: Product; badges?:
           type="button"
           onClick={() => go(index + 1)}
           aria-label="Foto siguiente"
-          className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-lg text-pine shadow-sm transition hover:bg-white"
+          className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-surface/85 text-lg text-ink shadow-sm transition hover:bg-surface"
         >
           ›
         </button>
@@ -111,7 +111,7 @@ export function ProductGallery({ product, badges }: { product: Product; badges?:
                 <img src={view} alt="" className="h-full w-full object-contain p-1 mix-blend-multiply" />
               </span>
             ) : (
-              <span className="flex h-full w-full items-center justify-center bg-[#eeece6]">
+              <span className="relative flex h-full w-full items-center justify-center photo-stage">
                 <Mark className="w-8 opacity-60" ink="#0a2a2a" technical />
               </span>
             )}
