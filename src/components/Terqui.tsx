@@ -151,8 +151,7 @@ function Leg({ side, className }: { side: "l" | "r"; className?: string }) {
 }
 
 function Face({ pose, look }: { pose: TerquiPose; look: number }) {
-  const happy = pose === "listo" || pose === "colgando" || pose === "caja";
-  const joyful = pose === "celebra" || pose === "corazon"; // ojos cerrados de felicidad
+  const happy = pose === "listo" || pose === "colgando" || pose === "caja" || pose === "celebra" || pose === "corazon";
   const eyeY = happy ? 102 : 103;
   const brows =
     {
@@ -167,17 +166,9 @@ function Face({ pose, look }: { pose: TerquiPose; look: number }) {
       guino: "M81 93 L93 92 M107 96 L119 96",
       caja: "M81 94 L93 91 M107 91 L119 94",
     }[pose as string] ?? "M81 95 L94 94 M106 94 L119 95";
-  const arc = (x: number) => (
-    <path d={`M${x - 5} 110 Q${x} 102 ${x + 5} 110`} stroke={INK} strokeWidth={3.2} strokeLinecap="round" fill="none" />
-  );
   return (
     <>
-      {joyful ? (
-        <>
-          {arc(87.5 + look)}
-          {arc(111.5 + look)}
-        </>
-      ) : pose === "guino" ? (
+      {pose === "guino" ? (
         <>
           <g className="terqui-blink">
             <rect x={84 + look} y={eyeY} width="7" height="13" rx="3.5" fill={INK} />
@@ -191,15 +182,9 @@ function Face({ pose, look }: { pose: TerquiPose; look: number }) {
         </g>
       )}
       <path d={brows} stroke={INK} strokeWidth={3} strokeLinecap="round" fill="none" />
-      {(joyful || pose === "guino") && (
-        <>
-          <ellipse cx="81" cy="119" rx="5" ry="3" fill={CORAL} opacity=".35" />
-          <ellipse cx="119" cy="119" rx="5" ry="3" fill={CORAL} opacity=".35" />
-        </>
-      )}
       {pose === "celebra" ? (
         <path d="M88 120 Q100 140 112 120 Z" fill={INK} />
-      ) : happy || pose === "corazon" || pose === "guino" ? (
+      ) : happy || pose === "guino" ? (
         <path d="M90 122 Q100 134 111 121 Z" fill={INK} />
       ) : pose === "carrito" ? (
         <ellipse cx="101" cy="126" rx="4" ry="5" fill={INK} />
