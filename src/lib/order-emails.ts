@@ -84,7 +84,13 @@ function itemsCard(order: Order, info: Map<string, ItemInfo>): string {
     })
     .join("");
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.paper};border-radius:14px;padding:6px 14px;margin:0 0 18px">
-    ${rows}
+    ${rows}${
+      order.discount
+        ? `
+    <tr><td colspan="2" style="padding:10px 0 0;border-top:1px solid ${C.line};font-size:14px;color:${C.muted}">Cupón ${escapeHtml(order.coupon_code ?? "")}</td>
+      <td align="right" style="padding:10px 0 0;border-top:1px solid ${C.line};font-size:14px;color:${C.muted}">−${formatCLP(order.discount)}</td></tr>`
+        : ""
+    }
     <tr><td colspan="2" style="padding:10px 0 4px;border-top:1px solid ${C.line};font-size:14px;color:${C.muted}">Envío</td>
       <td align="right" style="padding:10px 0 4px;border-top:1px solid ${C.line};font-size:14px;color:${C.muted}">${formatCLP(order.shipping_cost)}</td></tr>
     <tr><td colspan="2" style="padding:4px 0 10px;font-size:16px;font-weight:bold">Total pagado</td>
@@ -95,6 +101,7 @@ function itemsCard(order: Order, info: Map<string, ItemInfo>): string {
 function itemsText(order: Order): string {
   return [
     ...order.items.map((i) => `${i.quantity} x ${i.name}: ${formatCLP(i.unit_price * i.quantity)}`),
+    ...(order.discount ? [`Cupón ${order.coupon_code ?? ""}: −${formatCLP(order.discount)}`] : []),
     `Envío: ${formatCLP(order.shipping_cost)}`,
     `Total pagado: ${formatCLP(order.total)}`,
   ].join("\n");

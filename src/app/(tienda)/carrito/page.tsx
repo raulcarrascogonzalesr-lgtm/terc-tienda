@@ -26,6 +26,8 @@ const METHOD_HELP: Record<PaymentMethod, string> = {
   mercadopago: "Tarjeta, cuotas o saldo en Mercado Pago.",
 };
 
+type AppliedCoupon = { code: string; productId: string; productName: string; discount: number };
+
 export default function CartPage() {
   const { items, total, setQuantity, remove, canBuy } = useCart();
   const [shippingChoice, setShippingChoice] = useState<ShippingChoice | null>(null);
@@ -33,6 +35,7 @@ export default function CartPage() {
   const [sending, setSending] = useState(false);
   const [methods, setMethods] = useState<PaymentMethod[]>(["mercadopago"]);
   const [method, setMethod] = useState<PaymentMethod>("mercadopago");
+  const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
 
   // Medios de pago activos (Webpay aparece cuando está configurado).
   useEffect(() => {
@@ -70,6 +73,9 @@ export default function CartPage() {
   }
 
   const shipping = shippingChoice?.price ?? null;
+  // Si el cliente saca del carrito el equipo del cupón, el descuento deja de aplicar.
+  const activeCoupon = coupon && items.some((i) => i.productId === coupon.productId) ? coupon : null;
+  const discount = activeCoupon?.discount ?? 0;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -88,6 +94,7 @@ export default function CartPage() {
           customer: Object.fromEntries(form.entries()),
           utm: readUtm(),
           method,
+          coupon: activeCoupon?.code,
         }),
       });
       const data = await res.json();
@@ -163,9 +170,16 @@ export default function CartPage() {
 
         <dl className="text-sm space-y-1 border-t border-line/10 pt-4">
           <Row label="Productos" value={formatCLP(total)} />
+          {activeCoupon && <Row label={`Cupón ${activeCoupon.code}`} value={`−${formatCLP(discount)}`} />}
           <Row label="Envío" value={shipping === null ? "Elige tu comuna" : formatCLP(shipping)} />
-          <Row label="Total" value={formatCLP(total + (shipping ?? 0))} bold />
+          <Row label="Total" value={formatCLP(total - discount + (shipping ?? 0))} bold />
         </dl>
+
+        <CouponBox
+          applied={activeCoupon}
+          productIds={items.map((i) => i.productId)}
+          onApply={setCoupon}
+        />
 
         {methods.length > 1 && (
           <fieldset className="text-sm space-y-2 border-t border-line/10 pt-4">
@@ -203,6 +217,95 @@ export default function CartPage() {
           {sending ? "Redirigiendo..." : `Pagar con ${METHOD_LABELS[method]}`}
         </button>
       </form>
+    </div>
+  );
+}
+
+function CouponBox({
+  applied,
+  productIds,
+  onApply,
+}: {
+  applied: AppliedCoupon | null;
+  productIds: string[];
+  onApply: (coupon: AppliedCoupon | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [code, setCode] = useState("");
+  const [checking, setChecking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (applied) {
+    return (
+      <p className="text-sm text-pine">
+        Cupón <strong>{applied.code}</strong> aplicado a {applied.productName}.{" "}
+        <button type="button" onClick={() => onApply(null)} className="text-muted underline">
+          Quitar
+        </button>
+      </p>
+    );
+  }
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="text-sm text-muted underline">
+        ¿Tienes un cupón de descuento?
+      </button>
+    );
+  }
+
+  async function apply() {
+    if (!code.trim()) return;
+    setChecking(true);
+    setError(null);
+    try {
+      const email = (document.querySelector('input[name="email"]') as HTMLInputElement | null)?.value;
+      const res = await fetch("/api/cupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, productIds, email }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "No se pudo revisar el cupón");
+      onApply(data as AppliedCoupon);
+      setCode("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo revisar el cupón");
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  return (
+    <div className="text-sm space-y-1">
+      <label htmlFor="cupon" className="block">
+        Cupón de descuento
+      </label>
+      <div className="flex gap-2">
+        {/* Sin "name": el cupón no viaja con los datos de envío, va aparte. */}
+        <input
+          id="cupon"
+          value={code}
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              apply();
+            }
+          }}
+          autoComplete="off"
+          placeholder="Escribe tu código"
+          className="flex-1 min-w-0 border border-line/20 rounded px-3 py-2 uppercase"
+        />
+        <button
+          type="button"
+          onClick={apply}
+          disabled={checking || !code.trim()}
+          className="rounded border border-line/20 px-4 py-2 font-medium disabled:opacity-50"
+        >
+          {checking ? "Revisando…" : "Aplicar"}
+        </button>
+      </div>
+      {error && <p className="text-red-700">{error}</p>}
     </div>
   );
 }

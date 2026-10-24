@@ -114,6 +114,12 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <span>{formatCLP(item.unit_price * item.quantity)}</span>
           </div>
         ))}
+        {order.discount ? (
+          <div className="flex justify-between gap-4 text-[#6b716f]">
+            <span>Cupón {order.coupon_code}</span>
+            <span>−{formatCLP(order.discount)}</span>
+          </div>
+        ) : null}
         <div className="flex justify-between gap-4 text-[#6b716f]">
           <span>Envío {zone}</span>
           <span>{formatCLP(order.shipping_cost)}</span>

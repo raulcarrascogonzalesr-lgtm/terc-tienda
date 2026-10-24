@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { Preference } from "mercadopago";
 import { getAdminUser } from "@/lib/admin";
+import { checkCoupon, countCouponUses } from "@/lib/coupons";
 import { getMercadoPagoClient } from "@/lib/mercadopago";
 import { createWebpayTransaction, getWebpayConfig } from "@/lib/webpay";
 import { getProductsByIds } from "@/lib/products";
@@ -18,6 +19,7 @@ type CheckoutBody = {
   customer?: Record<string, unknown>;
   utm?: unknown;
   method?: unknown; // "webpay" o "mercadopago" (por defecto)
+  coupon?: unknown; // código de cupón de descuento, si el cliente escribió uno
 };
 
 type PaymentMethod = "mercadopago" | "webpay";
@@ -120,6 +122,18 @@ export async function POST(request: Request) {
   const orderId = randomUUID();
 
   const supabase = getAdminClient();
+
+  // Cupón: descuenta en una sola unidad del equipo para el que se creó.
+  let coupon: { code: string; productId: string; unitPrice: number; discount: number } | null = null;
+  if (typeof body.coupon === "string" && body.coupon.trim()) {
+    if (!supabase) return NextResponse.json({ error: "Los cupones no están disponibles" }, { status: 503 });
+    const check = await checkCoupon(supabase, body.coupon, lines.map((l) => l.product), undefined, customer.email);
+    if (!check.ok) return NextResponse.json({ error: check.error }, { status: 409 });
+    coupon = { code: check.coupon.code, productId: check.product.id, unitPrice: check.unitPrice, discount: check.discount };
+  }
+  const discount = coupon?.discount ?? 0;
+  const total = subtotal - discount + shipping.price;
+
   if (supabase) {
     // Costo de cada equipo al momento de la venta, para calcular la ganancia real.
     const { data: costs } = await supabase
@@ -135,7 +149,9 @@ export async function POST(request: Request) {
       shipping_zone: shipping.zone,
       shipping_cost: shipping.price,
       subtotal,
-      total: subtotal + shipping.price,
+      discount,
+      coupon_code: coupon?.code ?? null,
+      total,
       items: lines.map((l) => ({
         product_id: l.product.id,
         name: l.product.name,
@@ -149,6 +165,16 @@ export async function POST(request: Request) {
       console.error("No se pudo guardar el pedido", error);
       return NextResponse.json({ error: "No se pudo crear el pedido" }, { status: 500 });
     }
+    // Segunda revisión ya con el pedido guardado: si otra persona usó el mismo cupón al mismo
+    // tiempo, ninguna de las dos compras pasa con él (nunca se usa más veces de lo permitido).
+    if (coupon) {
+      const { data: limit } = await supabase.from("coupons").select("max_uses").eq("code", coupon.code).maybeSingle();
+      const others = await countCouponUses(supabase, coupon.code, orderId, customer.email).catch(() => Infinity);
+      if (!limit || others >= limit.max_uses) {
+        await supabase.from("orders").update({ status: "failed" }).eq("id", orderId);
+        return NextResponse.json({ error: "Ese cupón ya fue usado o hay otra compra en curso con él" }, { status: 409 });
+      }
+    }
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
@@ -158,7 +184,7 @@ export async function POST(request: Request) {
     try {
       const tx = await createWebpayTransaction(webpay, {
         orderId,
-        amount: subtotal + shipping.price,
+        amount: total,
         returnUrl: `${siteUrl}/api/webpay/retorno`,
       });
       // Webpay pide enviar al cliente con un formulario (POST) que lleva el token.
@@ -181,13 +207,17 @@ export async function POST(request: Request) {
     body: {
       external_reference: orderId,
       items: [
-        ...lines.map((l) => ({
-          id: l.product.id,
-          title: l.product.name,
-          quantity: l.quantity,
-          unit_price: l.product.price,
-          currency_id: "CLP",
-        })),
+        // Con cupón, la unidad con descuento va en su propia línea, para que la suma sea el total.
+        ...lines.flatMap((l) => {
+          const discounted = coupon?.productId === l.product.id;
+          const full = { id: l.product.id, title: l.product.name, unit_price: l.product.price, currency_id: "CLP" };
+          return [
+            ...(discounted
+              ? [{ ...full, title: `${l.product.name} (cupón ${coupon!.code})`, quantity: 1, unit_price: coupon!.unitPrice }]
+              : []),
+            ...(l.quantity - (discounted ? 1 : 0) > 0 ? [{ ...full, quantity: l.quantity - (discounted ? 1 : 0) }] : []),
+          ];
+        }),
         {
           id: `envio-${shipping.zone}`,
           title: `Envío ${shipping.label}`,
