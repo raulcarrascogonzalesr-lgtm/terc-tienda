@@ -3,8 +3,11 @@
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { ORDER_STATUS_LABELS, QUOTE_STATUS_LABELS } from "@/lib/format";
+import { emailEnabled } from "@/lib/email";
+import { resendOrderEmail, sendOrderEmailOnce } from "@/lib/order-emails";
 import { getAdminClient } from "@/lib/supabase";
 import type { OrderStatus, QuoteStatus } from "@/lib/types";
 import { CHANNEL_LABELS, EXPENSE_CATEGORIES, INCOME_CATEGORIES, OTHER_OUTFLOWS } from "./finance";
@@ -44,10 +47,25 @@ export async function updateOrder(id: string, form: FormData) {
     .eq("id", id);
   if (error) throw error;
 
+  // Correos al cliente: cada uno sale una sola vez por pedido.
+  if (status === "paid") after(() => sendOrderEmailOnce(id, "paid"));
+  if (status === "shipped" && tracking) after(() => sendOrderEmailOnce(id, "shipped"));
+
   revalidatePath("/admin");
   revalidatePath("/admin/pedidos");
   revalidatePath(`/admin/pedidos/${id}`);
   revalidatePath("/", "layout");
+}
+
+export type ResendResult = { ok?: boolean; error?: string } | null;
+
+// Vuelve a enviar al cliente el correo de pago o de envío (por ejemplo, si no le llegó).
+export async function resendEmail(id: string, kind: "paid" | "shipped"): Promise<ResendResult> {
+  await requireAdmin();
+  if (!emailEnabled()) return { error: "Falta configurar SMTP_PASSWORD en cPanel" };
+  if (!(await resendOrderEmail(id, kind))) return { error: "No se pudo enviar. Revisa el correo del cliente y el código de seguimiento." };
+  revalidatePath(`/admin/pedidos/${id}`);
+  return { ok: true };
 }
 
 function slugify(text: string): string {

@@ -3,7 +3,7 @@
 # Configurar una vez en GitHub > Settings > Secrets and variables > Actions:
 #   Secrets:   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD
 #   Variables: NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
-# Las claves secretas del servidor (SUPABASE_SERVICE_ROLE_KEY, MERCADOPAGO_ACCESS_TOKEN)
+# Las claves secretas del servidor (SUPABASE_SERVICE_ROLE_KEY, MERCADOPAGO_ACCESS_TOKEN, SMTP_PASSWORD)
 # se cargan directamente en cPanel, en la app Node.js, no aquí.
 
 name: Publicar en el hosting

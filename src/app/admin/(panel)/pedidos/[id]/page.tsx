@@ -5,6 +5,7 @@ import { shippingLabel } from "@/lib/shipping";
 import { updateOrder } from "../../actions";
 import { getOrder } from "../../data";
 import { PageHeader } from "../../ui";
+import { ResendEmail } from "./ResendEmail";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,8 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   if (!order) notFound();
 
   const zone = shippingLabel(order.shipping_zone);
+  const paid = ["paid", "shipped", "delivered"].includes(order.status);
+  const sentAt = (value?: string | null) => (value ? `enviado el ${formatDateTime(value)}` : null);
 
   return (
     <section className="space-y-6">
@@ -69,6 +72,28 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             Guardar
           </button>
         </form>
+      </div>
+
+      <div className="bg-white rounded-xl border border-[#e4e2dc] p-4 text-sm space-y-2">
+        <h2 className="font-semibold">Correos al cliente</h2>
+        <p className="text-[#6b716f]">
+          Salen solos: el de pago al confirmarse el pago, y el de envío al guardar el pedido como
+          &quot;Enviado&quot; con su código de seguimiento.
+        </p>
+        <ResendEmail
+          orderId={order.id}
+          kind="paid"
+          label="Pago recibido"
+          sentAt={sentAt(order.paid_email_at)}
+          disabled={!paid}
+        />
+        <ResendEmail
+          orderId={order.id}
+          kind="shipped"
+          label="Pedido en camino"
+          sentAt={sentAt(order.shipped_email_at)}
+          disabled={!order.tracking_code}
+        />
       </div>
 
       <div className="bg-white rounded-xl border border-[#e4e2dc] p-4 text-sm space-y-2">
