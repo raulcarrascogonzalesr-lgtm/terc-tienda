@@ -20,6 +20,7 @@ type CheckoutBody = {
   utm?: unknown;
   method?: unknown; // "webpay" o "mercadopago" (por defecto)
   coupon?: unknown; // código de cupón de descuento, si el cliente escribió uno
+  acceptPolicy?: unknown; // casilla "acepto la política de garantía y devoluciones"
 };
 
 type PaymentMethod = "mercadopago" | "webpay";
@@ -50,6 +51,12 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as CheckoutBody | null;
   if (!body || !Array.isArray(body.items) || body.items.length === 0) {
     return NextResponse.json({ error: "El carrito está vacío" }, { status: 400 });
+  }
+  if (body.acceptPolicy !== true) {
+    return NextResponse.json(
+      { error: "Debes aceptar la política de garantía y devoluciones para comprar" },
+      { status: 400 },
+    );
   }
   const method: PaymentMethod = body.method === "webpay" ? "webpay" : "mercadopago";
   if (!(await availableMethods()).includes(method)) {

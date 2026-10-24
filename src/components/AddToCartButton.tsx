@@ -42,6 +42,7 @@ export function AddToCartButton({ product, compact = false }: { product: Product
           name: product.name,
           price: product.price,
           maxQuantity: max,
+          cosmetic: product.grade !== "A",
         });
         setAdded(true);
         trackAddToCart({ id: product.id, name: product.name, price: product.price, quantity: 1, category: product.category });

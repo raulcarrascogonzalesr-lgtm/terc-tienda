@@ -112,6 +112,8 @@ function warrantyMonths(order: Order, info: Map<string, ItemInfo>): number | nul
   return months.length ? Math.min(...months) : null;
 }
 
+const POLICY_URL = "https://terc.cl/garantia-y-devoluciones";
+
 function warrantyCard(months: number | null): string {
   if (!months) return "";
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;border:2px dashed ${C.gold};border-radius:14px">
@@ -119,6 +121,7 @@ function warrantyCard(months: number | null): string {
       <div style="font-size:12px;letter-spacing:1px;color:${C.gold};font-weight:bold">TU GARANTÍA TERC</div>
       <div style="font-size:20px;font-weight:bold;margin:2px 0">${months} ${months === 1 ? "mes" : "meses"}</div>
       Guarda este correo: es el respaldo de tu compra si alguna vez necesitas usar la garantía.
+      <a href="${POLICY_URL}" style="color:${C.pine}">Así funciona la garantía</a>.
     </td></tr>
   </table>`;
 }
@@ -166,7 +169,7 @@ export function paidEmail(order: Order, info: Map<string, ItemInfo>) {
     `Recibimos tu pago y ya estamos preparando tu pedido ${number}.`,
     "",
     itemsText(order),
-    months ? `Garantía TERC: ${months} meses. Guarda este correo como respaldo.` : "",
+    months ? `Garantía TERC: ${months} meses. Guarda este correo como respaldo. Cómo funciona: ${POLICY_URL}` : "",
     "",
     `Lo enviamos a: ${addressOf(order)}`,
     "Cuando salga, te mandamos otro correo con el código de seguimiento.",

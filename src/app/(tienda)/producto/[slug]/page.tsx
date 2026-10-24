@@ -152,6 +152,14 @@ export default async function ProductPage({ params }: Props) {
               </li>
             ))}
           </ul>
+          <p className="-mt-3 text-xs leading-relaxed text-muted">
+            Equipo reacondicionado, revisado y 100% operativo.
+            {product.grade !== "A" && " Tiene detalles estéticos leves, que no afectan su funcionamiento."} No
+            aceptamos devoluciones por arrepentimiento.{" "}
+            <Link href="/garantia-y-devoluciones" className="underline">
+              Ver garantía y devoluciones
+            </Link>
+          </p>
 
           <dl className="divide-y divide-line/[0.06] rounded-2xl bg-surface border border-line/[0.06] text-sm">
             <div className="grid grid-cols-[140px_1fr] gap-3 px-5 py-3">
@@ -174,7 +182,12 @@ export default async function ProductPage({ params }: Props) {
             )}
             <div className="grid grid-cols-[140px_1fr] gap-3 px-5 py-3">
               <dt className="text-muted">Garantía</dt>
-              <dd className="text-ink">{product.warranty_months} meses</dd>
+              <dd className="text-ink">
+                {product.warranty_months} meses
+                <Link href="/garantia-y-devoluciones" className="block text-xs text-muted underline mt-0.5">
+                  Cómo funciona la garantía y las devoluciones
+                </Link>
+              </dd>
             </div>
             <div className="grid grid-cols-[140px_1fr] gap-3 px-5 py-3">
               <dt className="text-muted">Paquete de envío</dt>

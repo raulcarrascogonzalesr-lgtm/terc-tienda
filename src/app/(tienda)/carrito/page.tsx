@@ -76,6 +76,8 @@ export default function CartPage() {
   // Si el cliente saca del carrito el equipo del cupón, el descuento deja de aplicar.
   const activeCoupon = coupon && items.some((i) => i.productId === coupon.productId) ? coupon : null;
   const discount = activeCoupon?.discount ?? 0;
+  // Solo se nombran los detalles estéticos si el cliente lleva un equipo que los tiene.
+  const cosmeticItems = items.filter((i) => i.cosmetic).map((i) => i.name);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -95,6 +97,7 @@ export default function CartPage() {
           utm: readUtm(),
           method,
           coupon: activeCoupon?.code,
+          acceptPolicy: true, // el formulario no se envía sin marcar la casilla
         }),
       });
       const data = await res.json();
@@ -202,6 +205,25 @@ export default function CartPage() {
             ))}
           </fieldset>
         )}
+
+        <label className="flex items-start gap-2 text-sm border-t border-line/10 pt-4">
+          {/* Sin "name": no viaja con los datos de envío. */}
+          <input type="checkbox" required className="mt-1" />
+          <span>
+            He leído y acepto la{" "}
+            <Link href="/garantia-y-devoluciones" target="_blank" className="underline">
+              política de garantía y devoluciones
+            </Link>
+            .
+            {cosmeticItems.length > 0 && (
+              <>
+                {" "}Entiendo que {cosmeticItems.length === 1 ? "el equipo" : "los equipos"}{" "}
+                <strong>{cosmeticItems.join(", ")}</strong> {cosmeticItems.length === 1 ? "tiene" : "tienen"}{" "}
+                detalles estéticos leves, como se indica en su ficha.
+              </>
+            )}
+          </span>
+        </label>
 
         {error && <p className="text-sm text-red-700">{error}</p>}
         {!canBuy && (
