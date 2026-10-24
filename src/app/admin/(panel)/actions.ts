@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { requireAdmin } from "@/lib/admin";
+import { normalizeCode } from "@/lib/coupons";
 import { ORDER_STATUS_LABELS, QUOTE_STATUS_LABELS } from "@/lib/format";
 import { emailEnabled } from "@/lib/email";
 import { resendOrderEmail, sendOrderEmailOnce, type EmailKind } from "@/lib/order-emails";
@@ -541,4 +542,61 @@ export async function deleteExtraCost(id: string) {
   const { error } = await db().from("extra_costs").delete().eq("id", id);
   if (error) throw error;
   revalidatePath("/admin", "layout");
+}
+
+// Código al azar fácil de dictar (sin 0/O ni 1/I), para que nadie lo adivine.
+function randomCouponCode(): string {
+  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  return `TERC-${Array.from({ length: 5 }, () => letters[Math.floor(Math.random() * letters.length)]).join("")}`;
+}
+
+export async function saveCoupon(_prev: SaveResult, form: FormData): Promise<SaveResult> {
+  await requireAdmin();
+  const supabase = db();
+  const code = normalizeCode(form.get("code")) || randomCouponCode();
+  if (!/^[A-Z0-9-]{3,30}$/.test(code)) {
+    return { error: "El código va sin espacios ni tildes: solo letras, números y guiones (3 a 30)" };
+  }
+  const productId = String(form.get("product_id") ?? "");
+  const { data: product } = await supabase.from("products").select("price").eq("id", productId).maybeSingle();
+  if (!product) return { error: "Elige el equipo para el que es el cupón" };
+
+  const kind = form.get("kind") === "amount" ? "amount" : "percent";
+  const value = intOrNull(form.get("value"));
+  if (!value || value <= 0) return { error: "Escribe cuánto descuenta" };
+  if (kind === "percent" && value > 90) return { error: "El porcentaje va de 1 a 90" };
+  if (kind === "amount" && value >= product.price) return { error: "El descuento no puede ser mayor que el precio" };
+  const maxUses = intOrNull(form.get("max_uses")) ?? 1;
+  if (maxUses < 1) return { error: "Se tiene que poder usar al menos una vez" };
+  const expires = String(form.get("expires_on") ?? "");
+
+  const { error } = await supabase.from("coupons").insert({
+    code,
+    product_id: productId,
+    kind,
+    value,
+    max_uses: maxUses,
+    expires_on: /^\d{4}-\d{2}-\d{2}$/.test(expires) ? expires : null,
+    note: String(form.get("note") ?? "").trim().slice(0, 200),
+  });
+  if (error) {
+    if (error.code === "23505") return { error: `Ya existe un cupón ${code}. Usa otro código.` };
+    return { error: error.message };
+  }
+  revalidatePath("/admin/cupones");
+  return null;
+}
+
+export async function toggleCoupon(code: string, active: boolean) {
+  await requireAdmin();
+  const { error } = await db().from("coupons").update({ active }).eq("code", code);
+  if (error) throw error;
+  revalidatePath("/admin/cupones");
+}
+
+export async function deleteCoupon(code: string) {
+  await requireAdmin();
+  const { error } = await db().from("coupons").delete().eq("code", code);
+  if (error) throw error;
+  revalidatePath("/admin/cupones");
 }

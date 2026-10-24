@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin";
 import { getAdminClient } from "@/lib/supabase";
-import type { AdminProduct, Campaign, ExtraCost, Movement, Order, Quote } from "@/lib/types";
+import type { AdminProduct, Campaign, Coupon, ExtraCost, Movement, Order, Quote } from "@/lib/types";
 
 // Estos datos son privados: cada lectura revisa primero que entró el administrador.
 function db() {
@@ -121,4 +121,12 @@ export async function listExtraCosts(): Promise<ExtraCost[]> {
     .order("created_at", { ascending: true });
   if (error) return []; // la tabla puede no existir todavía
   return (data as ExtraCost[]).map((c) => ({ ...c, percent: Number(c.percent) }));
+}
+
+// Cupones de descuento, los más nuevos primero.
+export async function listCoupons(): Promise<Coupon[]> {
+  await requireAdmin();
+  const { data, error } = await db().from("coupons").select("*").order("created_at", { ascending: false });
+  if (error) return []; // la tabla puede no existir todavía
+  return data as Coupon[];
 }

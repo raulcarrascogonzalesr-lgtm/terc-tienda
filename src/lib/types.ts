@@ -72,6 +72,21 @@ export type Order = {
   shipped_email_at?: string | null; // cuándo se envió el correo con el código de seguimiento
   delivered_email_at?: string | null; // cuándo se envió el correo de "¿cómo te fue?"
   utm: Record<string, string> | null;
+  coupon_code?: string | null; // cupón usado en el pedido
+  discount?: number; // pesos descontados con el cupón (con IVA); total = subtotal − descuento + envío
+};
+
+// Cupón de descuento para un equipo. Solo lo ve el panel.
+export type Coupon = {
+  code: string; // en mayúsculas, por ejemplo PRIMERO7
+  product_id: string;
+  kind: "percent" | "amount"; // porcentaje del precio o monto fijo en pesos (con IVA)
+  value: number;
+  max_uses: number;
+  expires_on: string | null; // último día en que sirve (AAAA-MM-DD)
+  note: string;
+  active: boolean;
+  created_at: string;
 };
 
 export type MovementKind = "ingreso" | "egreso";
