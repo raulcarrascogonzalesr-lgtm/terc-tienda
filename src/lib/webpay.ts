@@ -42,11 +42,13 @@ async function call<T>(config: WebpayConfig, method: string, path: string, body?
 
 // Crea la transacción. Webpay devuelve un token y la página a la que se envía al cliente.
 // buy_order admite hasta 26 caracteres; el ID del pedido (36) va en session_id.
+// Empieza con "TERC-" para separar estas ventas de las de otros portales de Wiremax
+// en los reportes de Transbank, mientras se comparte su código de comercio.
 export function createWebpayTransaction(
   config: WebpayConfig,
   input: { orderId: string; amount: number; returnUrl: string },
 ) {
-  const buyOrder = `T${Date.now().toString(36)}${input.orderId.replace(/-/g, "").slice(0, 8)}`;
+  const buyOrder = `TERC-${Date.now().toString(36)}${input.orderId.replace(/-/g, "").slice(0, 8)}`;
   return call<{ token: string; url: string }>(config, "POST", "", {
     buy_order: buyOrder,
     session_id: input.orderId,
