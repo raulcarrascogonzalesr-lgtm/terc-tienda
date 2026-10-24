@@ -41,7 +41,8 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="mt-auto pt-3">
           {sale && (
             <p className="mb-1 inline-block rounded bg-sale-50 px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-sale">
-              {product.offer_ends_at ? `Oferta hasta el ${shortDate(product.offer_ends_at)}` : "Oferta"}
+              {product.offer_name ??
+                (product.offer_ends_at ? `Oferta hasta el ${shortDate(product.offer_ends_at)}` : "Oferta")}
             </p>
           )}
           {sale ? (

@@ -64,7 +64,7 @@ function ProductSlide({ product }: { product: Product }) {
           <span
             className={`inline-block rounded-md px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${sale ? "bg-sale text-white" : "bg-gold text-pine"}`}
           >
-            {sale ? "Oferta irresistible" : "Precio TERC"}
+            {sale ? (product.offer_name ?? "Oferta irresistible") : "Precio TERC"}
           </span>
           {sale && product.offer_ends_at && (
             <span className="inline-flex items-center gap-1.5 rounded-md bg-white/10 px-2.5 py-1 text-xs font-semibold text-white">
@@ -236,6 +236,7 @@ export default async function HomePage({ searchParams }: Props) {
   const shownOffers = offers.slice(0, 5);
   const allLimited = shownOffers.every((p) => p.offer_ends_at);
   const firstEnd = shownOffers.map((p) => p.offer_ends_at!).sort()[0];
+  const offerName = offers.find((p) => p.offer_name)?.offer_name ?? null;
   // Las categorías con más equipos, con la foto de uno y el precio más bajo ("desde").
   const tiles: Tile[] = categories
     .map((name) => {
@@ -249,8 +250,10 @@ export default async function HomePage({ searchParams }: Props) {
     })
     .sort((a, b) => b.count - a.count)
     .slice(0, offers.length ? 3 : 4);
-  // El banner muestra primero los equipos con más descuento.
-  const featured = [...all].sort((a, b) => bestDiscount(b) - bestDiscount(a)).slice(0, 3);
+  // El banner muestra primero los equipos en oferta y luego los con más descuento frente a uno nuevo.
+  const featured = [...all]
+    .sort((a, b) => Number(Boolean(offer(b))) - Number(Boolean(offer(a))) || bestDiscount(b) - bestDiscount(a))
+    .slice(0, 3);
 
   // Arma el enlace manteniendo los filtros actuales.
   const link = (changes: Record<string, string | null>) => {
@@ -302,7 +305,7 @@ export default async function HomePage({ searchParams }: Props) {
               >
                 <StoreIcon name="tag" className="absolute -right-6 -bottom-6 h-32 w-32 text-white/10" />
                 <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.16em] text-white/85">
-                  Ofertas irresistibles
+                  {offerName ?? "Ofertas irresistibles"}
                 </span>
                 <div className="relative">
                   <p className="text-xs sm:text-sm font-semibold text-white/85">Hasta</p>
@@ -350,7 +353,7 @@ export default async function HomePage({ searchParams }: Props) {
             <div data-reveal className="mb-6 flex flex-wrap items-end justify-between gap-4">
               <div>
                 <span className="inline-flex items-center gap-1.5 rounded-md bg-sale px-2.5 py-1 text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
-                  <StoreIcon name="tag" className="w-4 h-4" /> Ofertas irresistibles
+                  <StoreIcon name="tag" className="w-4 h-4" /> {offerName ?? "Ofertas irresistibles"}
                 </span>
                 <h2 className="mt-2 text-2xl sm:text-4xl font-bold tracking-tight text-ink">
                   {allLimited ? "Solo por tiempo limitado" : "Precios rebajados"}

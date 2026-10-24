@@ -32,10 +32,12 @@ export function Header({
   categories,
   offerPercent,
   limitedOffers,
+  offerName,
 }: {
   categories: string[];
   offerPercent: number; // mayor descuento en oferta; 0 si no hay ofertas
   limitedOffers: boolean; // alguna oferta tiene fecha de término
+  offerName: string | null; // nombre de la promoción, si tiene
 }) {
   const { count } = useCart();
   // Al bajar, la franja de arriba se va con la página y el menú queda fijo, más compacto y con sombra.
@@ -56,8 +58,10 @@ export function Header({
           <div className="shell h-9 flex items-center justify-center gap-2">
             <StoreIcon name="tag" className="w-4 h-4" />
             <span>
-              {limitedOffers ? "Solo por tiempo limitado: " : ""}ofertas de
-              hasta −{offerPercent}%
+              {offerName && <strong className="font-extrabold uppercase tracking-wide">{offerName}: </strong>}
+              {limitedOffers && !offerName && "Solo por tiempo limitado: "}
+              {limitedOffers && offerName && <span className="hidden sm:inline">solo por tiempo limitado, </span>}
+              ofertas de hasta −{offerPercent}%
             </span>
             <span className="hidden sm:flex items-center gap-1 underline underline-offset-2">
               Ver ofertas <StoreIcon name="arrow" className="w-3.5 h-3.5" />

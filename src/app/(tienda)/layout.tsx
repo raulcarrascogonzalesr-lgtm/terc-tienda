@@ -24,13 +24,15 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
   const limited = offers.filter((p) => p.offer_ends_at);
   const limitedOffers = limited.length > 0;
   const offerPercent = Math.max(0, ...(limitedOffers ? limited : offers).map((p) => offer(p)!.percent));
+  // Nombre de la promoción, si alguna oferta tiene uno (por ejemplo "Remate de Terqui").
+  const offerName = offers.find((p) => p.offer_name)?.offer_name ?? null;
   return (
     <CartProvider storeOpen={open}>
       <UtmCapture />
       <ScrollReveal />
       <div className="min-h-screen flex flex-col bg-paper text-ink">
         {!open && <PreparingBanner />}
-        <Header categories={categories} offerPercent={offerPercent} limitedOffers={limitedOffers} />
+        <Header categories={categories} offerPercent={offerPercent} limitedOffers={limitedOffers} offerName={offerName} />
         <main className="flex-1 w-full">{children}</main>
         <Footer categories={categories} />
       </div>

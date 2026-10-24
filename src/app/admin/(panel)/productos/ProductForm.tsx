@@ -137,6 +137,17 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
           />
         </Field>
         <Field
+          label="Nombre de la oferta"
+          hint="Opcional. Por ejemplo “Remate de Terqui”. Se muestra en el aviso de arriba de la tienda y en la ficha mientras dure la oferta."
+        >
+          <input
+            name="offer_name"
+            maxLength={40}
+            defaultValue={product?.offer_name ?? ""}
+            className="input"
+          />
+        </Field>
+        <Field
           label="Precio de un equipo nuevo (CLP)"
           hint="Opcional. La tienda muestra cuánto ahorra el cliente."
         >

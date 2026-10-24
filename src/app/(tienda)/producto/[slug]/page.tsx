@@ -96,7 +96,7 @@ export default async function ProductPage({ params }: Props) {
           {sale && (
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-sale px-4 py-3 text-white">
               <span className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide">
-                <StoreIcon name="tag" className="w-4 h-4" /> Oferta irresistible
+                <StoreIcon name="tag" className="w-4 h-4" /> {product.offer_name ?? "Oferta irresistible"}
               </span>
               {product.offer_ends_at && (
                 <span className="flex items-center gap-1.5 text-sm font-semibold">
