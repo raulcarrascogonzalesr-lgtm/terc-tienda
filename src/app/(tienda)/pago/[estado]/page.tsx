@@ -7,17 +7,17 @@ import { TrackPurchase } from "./TrackPurchase";
 
 const MESSAGES: Record<string, { title: string; text: string; pose: TerquiPose }> = {
   exito: {
-    pose: "listo",
+    pose: "celebra",
     title: "¡Gracias por tu compra!",
     text: "Recibimos tu pago. Te enviaremos un correo con el detalle y el seguimiento del envío.",
   },
   pendiente: {
-    pose: "hola",
+    pose: "cargando",
     title: "Tu pago está en proceso",
     text: "Te avisaremos por correo apenas Mercado Pago lo confirme.",
   },
   error: {
-    pose: "apunta",
+    pose: "duda",
     title: "El pago no se completó",
     text: "No se hizo ningún cargo. Puedes volver al carrito e intentarlo de nuevo.",
   },

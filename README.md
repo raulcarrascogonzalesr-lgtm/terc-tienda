@@ -59,6 +59,25 @@ Estas secciones necesitan las tablas de `supabase/finanzas.sql` (también inclui
 
 Solo los correos de `ADMIN_EMAILS` pueden entrar. Marcar un pedido como "Pagado" a mano (por ejemplo, una transferencia) también descuenta el stock.
 
+## Correos automáticos
+
+La tienda envía estos correos desde `contacto@terc.cl` (la casilla del hosting, por SMTP):
+
+- **Al cliente, cuando se confirma el pago:** "Recibimos tu pago", con el detalle del pedido.
+- **Al cliente, cuando el pedido pasa a "Enviado" con código de seguimiento:** "Tu pedido va en camino".
+- **Al cliente, cuando el pedido pasa a "Entregado":** "¡Llegó tu pedido! ¿Cómo te fue?", con botones que abren WhatsApp.
+
+Cada correo trae a Terqui animado (GIF en `public/correo/`), en una pose distinta según el correo y el pedido.
+- **A TERC:** aviso de cada venta nueva y de cada solicitud de cotización (respondiendo el correo se le escribe al cliente).
+
+Cada correo al cliente sale una sola vez por pedido. En el detalle del pedido, en el panel, se ve si salió y se puede reenviar.
+
+Para activarlo, una sola vez:
+
+1. En Supabase > **SQL Editor**, ejecuta `supabase/correos.sql`.
+2. En cPanel > **Setup Node.js App** > terc.cl, agrega la variable `SMTP_PASSWORD` con la contraseña de `contacto@terc.cl`, presiona "Ejecutar NPM Install" y luego "Restart".
+3. En cPanel > **Email Deliverability**, revisa que terc.cl tenga DKIM y SPF en verde, para que los correos no caigan en spam.
+
 ## Conectar Mercado Pago
 
 1. En https://www.mercadopago.cl/developers, crea una aplicación (Checkout Pro).
@@ -113,7 +132,7 @@ Configuración, una sola vez:
    - Application root: esa misma carpeta
    - Application URL: el dominio de la tienda
    - Application startup file: `server.js`
-   - Variables: `SUPABASE_SERVICE_ROLE_KEY`, `MERCADOPAGO_ACCESS_TOKEN`, `ADMIN_EMAILS` y las `NEXT_PUBLIC_*`
+   - Variables: `SUPABASE_SERVICE_ROLE_KEY`, `MERCADOPAGO_ACCESS_TOKEN`, `ADMIN_EMAILS`, `SMTP_PASSWORD` y las `NEXT_PUBLIC_*`
 3. En GitHub > Settings > Secrets and variables > Actions:
    - **Secrets:** `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`
    - **Variables:** `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`

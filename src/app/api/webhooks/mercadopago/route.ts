@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { Payment } from "mercadopago";
 import { getMercadoPagoClient } from "@/lib/mercadopago";
+import { sendOrderEmailOnce } from "@/lib/order-emails";
 import { getAdminClient } from "@/lib/supabase";
 
 // Mercado Pago avisa aquí cuando cambia el estado de un pago.
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
       });
       return NextResponse.json({ ignored: true });
     }
-    const { error }= await supabase.rpc("mark_order_paid", {
+    const { error } = await supabase.rpc("mark_order_paid", {
       p_order_id: orderId,
       p_payment_id: String(payment.id),
     });
@@ -55,6 +56,8 @@ export async function POST(request: Request) {
       console.error("No se pudo marcar el pedido como pagado", error);
       return NextResponse.json({ error: "Error al actualizar" }, { status: 500 });
     }
+    // El correo de confirmación sale después de responder, una sola vez por pedido.
+    after(() => sendOrderEmailOnce(orderId, "paid"));
   } else {
     await supabase
       .from("orders")

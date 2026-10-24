@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { sendOrderEmailOnce } from "@/lib/order-emails";
 import { getAdminClient } from "@/lib/supabase";
 import {
   commitWebpayTransaction,
@@ -68,6 +69,7 @@ async function handle(request: Request) {
       p_payment_id: paymentId,
     });
     if (error) console.error("No se pudo marcar el pedido como pagado", error);
+    else after(() => sendOrderEmailOnce(orderId, "paid"));
     return go("exito", orderId);
   }
 

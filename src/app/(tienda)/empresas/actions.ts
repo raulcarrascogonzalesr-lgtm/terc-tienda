@@ -1,8 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { QUOTE_KIND_LABELS } from "@/lib/format";
+import { sendQuoteNotice } from "@/lib/order-emails";
 import { getAdminClient } from "@/lib/supabase";
+import type { QuoteKind } from "@/lib/types";
 
 export type QuoteState = { ok?: boolean; error?: string } | null;
 
@@ -32,19 +35,21 @@ export async function submitQuote(_prev: QuoteState, form: FormData): Promise<Qu
 
   const supabase = getAdminClient();
   if (!supabase) return { error: "No pudimos enviar tu solicitud. Escríbenos por WhatsApp o correo." };
-  const { error } = await supabase.from("quotes").insert({
+  const quote = {
     name,
     email,
     phone: phone || null,
     company: company || null,
-    kind,
+    kind: kind as QuoteKind,
     quantity: quantity || null,
     message,
-  });
+  };
+  const { error } = await supabase.from("quotes").insert(quote);
   if (error) {
     console.error("No se pudo guardar la cotización", error);
     return { error: "No pudimos enviar tu solicitud. Escríbenos por WhatsApp o correo." };
   }
   revalidatePath("/admin", "layout");
+  after(() => sendQuoteNotice(quote));
   return { ok: true };
 }
