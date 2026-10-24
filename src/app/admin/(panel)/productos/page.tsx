@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { formatCLP } from "@/lib/format";
+import { formatCLP, shortDate, todayInChile } from "@/lib/format";
 import { listAllProducts, listExtraCosts } from "../data";
+import type { ExtraCost } from "@/lib/types";
 import { extraCostFor } from "../extra-costs";
 import { netOf } from "../finance";
 import { ICONS } from "../icons";
@@ -10,8 +11,17 @@ import { ImportPhotosButton } from "./ImportPhotosButton";
 
 export const dynamic = "force-dynamic";
 
+// Margen neto: precio sin IVA menos costo neto y menos los costos por venta.
+function marginOf(price: number, cost: number | null, category: string, extraCosts: ExtraCost[]) {
+  if (cost === null) return null;
+  const net = netOf(price);
+  const value = net - cost - extraCostFor(price, category, extraCosts);
+  return { value, percent: net ? Math.round((value / net) * 100) : 0 };
+}
+
 export default async function ProductsPage() {
   const [products, extraCosts] = await Promise.all([listAllProducts(), listExtraCosts()]);
+  const today = todayInChile();
   const ours = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/productos/`;
   const isExternal = (url: string | null) => !!url?.startsWith("https://") && !url.startsWith(ours);
   const externalPhotos = products.filter(
@@ -48,10 +58,14 @@ export default async function ProductsPage() {
           </thead>
           <tbody>
             {products.map((p) => {
-              // Se compara sin IVA: precio neto menos costo neto y menos los costos por venta.
-              const priceNet = netOf(p.price);
-              const extra = extraCostFor(p.price, p.category, extraCosts);
-              const margin = p.cost === null ? null : priceNet - p.cost - extra;
+              // En oferta: muestra también el precio y el margen de antes. Cuando pasa el último
+              // día, la tienda cobra otra vez el precio de antes, así que el margen se calcula con ese.
+              const before = p.compare_price && p.compare_price > p.price ? p.compare_price : null;
+              const ended = before !== null && !!p.offer_ends_at && p.offer_ends_at < today;
+              const price = ended ? before : p.price;
+              const extra = extraCostFor(price, p.category, extraCosts);
+              const margin = marginOf(price, p.cost, p.category, extraCosts);
+              const marginBefore = before && !ended ? marginOf(before, p.cost, p.category, extraCosts) : null;
               return (
                 <tr
                   key={p.id}
@@ -63,7 +77,17 @@ export default async function ProductsPage() {
                     </Link>
                   </td>
                   <td className="p-3">{p.grade}</td>
-                  <td className="p-3 text-right whitespace-nowrap">{formatCLP(p.price)}</td>
+                  <td className="p-3 text-right whitespace-nowrap">
+                    {formatCLP(price)}
+                    {before && !ended && (
+                      <span className="block text-xs text-[#b3362a]">
+                        {p.offer_name ?? "Oferta"}
+                        {p.offer_ends_at && ` hasta el ${shortDate(p.offer_ends_at)}`} · antes{" "}
+                        <span className="line-through">{formatCLP(before)}</span>
+                      </span>
+                    )}
+                    {ended && <span className="block text-xs text-[#6b716f]">Oferta terminada</span>}
+                  </td>
                   <td className="p-3 text-right whitespace-nowrap">
                     {p.cost === null ? "—" : formatCLP(p.cost)}
                   </td>
@@ -71,11 +95,14 @@ export default async function ProductsPage() {
                     {extra ? `−${formatCLP(extra)}` : "—"}
                   </td>
                   <td
-                    className={`p-3 text-right whitespace-nowrap ${margin !== null && margin < 0 ? "text-[#b3362a]" : ""}`}
+                    className={`p-3 text-right whitespace-nowrap ${margin !== null && margin.value < 0 ? "text-[#b3362a]" : ""}`}
                   >
-                    {margin === null
-                      ? "—"
-                      : `${formatCLP(margin)} (${priceNet ? Math.round((margin / priceNet) * 100) : 0}%)`}
+                    {margin === null ? "—" : `${formatCLP(margin.value)} (${margin.percent}%)`}
+                    {marginBefore && (
+                      <span className="block text-xs text-[#6b716f]">
+                        antes {formatCLP(marginBefore.value)} ({marginBefore.percent}%)
+                      </span>
+                    )}
                   </td>
                   <td
                     className={`p-3 text-right whitespace-nowrap ${p.stock === 0 ? "text-[#b3362a]" : ""}`}
