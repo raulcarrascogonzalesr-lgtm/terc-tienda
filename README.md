@@ -65,6 +65,9 @@ La tienda envía estos correos desde `contacto@terc.cl` (la casilla del hosting,
 
 - **Al cliente, cuando se confirma el pago:** "Recibimos tu pago", con el detalle del pedido.
 - **Al cliente, cuando el pedido pasa a "Enviado" con código de seguimiento:** "Tu pedido va en camino".
+- **Al cliente, cuando el pedido pasa a "Entregado":** "¡Llegó tu pedido! ¿Cómo te fue?", con botones que abren WhatsApp.
+
+Cada correo trae a Terqui animado (GIF en `public/correo/`), en una pose distinta según el correo y el pedido.
 - **A TERC:** aviso de cada venta nueva y de cada solicitud de cotización (respondiendo el correo se le escribe al cliente).
 
 Cada correo al cliente sale una sola vez por pedido. En el detalle del pedido, en el panel, se ve si salió y se puede reenviar.

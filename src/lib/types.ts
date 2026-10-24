@@ -69,6 +69,7 @@ export type Order = {
   paid_at: string | null;
   paid_email_at?: string | null; // cuándo se envió al cliente el correo de pago recibido
   shipped_email_at?: string | null; // cuándo se envió el correo con el código de seguimiento
+  delivered_email_at?: string | null; // cuándo se envió el correo de "¿cómo te fue?"
   utm: Record<string, string> | null;
 };
 

@@ -7,7 +7,7 @@ import { after } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { ORDER_STATUS_LABELS, QUOTE_STATUS_LABELS } from "@/lib/format";
 import { emailEnabled } from "@/lib/email";
-import { resendOrderEmail, sendOrderEmailOnce } from "@/lib/order-emails";
+import { resendOrderEmail, sendOrderEmailOnce, type EmailKind } from "@/lib/order-emails";
 import { getAdminClient } from "@/lib/supabase";
 import type { OrderStatus, QuoteStatus } from "@/lib/types";
 import { CHANNEL_LABELS, EXPENSE_CATEGORIES, INCOME_CATEGORIES, OTHER_OUTFLOWS } from "./finance";
@@ -50,6 +50,7 @@ export async function updateOrder(id: string, form: FormData) {
   // Correos al cliente: cada uno sale una sola vez por pedido.
   if (status === "paid") after(() => sendOrderEmailOnce(id, "paid"));
   if (status === "shipped" && tracking) after(() => sendOrderEmailOnce(id, "shipped"));
+  if (status === "delivered") after(() => sendOrderEmailOnce(id, "delivered"));
 
   revalidatePath("/admin");
   revalidatePath("/admin/pedidos");
@@ -59,8 +60,8 @@ export async function updateOrder(id: string, form: FormData) {
 
 export type ResendResult = { ok?: boolean; error?: string } | null;
 
-// Vuelve a enviar al cliente el correo de pago o de envío (por ejemplo, si no le llegó).
-export async function resendEmail(id: string, kind: "paid" | "shipped"): Promise<ResendResult> {
+// Vuelve a enviar al cliente un correo del pedido (por ejemplo, si no le llegó).
+export async function resendEmail(id: string, kind: EmailKind): Promise<ResendResult> {
   await requireAdmin();
   if (!emailEnabled()) return { error: "Falta configurar SMTP_PASSWORD en cPanel" };
   if (!(await resendOrderEmail(id, kind))) return { error: "No se pudo enviar. Revisa el correo del cliente y el código de seguimiento." };

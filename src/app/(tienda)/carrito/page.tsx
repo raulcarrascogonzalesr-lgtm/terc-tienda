@@ -56,9 +56,9 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="shell flex flex-col items-center py-14 text-center">
-        <Terqui pose="apunta" className="w-44 h-44" />
+        <Terqui pose="carrito" className="w-52 h-52" />
         <h1 className="mt-2 text-2xl font-bold text-ink">Tu carrito está vacío</h1>
-        <p className="mt-2 text-muted">Todavía no eliges tu equipo. Terqui te ayuda a encontrar uno.</p>
+        <p className="mt-2 text-muted">Terqui lo revisó dos veces y no encontró nada. ¿Le ayudamos a llenarlo?</p>
         <Link
           href="/#equipos"
           className="mt-6 inline-flex items-center gap-2 rounded-full bg-pine px-6 py-3 text-sm font-semibold text-white transition hover:bg-pine-700"

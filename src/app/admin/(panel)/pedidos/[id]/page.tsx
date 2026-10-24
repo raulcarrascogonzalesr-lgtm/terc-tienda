@@ -77,8 +77,9 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       <div className="bg-white rounded-xl border border-[#e4e2dc] p-4 text-sm space-y-2">
         <h2 className="font-semibold">Correos al cliente</h2>
         <p className="text-[#6b716f]">
-          Salen solos: el de pago al confirmarse el pago, y el de envío al guardar el pedido como
-          &quot;Enviado&quot; con su código de seguimiento.
+          Salen solos: el de pago al confirmarse el pago, el de envío al guardar el pedido como
+          &quot;Enviado&quot; con su código de seguimiento, y el de &quot;¿cómo te fue?&quot; al marcarlo
+          &quot;Entregado&quot;.
         </p>
         <ResendEmail
           orderId={order.id}
@@ -93,6 +94,13 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           label="Pedido en camino"
           sentAt={sentAt(order.shipped_email_at)}
           disabled={!order.tracking_code}
+        />
+        <ResendEmail
+          orderId={order.id}
+          kind="delivered"
+          label="Pedido entregado"
+          sentAt={sentAt(order.delivered_email_at)}
+          disabled={order.status !== "delivered"}
         />
       </div>
 

@@ -16,7 +16,7 @@ export function QuoteForm({ kind }: { kind: QuoteKind }) {
   if (state?.ok) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-3xl bg-white p-10 text-center ring-1 ring-black/[0.06]">
-        <Terqui pose="listo" className="w-36 h-36" />
+        <Terqui pose="corazon" className="w-36 h-36" />
         <h3 className="text-xl font-bold text-ink">¡Recibimos tu solicitud!</h3>
         <p className="max-w-sm text-sm text-muted">
           Te contactamos dentro de un día hábil para ver los detalles y enviarte una cotización.

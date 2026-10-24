@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import type { EmailKind } from "@/lib/order-emails";
 import { resendEmail, type ResendResult } from "../../actions";
 
 // Muestra si el correo ya salió y permite reenviarlo al cliente.
@@ -12,7 +13,7 @@ export function ResendEmail({
   disabled,
 }: {
   orderId: string;
-  kind: "paid" | "shipped";
+  kind: EmailKind;
   label: string;
   sentAt: string | null;
   disabled?: boolean;

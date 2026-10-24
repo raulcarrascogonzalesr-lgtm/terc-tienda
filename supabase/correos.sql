@@ -5,3 +5,4 @@
 
 alter table orders add column if not exists paid_email_at timestamptz;
 alter table orders add column if not exists shipped_email_at timestamptz;
+alter table orders add column if not exists delivered_email_at timestamptz;

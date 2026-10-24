@@ -298,6 +298,264 @@ body {
     transform: rotate(-6deg);
   }
 }
+/* Poses y movimientos nuevos de Terqui. */
+.terqui-hop {
+  animation: terqui-hop 2.4s ease-in-out infinite;
+}
+@keyframes terqui-hop {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+  70% {
+    transform: translateY(-7px);
+  }
+  80% {
+    transform: translateY(0);
+  }
+  86% {
+    transform: translateY(-3px);
+  }
+}
+.terqui-jump {
+  animation: terqui-jump 1.1s cubic-bezier(0.3, 0, 0.4, 1) infinite;
+}
+@keyframes terqui-jump {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  12% {
+    transform: translateY(2px) scaleY(0.96);
+  }
+  45% {
+    transform: translateY(-14px) scaleY(1.02);
+  }
+  80% {
+    transform: translateY(0) scaleY(1);
+  }
+}
+.terqui-shadow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: terqui-shadow 1.1s cubic-bezier(0.3, 0, 0.4, 1) infinite;
+}
+@keyframes terqui-shadow {
+  45% {
+    transform: scaleX(0.7);
+    opacity: 0.04;
+  }
+}
+.terqui-confetti {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: terqui-confetti 1.65s ease-in-out infinite;
+}
+@keyframes terqui-confetti {
+  0% {
+    transform: translateY(-6px) rotate(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(14px) rotate(200deg);
+    opacity: 0;
+  }
+}
+.terqui-run {
+  animation: terqui-run 0.5s ease-in-out infinite alternate;
+}
+@keyframes terqui-run {
+  from {
+    transform: translateY(0) rotate(0);
+  }
+  to {
+    transform: translateY(-4px) rotate(2deg);
+  }
+}
+.terqui-step-l,
+.terqui-step-r {
+  animation: terqui-step 0.5s ease-in-out infinite alternate;
+}
+.terqui-step-l {
+  transform-origin: 88px 176px;
+}
+.terqui-step-r {
+  transform-origin: 112px 176px;
+  animation-delay: -0.5s;
+}
+@keyframes terqui-step {
+  from {
+    transform: rotate(-22deg);
+  }
+  to {
+    transform: rotate(22deg);
+  }
+}
+.terqui-flutter {
+  transform-origin: 100px 58px;
+  animation: terqui-flutter 0.5s ease-in-out infinite alternate;
+}
+@keyframes terqui-flutter {
+  from {
+    transform: rotate(-6deg);
+  }
+  to {
+    transform: rotate(6deg);
+  }
+}
+.terqui-sway {
+  transform-origin: 50% 95%;
+  animation: terqui-sway 2.6s ease-in-out infinite;
+}
+@keyframes terqui-sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+.terqui-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: terqui-pulse 1.3s ease-in-out infinite;
+}
+@keyframes terqui-pulse {
+  0%,
+  40%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.12);
+  }
+  28% {
+    transform: scale(1.04);
+  }
+}
+.terqui-float {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: terqui-float 2.6s ease-out infinite;
+}
+.terqui-float-2 {
+  animation-delay: 1.3s;
+}
+@keyframes terqui-float {
+  0% {
+    transform: translateY(10px) scale(0.6);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-16px) scale(1);
+    opacity: 0;
+  }
+}
+.terqui-pop {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: terqui-pop 2.2s cubic-bezier(0.3, 1.6, 0.5, 1) infinite;
+}
+.terqui-pop-2 {
+  animation-delay: 0.5s;
+}
+@keyframes terqui-pop {
+  0%,
+  100% {
+    transform: scale(1) rotate(0);
+  }
+  12% {
+    transform: scale(1.25) rotate(-10deg);
+  }
+  24% {
+    transform: scale(1) rotate(6deg);
+  }
+  36% {
+    transform: scale(1) rotate(0);
+  }
+}
+.terqui-wobble {
+  transform-origin: 178px 190px;
+  animation: terqui-wobble 2.2s ease-in-out infinite;
+}
+@keyframes terqui-wobble {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  30% {
+    transform: rotate(-3deg);
+  }
+  45% {
+    transform: rotate(2deg);
+  }
+}
+.terqui-scratch {
+  transform-origin: 70px 110px;
+  animation: terqui-scratch 0.6s ease-in-out infinite alternate;
+}
+@keyframes terqui-scratch {
+  from {
+    transform: rotate(-4deg);
+  }
+  to {
+    transform: rotate(5deg);
+  }
+}
+.terqui-nudge {
+  animation: terqui-nudge 1.6s ease-in-out infinite;
+}
+@keyframes terqui-nudge {
+  0%,
+  50%,
+  100% {
+    transform: translateX(0);
+  }
+  65% {
+    transform: translateX(4px);
+  }
+  80% {
+    transform: translateX(0);
+  }
+}
+.terqui-scan {
+  transform-origin: 130px 112px;
+  animation: terqui-scan 2.4s ease-in-out infinite;
+}
+@keyframes terqui-scan {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(-14deg);
+  }
+}
+.terqui-twinkle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: terqui-twinkle 1.8s ease-in-out infinite;
+}
+@keyframes terqui-twinkle {
+  0%,
+  100% {
+    transform: scale(0.6) rotate(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.1) rotate(45deg);
+    opacity: 1;
+  }
+}
+
 /* Terqui asomado en el menú: se esconde un poco y vuelve a asomarse al pasar el mouse. */
 .terqui-peek {
   transition: transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
@@ -317,7 +575,24 @@ a:hover > .terqui-peek {
   .terqui-bob,
   .terqui-leaf-l,
   .terqui-leaf-r,
-  .terqui-bar {
+  .terqui-bar,
+  .terqui-hop,
+  .terqui-jump,
+  .terqui-shadow,
+  .terqui-confetti,
+  .terqui-run,
+  .terqui-step-l,
+  .terqui-step-r,
+  .terqui-flutter,
+  .terqui-sway,
+  .terqui-pulse,
+  .terqui-float,
+  .terqui-pop,
+  .terqui-wobble,
+  .terqui-scratch,
+  .terqui-nudge,
+  .terqui-scan,
+  .terqui-twinkle {
     animation: none;
   }
   .terqui-msgs > span {

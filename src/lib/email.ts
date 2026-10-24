@@ -64,25 +64,66 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
-// Plantilla común: encabezado con la marca, el contenido y el pie con los datos de contacto.
-// Estilos en línea porque los programas de correo ignoran las hojas de estilo.
-export function layout(title: string, body: string): string {
-  const whatsapp = SITE.whatsapp ? ` · WhatsApp +${SITE.whatsapp.replace(/^(\d{2})(\d)(\d{4})(\d{4})$/, "$1 $2 $3 $4")}` : "";
+export const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL ?? "https://terc.cl";
+
+// Colores de la marca. Los programas de correo ignoran las hojas de estilo: todo va en línea.
+export const C = {
+  pine: "#0a2a2a",
+  leaf: "#288868",
+  mint: "#eaf5f0",
+  gold: "#b3a26a",
+  paper: "#f6f4ef",
+  line: "#e4e2dc",
+  muted: "#5f6866",
+  whatsapp: "#1fa855",
+};
+
+const FONT = "'Montserrat',Arial,Helvetica,sans-serif";
+
+export function button(href: string, label: string, color = C.leaf): string {
+  return `<a href="${escapeHtml(href)}" style="display:inline-block;background:${color};color:#ffffff;font-family:${FONT};font-size:15px;font-weight:bold;padding:13px 26px;border-radius:999px;text-decoration:none">${label}</a>`;
+}
+
+// Terqui animado (GIF en terc.cl/correo). Funciona en Gmail, Apple Mail y celulares;
+// Outlook de escritorio muestra el primer cuadro.
+export type MailPose = "celebra" | "listo" | "caja" | "corazon" | "guino" | "lupa" | "hola" | "carrito";
+
+export function layout({
+  preheader,
+  pose,
+  title,
+  intro,
+  body,
+}: {
+  preheader: string; // texto que se ve junto al asunto en la bandeja de entrada
+  pose: MailPose;
+  title: string;
+  intro: string;
+  body: string;
+}): string {
+  const whatsapp = SITE.whatsapp
+    ? ` · <a href="https://wa.me/${SITE.whatsapp}" style="color:${C.leaf}">WhatsApp</a>`
+    : "";
   return `<!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(title)}</title></head>
-<body style="margin:0;padding:0;background:#f4f3ef;font-family:Arial,Helvetica,sans-serif;color:#1d2422">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f3ef;padding:24px 12px">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>${escapeHtml(title)}</title></head>
+<body style="margin:0;padding:0;background:${C.paper};font-family:${FONT};color:${C.pine}">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(preheader)}</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.paper};padding:20px 10px">
     <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:12px;border:1px solid #e4e2dc">
-        <tr><td style="background:#288868;border-radius:12px 12px 0 0;padding:18px 24px;color:#ffffff">
-          <div style="font-size:22px;font-weight:bold;letter-spacing:1px">TERC</div>
-          <div style="font-size:12px;opacity:.85">${escapeHtml(SITE.slogan)}</div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid ${C.line}">
+        <tr><td align="center" style="background:${C.pine};padding:16px 24px">
+          <a href="${siteUrl()}"><img src="${siteUrl()}/correo/logo.png" width="120" height="56" alt="TERC" style="display:block;border:0"></a>
         </td></tr>
-        <tr><td style="padding:24px;font-size:15px;line-height:1.5">${body}</td></tr>
-        <tr><td style="padding:16px 24px;border-top:1px solid #e4e2dc;font-size:12px;color:#6b716f;line-height:1.5">
-          TERC · Tecnología y Equipos Reacondicionados Chile<br>
-          <a href="https://terc.cl" style="color:#288868">terc.cl</a> · ${escapeHtml(SITE.email)}${whatsapp}<br>
+        <tr><td align="center" style="background:${C.mint};padding:22px 24px 26px">
+          <img src="${siteUrl()}/correo/terqui-${pose}.gif" width="170" height="170" alt="Terqui, la mascota de TERC" style="display:block;border:0;margin:0 auto">
+          <h1 style="margin:10px 0 6px;font-size:24px;line-height:1.25;color:${C.pine}">${title}</h1>
+          <p style="margin:0;font-size:15px;line-height:1.5;color:${C.muted}">${intro}</p>
+        </td></tr>
+        <tr><td style="padding:24px;font-size:15px;line-height:1.55">${body}</td></tr>
+        <tr><td align="center" style="padding:18px 24px 22px;border-top:1px solid ${C.line};font-size:12px;color:${C.muted};line-height:1.6">
+          <strong style="color:${C.pine}">TERC</strong> · ${escapeHtml(SITE.slogan)}<br>
+          <a href="${siteUrl()}" style="color:${C.leaf}">terc.cl</a> · ${escapeHtml(SITE.email)}${whatsapp}<br>
           ${escapeHtml(SITE.company)}
         </td></tr>
       </table>
