@@ -57,6 +57,11 @@ export function Footer({ categories }: { categories: string[] }) {
               </a>
             </li>
             <li>
+              <Link href="/garantia-y-devoluciones" className="flex items-center gap-2 hover:text-white">
+                <StoreIcon name="receipt" className="w-4 h-4" /> Garantía y devoluciones
+              </Link>
+            </li>
+            <li>
               <Link href="/privacidad" className="flex items-center gap-2 hover:text-white">
                 <StoreIcon name="shield" className="w-4 h-4" /> Privacidad y cookies
               </Link>
