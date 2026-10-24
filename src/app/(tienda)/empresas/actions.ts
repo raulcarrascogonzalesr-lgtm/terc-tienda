@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
-import { QUOTE_KIND_LABELS } from "@/lib/format";
+import { QUOTE_KINDS_OFFERED } from "@/lib/format";
 import { sendQuoteNotice } from "@/lib/order-emails";
 import { getAdminClient } from "@/lib/supabase";
 import type { QuoteKind } from "@/lib/types";
@@ -30,7 +30,7 @@ export async function submitQuote(_prev: QuoteState, form: FormData): Promise<Qu
 
   if (name.length < 2) return { error: "Escribe tu nombre." };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Revisa tu correo." };
-  if (!(kind in QUOTE_KIND_LABELS)) return { error: "Elige qué necesitas." };
+  if (!(QUOTE_KINDS_OFFERED as readonly string[]).includes(kind)) return { error: "Elige qué necesitas." };
   if (message.length < 5) return { error: "Cuéntanos un poco más en el mensaje." };
 
   const supabase = getAdminClient();
