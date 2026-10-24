@@ -139,6 +139,7 @@ export async function saveProduct(_prev: SaveResult, form: FormData): Promise<Sa
     list_price: intOrNull(form.get("list_price")),
     compare_price: intOrNull(form.get("compare_price")),
     offer_ends_at: String(form.get("offer_ends_at") ?? "").trim() || null,
+    offer_name: String(form.get("offer_name") ?? "").trim().slice(0, 40) || null,
     cost: intOrNull(form.get("cost")),
     stock,
     battery_health: battery,
