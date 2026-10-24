@@ -36,6 +36,7 @@ export type CartItem = {
   price: number;
   quantity: number;
   maxQuantity: number;
+  cosmetic?: boolean; // el equipo tiene detalles estéticos leves (grado B o C)
 };
 
 // Datos completos que solo ve el panel de administración.

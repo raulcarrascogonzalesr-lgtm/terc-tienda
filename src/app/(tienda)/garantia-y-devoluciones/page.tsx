@@ -13,7 +13,7 @@ const SUMMARY: { icon: IconName; title: string; text: string }[] = [
   {
     icon: "leaf",
     title: "Son equipos reacondicionados",
-    text: "Usados, revisados y 100% operativos. Pueden tener detalles estéticos leves.",
+    text: "Revisados uno por uno y 100% operativos. El estado de cada uno está en su ficha.",
   },
   {
     icon: "shield",
@@ -91,9 +91,10 @@ export default function WarrantyPage() {
           nuevos. Antes de venderlos los revisamos uno por uno y nos aseguramos de que funcionen al 100%.
         </p>
         <p>
-          Como ya tuvieron un primer dueño, pueden tener <strong className="text-ink">detalles estéticos leves</strong>,
-          como pequeños roces o rayitas en la carcasa, que no afectan su funcionamiento. En la ficha de cada equipo
-          indicamos su estado. Esos detalles informados no son una falla y no dan derecho a devolución.
+          La mayoría llega en excelente estado, sin marcas visibles. Cuando un equipo tiene{" "}
+          <strong className="text-ink">detalles estéticos leves</strong>, como pequeños roces o rayitas en la
+          carcasa que no afectan su funcionamiento, lo indicamos claramente en su ficha. Esos detalles informados no
+          son una falla y no dan derecho a devolución.
         </p>
       </section>
 

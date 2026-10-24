@@ -153,7 +153,8 @@ export default async function ProductPage({ params }: Props) {
             ))}
           </ul>
           <p className="-mt-3 text-xs leading-relaxed text-muted">
-            Equipo usado y reacondicionado: revisado y 100% operativo, puede tener detalles estéticos leves. No
+            Equipo reacondicionado, revisado y 100% operativo.
+            {product.grade !== "A" && " Tiene detalles estéticos leves, que no afectan su funcionamiento."} No
             aceptamos devoluciones por arrepentimiento.{" "}
             <Link href="/garantia-y-devoluciones" className="underline">
               Ver garantía y devoluciones
