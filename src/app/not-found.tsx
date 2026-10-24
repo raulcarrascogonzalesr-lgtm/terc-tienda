@@ -15,7 +15,7 @@ export default function NotFound() {
       </p>
       <Link
         href="/#equipos"
-        className="mt-6 inline-flex items-center gap-2 rounded-full bg-pine px-6 py-3 text-sm font-semibold text-white transition hover:bg-pine-700"
+        className="mt-6 inline-flex items-center gap-2 rounded-full bg-pine px-6 py-3 text-sm font-semibold text-white transition hover:bg-cta"
       >
         Ver equipos disponibles
       </Link>

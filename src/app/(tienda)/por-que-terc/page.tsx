@@ -82,9 +82,9 @@ export default function WhyTercPage() {
         </div>
       </section>
 
-      <ul data-reveal className="grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-2xl border border-black/[0.06] bg-black/[0.06]">
+      <ul data-reveal className="grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-2xl border border-line/[0.06] bg-line/[0.06]">
         {TRUST.map((t) => (
-          <li key={t.title} className="flex gap-3 bg-white p-5">
+          <li key={t.title} className="flex gap-3 bg-surface p-5">
             <StoreIcon name={t.icon} className="w-6 h-6 text-pine-700" />
             <div>
               <p className="text-sm font-semibold text-ink">{t.title}</p>
@@ -94,7 +94,7 @@ export default function WhyTercPage() {
         ))}
       </ul>
 
-      <section data-reveal className="rounded-3xl bg-white border border-black/[0.06] p-8 sm:p-12">
+      <section data-reveal className="rounded-3xl bg-surface border border-line/[0.06] p-8 sm:p-12">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-pine-700">Cómo funciona TERC</p>
         <h2 className="mt-1 max-w-xl text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
           La calidad del primer día, al precio de la segunda vida.
@@ -111,7 +111,7 @@ export default function WhyTercPage() {
           ))}
         </ol>
 
-        <div className="mt-12 border-t border-black/[0.06] pt-10">
+        <div className="mt-12 border-t border-line/[0.06] pt-10">
           <h3 className="font-semibold text-ink">¿Cómo describimos el estado de cada equipo?</h3>
           <p className="mt-1.5 text-sm text-muted">
             Todos los equipos están revisados y 100% operativos. Lo único que cambia es cómo se ven.
@@ -119,7 +119,7 @@ export default function WhyTercPage() {
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             {CONDITIONS.map((c) => (
               <div key={c.title} className="rounded-2xl bg-paper p-5">
-                <p className="text-sm font-semibold text-pine">{c.title}</p>
+                <p className="text-sm font-semibold text-ink">{c.title}</p>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted">{c.text}</p>
               </div>
             ))}
@@ -127,7 +127,7 @@ export default function WhyTercPage() {
         </div>
       </section>
 
-      <section data-reveal className="rounded-3xl bg-white border border-black/[0.06] p-8 sm:p-12">
+      <section data-reveal className="rounded-3xl bg-surface border border-line/[0.06] p-8 sm:p-12">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-pine-700">Compra segura</p>
@@ -152,7 +152,7 @@ export default function WhyTercPage() {
         </ul>
       </section>
 
-      <section data-reveal className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-pine-700 px-8 py-10 text-white sm:flex-row sm:items-center sm:px-12">
+      <section data-reveal className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-cta px-8 py-10 text-white sm:flex-row sm:items-center sm:px-12">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">¿No sabes cuál elegir?</h2>
           <p className="mt-1 text-white/75">Cuéntanos para qué lo necesitas y te recomendamos el equipo ideal.</p>
@@ -162,7 +162,7 @@ export default function WhyTercPage() {
             href={whatsapp ?? `mailto:${SITE.email}`}
             target={whatsapp ? "_blank" : undefined}
             rel={whatsapp ? "noopener" : undefined}
-            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-pine transition hover:bg-paper"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-pine transition hover:bg-mint-50"
           >
             {whatsapp ? <WhatsAppIcon className="w-5 h-5 text-[#25d366]" /> : <StoreIcon name="mail" />}
             {whatsapp ? "Escríbenos por WhatsApp" : "Escríbenos"}

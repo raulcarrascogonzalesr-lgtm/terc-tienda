@@ -6,6 +6,7 @@ import { useCart } from "./CartProvider";
 import { StoreIcon } from "./icons";
 import { Logo } from "./Logo";
 import { Terqui } from "./Terqui";
+import { ThemeToggle } from "./ThemeToggle";
 
 function SearchForm({ className = "" }: { className?: string }) {
   return (
@@ -15,12 +16,12 @@ function SearchForm({ className = "" }: { className?: string }) {
         name="q"
         placeholder="¿Qué equipo buscas?"
         aria-label="Buscar equipos"
-        className="w-full rounded-full border border-black/10 bg-paper py-2.5 pl-4 pr-11 text-sm text-ink placeholder:text-muted/80 focus:border-pine-700 focus:bg-white focus:outline-none focus:ring-4 focus:ring-pine-700/10"
+        className="w-full rounded-full border border-line/10 bg-paper/70 py-2.5 pl-4 pr-11 text-sm text-ink placeholder:text-muted/80 focus:border-pine-700 focus:bg-surface focus:outline-none focus:ring-4 focus:ring-pine-700/10"
       />
       <button
         type="submit"
         aria-label="Buscar"
-        className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-pine hover:bg-mint-50"
+        className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-ink hover:bg-mint-50"
       >
         <StoreIcon name="search" className="w-[18px] h-[18px]" />
       </button>
@@ -90,7 +91,7 @@ export function Header({
       <header
         className={`sticky top-0 z-40 transition-shadow duration-300 ${scrolled ? "shadow-lg shadow-pine/[0.07]" : ""}`}
       >
-        <div className="bg-white/95 backdrop-blur border-b border-black/[0.06]">
+        <div className="bg-surface/95 backdrop-blur border-b border-line/[0.06]">
           <div className="shell h-16 flex items-center gap-6">
             <Link href="/" aria-label="TERC, ir al inicio" className="shrink-0">
               <Logo
@@ -98,10 +99,12 @@ export function Header({
               />
             </Link>
             <SearchForm className="hidden md:block flex-1 max-w-xl mx-auto" />
+            <div className="ml-auto md:ml-0 flex items-center gap-1">
+            <ThemeToggle />
             <Link
               href="/carrito"
               aria-label={`Carrito, ${count} productos`}
-              className="relative ml-auto md:ml-0 flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-ink hover:bg-paper"
+              className="relative flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-ink hover:bg-mint-50"
             >
               <StoreIcon name="cart" className="w-[22px] h-[22px]" />
               <span className="hidden sm:inline">Carrito</span>
@@ -111,6 +114,7 @@ export function Header({
                 </span>
               )}
             </Link>
+            </div>
           </div>
           <div className="md:hidden px-4 pb-3">
             <SearchForm />
@@ -118,12 +122,12 @@ export function Header({
           {categories.length > 0 && (
             <nav
               aria-label="Categorías"
-              className="border-t border-black/[0.06]"
+              className="border-t border-line/[0.06] bg-mint-50/70"
             >
               <div className="shell h-11 flex items-center gap-1 overflow-x-auto text-sm">
                 <Link
                   href="/#equipos"
-                  className="shrink-0 rounded-full px-3 py-1.5 font-medium text-ink hover:bg-paper"
+                  className="shrink-0 rounded-full px-3 py-1.5 font-medium text-ink hover:bg-surface"
                 >
                   Todos
                 </Link>
@@ -139,21 +143,21 @@ export function Header({
                   <Link
                     key={c}
                     href={`/?categoria=${encodeURIComponent(c)}#equipos`}
-                    className="shrink-0 rounded-full px-3 py-1.5 text-muted hover:bg-paper hover:text-ink"
+                    className="shrink-0 rounded-full px-3 py-1.5 text-muted hover:bg-surface hover:text-ink"
                   >
                     {c}
                   </Link>
                 ))}
                 <Link
                   href="/por-que-terc"
-                  className="ml-auto flex shrink-0 items-center gap-1 rounded-full py-1.5 pl-1 pr-3 text-muted hover:bg-paper hover:text-ink"
+                  className="ml-auto flex shrink-0 items-center gap-1 rounded-full py-1.5 pl-1 pr-3 text-muted hover:bg-surface hover:text-ink"
                 >
                   <Terqui pose="apunta" crop="asoma" className="terqui-peek -my-3 h-11 w-auto" />
                   Por qué TERC
                 </Link>
                 <Link
                   href="/empresas"
-                  className="shrink-0 rounded-full px-3 py-1.5 font-medium text-pine-700 hover:bg-mint-50"
+                  className="shrink-0 rounded-full px-3 py-1.5 font-medium text-pine-700 hover:bg-surface"
                 >
                   Empresas y cotizaciones
                 </Link>

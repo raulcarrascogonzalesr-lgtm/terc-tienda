@@ -22,13 +22,20 @@ export const metadata: Metadata = {
   verification: { google: SITE.googleSiteVerification },
 };
 
+// Aplica el modo oscuro antes de pintar la página, para que no parpadee en blanco.
+// Solo en la tienda: el panel /admin siempre va en claro.
+const THEME_SCRIPT = `try{if(!location.pathname.startsWith("/admin")&&localStorage.getItem("terc-tema")==="oscuro")document.documentElement.dataset.theme="dark"}catch(e){}`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es-CL" className={`${inter.variable} ${montserrat.variable}`}>
+    <html lang="es-CL" className={`${inter.variable} ${montserrat.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="antialiased min-h-screen">{children}</body>
     </html>
   );

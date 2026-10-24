@@ -23,8 +23,8 @@ export function AddToCartButton({ product, compact = false }: { product: Product
         disabled
         className={
           compact
-            ? "flex w-full items-center justify-center rounded-full bg-black/[0.06] px-4 py-2.5 text-sm font-semibold text-muted"
-            : "w-full rounded-full bg-black/[0.06] px-6 py-3.5 font-semibold text-muted"
+            ? "flex w-full items-center justify-center rounded-full bg-line/[0.06] px-4 py-2.5 text-sm font-semibold text-muted"
+            : "w-full rounded-full bg-line/[0.06] px-6 py-3.5 font-semibold text-muted"
         }
       >
         {compact ? "Muy pronto" : "Muy pronto podrás comprarlo"}
@@ -48,8 +48,8 @@ export function AddToCartButton({ product, compact = false }: { product: Product
       }}
       className={
         compact
-          ? "flex w-full items-center justify-center gap-2 rounded-full bg-pine px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-pine-700"
-          : "w-full rounded-full bg-pine px-6 py-3.5 font-semibold text-white transition hover:bg-pine-700"
+          ? "flex w-full items-center justify-center gap-2 rounded-full bg-cta px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-cta-hover"
+          : "w-full rounded-full bg-cta px-6 py-3.5 font-semibold text-white transition hover:bg-cta-hover"
       }
     >
       {compact && !added && <StoreIcon name="cart" className="w-4 h-4" />}

@@ -12,7 +12,7 @@ export function ResetCookies() {
         } catch {}
         window.location.reload();
       }}
-      className="rounded-full border border-black/15 px-4 py-2 text-sm font-semibold hover:bg-black/[0.04]"
+      className="rounded-full border border-line/15 px-4 py-2 text-sm font-semibold hover:bg-line/[0.04]"
     >
       Cambiar mi elección de cookies
     </button>
