@@ -2,7 +2,7 @@ import { formatDateTime, QUOTE_KIND_LABELS, QUOTE_STATUS_LABELS } from "@/lib/fo
 import type { Quote, QuoteStatus } from "@/lib/types";
 import { updateQuoteStatus } from "../actions";
 import { listQuotes } from "../data";
-import { Badge, PageHeader, Tip } from "../ui";
+import { Badge, PageHeader } from "../ui";
 
 export const dynamic = "force-dynamic";
 
@@ -86,7 +86,7 @@ export default async function QuotesPage() {
       <PageHeader
         eyebrow="Tienda"
         title="Cotizaciones"
-        subtitle="Las solicitudes de la página Empresas y cotizaciones: compras por volumen, arriendos y pedidos especiales."
+        subtitle="Las solicitudes de la página Empresas y cotizaciones: compras por volumen y pedidos especiales."
       />
       {quotes.length === 0 ? (
         <p className="text-[#6b716f]">Todavía no llegan solicitudes.</p>
@@ -110,10 +110,6 @@ export default async function QuotesPage() {
           )}
         </>
       )}
-      <Tip title="Antes de cotizar un arriendo">
-        Conversa con tu papá las condiciones: contrato, garantía y seguro de los equipos van a nombre de
-        Wiremax.
-      </Tip>
     </section>
   );
 }

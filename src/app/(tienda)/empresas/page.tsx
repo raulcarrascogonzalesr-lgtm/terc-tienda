@@ -7,7 +7,7 @@ import { QuoteForm } from "./QuoteForm";
 export const metadata: Metadata = {
   title: "Empresas y cotizaciones | TERC",
   description:
-    "Compras por volumen, arriendo de equipos y pedidos especiales de tecnología reacondicionada con garantía.",
+    "Compras por volumen y pedidos especiales de tecnología reacondicionada con garantía.",
 };
 
 type Props = { searchParams: Promise<{ tipo?: string }> };
@@ -18,12 +18,6 @@ const SERVICES: { kind: QuoteKind; icon: IconName; title: string; text: string }
     icon: "truck",
     title: "Compras por volumen",
     text: "Varios equipos para tu oficina, colegio o pyme. Te armamos una cotización con precio por cantidad y factura a nombre de tu empresa.",
-  },
-  {
-    kind: "arriendo",
-    icon: "clock",
-    title: "Arriendo de equipos",
-    text: "¿Necesitas equipos por un tiempo, para un proyecto o un evento? Consúltanos y vemos juntos qué alternativa te sirve.",
   },
   {
     kind: "otro",
@@ -42,7 +36,7 @@ const PERKS = [
 
 export default async function BusinessPage({ searchParams }: Props) {
   const { tipo } = await searchParams;
-  const kind: QuoteKind = tipo === "arriendo" || tipo === "otro" ? tipo : "volumen";
+  const kind: QuoteKind = tipo === "otro" ? "otro" : "volumen";
   const whatsapp = whatsappLink("Hola, quiero cotizar equipos para mi empresa");
 
   return (
@@ -51,8 +45,8 @@ export default async function BusinessPage({ searchParams }: Props) {
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-gold-700">Empresas y cotizaciones</p>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">Pedidos especiales y por volumen</h1>
         <p className="text-muted leading-relaxed">
-          Si necesitas varios equipos para tu empresa o institución, arrendar por un tiempo o algo que no
-          está en la tienda, cuéntanos y te preparamos una cotización.
+          Si necesitas varios equipos para tu empresa o institución, o algo que no está en la tienda,
+          cuéntanos y te preparamos una cotización.
         </p>
         <ul className="flex flex-wrap gap-x-5 gap-y-1.5 pt-1">
           {PERKS.map((perk) => (
@@ -63,7 +57,7 @@ export default async function BusinessPage({ searchParams }: Props) {
         </ul>
       </header>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-2">
         {SERVICES.map((s, i) => (
           <a
             key={s.kind}
