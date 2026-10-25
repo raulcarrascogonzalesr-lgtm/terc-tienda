@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { CutoutImage } from "@/components/CutoutImage";
 import { DiscountSticker } from "@/components/DiscountSticker";
 import { StoreIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
@@ -101,15 +100,11 @@ function ProductSlide({ product }: { product: Product }) {
       <div className="relative hidden sm:block">
         <div className="relative mx-auto aspect-square max-w-[360px]">
           {product.image_url ? (
-            // El equipo sin fondo, flotando sobre un brillo verde y con su sombra en el "piso".
-            <div className="relative h-full w-full">
-              <div className="absolute inset-x-0 inset-y-[8%] rounded-full bg-[radial-gradient(ellipse_at_50%_55%,rgba(61,181,133,0.38),rgba(61,181,133,0.1)_45%,transparent_70%)]" />
-              <div className="absolute inset-x-[14%] bottom-[9%] h-5 rounded-[50%] bg-black/55 blur-xl" />
-              <CutoutImage
-                src={product.image_url}
-                alt={product.name}
-                className="relative h-full w-full scale-110 drop-shadow-[0_24px_22px_rgba(0,0,0,0.45)]"
-              />
+            // La foto tal cual sobre un panel blanco: recortar el fondo en el navegador se comía las
+            // partes plateadas de los equipos.
+            <div className="h-full w-full overflow-hidden rounded-3xl bg-white p-[7%] shadow-2xl shadow-black/30">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={product.image_url} alt={product.name} className="h-full w-full object-contain" />
             </div>
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-[#f1efe8] to-[#e6ebe7] shadow-2xl shadow-black/30">
@@ -154,13 +149,13 @@ function CategoryTile({ tile }: { tile: Tile }) {
         <span className="block text-base sm:text-xl font-bold tracking-tight text-pine-700">{formatCLP(tile.from)}</span>
       </p>
       {tile.photo ? (
-        // La foto sobre un círculo verde con hojas de TERC, que asoma desde la esquina.
-        <div className="photo-stage absolute -bottom-[14%] -right-[8%] aspect-square w-[52%] overflow-hidden rounded-full sm:w-[60%]">
+        // La foto sobre un círculo blanco que asoma desde la esquina.
+        <div className="absolute bg-white ring-1 ring-black/[0.06] -bottom-[14%] -right-[8%] aspect-square w-[52%] overflow-hidden rounded-full sm:w-[60%]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={tile.photo}
             alt=""
-            className="absolute inset-0 h-full w-full object-contain p-[12%] pb-[22%] pr-[18%] mix-blend-multiply transition duration-500 group-hover:scale-105"
+            className="absolute inset-0 h-full w-full object-contain p-[12%] pb-[22%] pr-[18%] transition duration-500 group-hover:scale-105"
           />
         </div>
       ) : (

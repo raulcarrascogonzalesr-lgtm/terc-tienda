@@ -120,8 +120,8 @@ body {
 }
 
 @layer components {
-  /* Escenario de las fotos (tarjetas, ficha y categorías): degradado verde con hojas de TERC.
-     Las fotos van encima con mix-blend-multiply, así su fondo blanco toma este color. */
+  /* Fondo verde con hojas de TERC.
+     Hoy se usa para el aviso de equipo sin foto; las fotos van sobre blanco liso. */
   .photo-stage {
     background-color: var(--stage-1);
     background-image: radial-gradient(
