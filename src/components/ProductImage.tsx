@@ -2,7 +2,9 @@ import type { Product } from "@/lib/types";
 import { Mark } from "./Mark";
 
 // Escenario verde con hojas de TERC detrás de cada foto (clase .photo-stage en globals.css).
-export const PHOTO_BACKDROP = "relative photo-stage";
+// Fondo blanco liso detrás de las fotos: sin mezclar colores, así los equipos plateados y los
+// bordes de los recortes no toman el verde ni el dibujo de las hojas.
+export const PHOTO_BACKDROP = "relative bg-white";
 
 export function ProductImage({ product }: { product: Product }) {
   if (!product.image_url) {
@@ -23,7 +25,7 @@ export function ProductImage({ product }: { product: Product }) {
       <img
         src={product.image_url}
         alt={product.name}
-        className="h-full w-full object-contain p-[1.5%] mix-blend-multiply"
+        className="h-full w-full object-contain p-[1.5%]"
       />
     </div>
   );
