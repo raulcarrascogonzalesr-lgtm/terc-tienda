@@ -1,4 +1,4 @@
-import type { ShippingOption } from "./shipping";
+import { MIN_REGION_SHIPPING, type ShippingOption } from "./shipping";
 import { getPublicClient } from "./supabase";
 
 // Envío gratis en la Región Metropolitana: cada equipo trae un monto fijo para el envío
@@ -23,12 +23,12 @@ export function isMetropolitana(region: string) {
 }
 
 // Lo que paga el cliente por cada opción. En la RM se ofrece solo la más barata, gratis;
-// en regiones, cada opción con el descuento (nunca menos de $0). `cost` guarda lo que cobra el courier.
+// en regiones, cada opción con el descuento, pero nunca menos de MIN_REGION_SHIPPING. `cost` guarda lo que cobra el courier.
 export function withShippingFund(options: ShippingOption[], region: string, fundTotal: number): ShippingOption[] {
   if (fundTotal <= 0 || options.length === 0) return options;
   if (isMetropolitana(region)) {
     const cheapest = options.reduce((a, b) => (b.price < a.price ? b : a));
     return [{ ...cheapest, label: "Envío gratis", price: 0, cost: cheapest.price }];
   }
-  return options.map((o) => ({ ...o, price: Math.max(0, o.price - fundTotal), cost: o.price }));
+  return options.map((o) => ({ ...o, price: Math.max(MIN_REGION_SHIPPING, o.price - fundTotal), cost: o.price }));
 }

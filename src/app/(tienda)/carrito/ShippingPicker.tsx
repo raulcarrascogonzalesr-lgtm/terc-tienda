@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { formatCLP } from "@/lib/format";
-import { SHIPPING_ZONES, type Commune, type ShippingOption, type ShippingZone } from "@/lib/shipping";
+import { MIN_REGION_SHIPPING, SHIPPING_ZONES, type Commune, type ShippingOption, type ShippingZone } from "@/lib/shipping";
 import type { CartItem } from "@/lib/types";
 
 // Lo que el carrito manda al pagar: el envío cotizado con Shipit o, si Shipit no está
@@ -47,7 +47,7 @@ export function ShippingPicker({
   // Tarifa fija (sin Shipit) con el mismo descuento que hace el servidor al pagar.
   const units = items.reduce((n, i) => n + i.quantity, 0);
   const zonePrice = (z: ShippingZone) =>
-    fund > 0 ? (z === "rm" ? 0 : Math.max(0, SHIPPING_ZONES[z].price - fund * units)) : SHIPPING_ZONES[z].price;
+    fund > 0 ? (z === "rm" ? 0 : Math.max(MIN_REGION_SHIPPING, SHIPPING_ZONES[z].price - fund * units)) : SHIPPING_ZONES[z].price;
 
   const regions = useMemo(() => [...new Set((communes ?? []).map((c) => c.region))], [communes]);
   const cartKey = items.map((i) => `${i.productId}x${i.quantity}`).join(",");
