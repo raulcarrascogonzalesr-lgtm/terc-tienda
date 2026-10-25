@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { CutoutImage } from "@/components/CutoutImage";
 import { DiscountSticker } from "@/components/DiscountSticker";
@@ -10,6 +11,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { PromoCarousel } from "@/components/PromoCarousel";
 import { formatCLP, offer, savings } from "@/lib/format";
 import { listProducts } from "@/lib/products";
+import { jsonLdScript, storeJsonLd } from "@/lib/seo";
 import { getShippingFund } from "@/lib/shipping-fund";
 import type { Product } from "@/lib/types";
 
@@ -18,6 +20,19 @@ export const revalidate = 60;
 type Props = {
   searchParams: Promise<{ q?: string; categoria?: string; orden?: string; ofertas?: string }>;
 };
+
+// Cada categoría tiene su propio título en Google ("Notebooks reacondicionados…").
+// Las búsquedas, el orden y las ofertas son la misma portada, así que apuntan a ella.
+// (La categoría no lleva "canonical": Next.js le borra el "?categoria=" y la mandaría a la portada.)
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { categoria } = await searchParams;
+  const products = categoria ? await listProducts().catch(() => []) : [];
+  if (!categoria || !products.some((p) => p.category === categoria)) return { alternates: { canonical: "/" } };
+  return {
+    title: `${categoria} reacondicionados con garantía | TERC`,
+    description: `${categoria} reacondicionados baratos, revisados uno por uno y con garantía TERC. Paga en cuotas y recibe en todo Chile.`,
+  };
+}
 
 const SORTS = {
   recientes: "Más nuevos",
@@ -279,6 +294,11 @@ export default async function HomePage({ searchParams }: Props) {
 
   return (
     <div className="pb-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(storeJsonLd())} />
+      {/* Título principal para Google y lectores de pantalla; en pantalla lo reemplaza el carrusel. */}
+      <h1 className="sr-only">
+        {categoria ? `${categoria} reacondicionados con garantía` : "TERC: computadores y notebooks reacondicionados con garantía en Chile"}
+      </h1>
       {!filtering && (
         <section className="shell pt-5 grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           <div className="rise h-[420px] lg:h-[460px] min-w-0">

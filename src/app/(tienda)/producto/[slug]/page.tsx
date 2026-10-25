@@ -10,6 +10,7 @@ import { TrackView } from "@/components/TrackView";
 import { CONDITION, formatCLP, offer, savings } from "@/lib/format";
 import { getProductBySlug } from "@/lib/products";
 import { boxFor } from "@/lib/shipping";
+import { jsonLdScript, productDescription, productJsonLd } from "@/lib/seo";
 import { getShippingFund } from "@/lib/shipping-fund";
 import { SITE, whatsappLink } from "@/lib/site";
 
@@ -17,7 +18,20 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug((await params).slug);
-  return { title: product ? `${product.name} | TERC` : "Producto no encontrado" };
+  if (!product) return { title: "Producto no encontrado" };
+  const title = `${product.name} reacondicionado | TERC`;
+  const description = productDescription(product);
+  return {
+    title,
+    description,
+    alternates: { canonical: `/producto/${product.slug}` },
+    openGraph: {
+      title,
+      description,
+      url: `/producto/${product.slug}`,
+      ...(product.image_url ? { images: [product.image_url] } : {}),
+    },
+  };
 }
 
 export default async function ProductPage({ params }: Props) {
@@ -48,6 +62,7 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div className="shell py-6 sm:py-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(productJsonLd(product))} />
       <TrackView item={{ id: product.id, name: product.name, price: product.price, quantity: 1, category: product.category }} />
       <nav aria-label="Ruta" className="mb-6 text-sm text-muted">
         <Link href="/" className="hover:text-ink">
