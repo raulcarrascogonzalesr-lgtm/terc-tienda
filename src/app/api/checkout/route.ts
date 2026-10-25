@@ -2,13 +2,14 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { Preference } from "mercadopago";
 import { getAdminUser } from "@/lib/admin";
+import { addressLine, DWELLINGS, isDwelling, isFixedCourier, normalizePhone, normalizeRut } from "@/lib/address";
 import { checkCoupon, countCouponUses } from "@/lib/coupons";
 import { getMercadoPagoClient } from "@/lib/mercadopago";
 import { createWebpayTransaction, getWebpayConfig } from "@/lib/webpay";
 import { getProductsByIds } from "@/lib/products";
 import { findCommune, quoteWithFund } from "@/lib/shipit";
 import { getShippingFund } from "@/lib/shipping-fund";
-import { isShippingZone, SHIPPING_ZONES } from "@/lib/shipping";
+import { courierLabel, isShippingZone, SHIPPING_ZONES } from "@/lib/shipping";
 import { storeIsOpen } from "@/lib/store-status";
 import { getAdminClient } from "@/lib/supabase";
 import { sanitizeUtm } from "@/lib/utm";
@@ -17,6 +18,7 @@ type CheckoutBody = {
   items?: { productId?: unknown; quantity?: unknown }[];
   shippingZone?: unknown; // tarifas fijas, cuando Shipit no está disponible
   shipping?: { communeId?: unknown; courier?: unknown }; // envío cotizado con Shipit
+  preferredCourier?: unknown; // courier que eligió el cliente cuando el envío va con tarifa fija
   customer?: Record<string, unknown>;
   utm?: unknown;
   method?: unknown; // "webpay" o "mercadopago" (por defecto)
@@ -39,7 +41,13 @@ export async function GET() {
   return NextResponse.json({ methods: await availableMethods() });
 }
 
-const CUSTOMER_FIELDS = ["name", "email", "phone", "region", "comuna", "address"] as const;
+// Datos del cliente: los obligatorios y los que puede dejar en blanco.
+const REQUIRED_FIELDS = ["name", "email", "phone", "region", "comuna", "street", "number"] as const;
+const OPTIONAL_FIELDS = ["rut", "unit", "villa", "references"] as const;
+
+function text(value: unknown, max = 200) {
+  return typeof value === "string" ? value.trim().slice(0, max) : "";
+}
 
 export async function POST(request: Request) {
   // Con las compras cerradas desde el panel, solo el administrador puede pagar (para probar).
@@ -74,14 +82,37 @@ export async function POST(request: Request) {
     customer.region = commune.region;
     customer.comuna = commune.name;
   }
-  for (const field of CUSTOMER_FIELDS) {
+  for (const field of REQUIRED_FIELDS) {
     if (customer[field]) continue;
-    const value = body.customer?.[field];
-    if (typeof value !== "string" || value.trim() === "") {
-      return NextResponse.json({ error: "Faltan datos de envío" }, { status: 400 });
-    }
-    customer[field] = value.trim().slice(0, 200);
+    const value = text(body.customer?.[field]);
+    if (!value) return NextResponse.json({ error: "Faltan datos de envío" }, { status: 400 });
+    customer[field] = value;
   }
+  for (const field of OPTIONAL_FIELDS) {
+    const value = text(body.customer?.[field]);
+    if (value) customer[field] = value;
+  }
+  const phone = normalizePhone(customer.phone);
+  if (!phone) return NextResponse.json({ error: "El celular debe tener 9 dígitos" }, { status: 400 });
+  customer.phone = phone;
+  if (customer.rut) {
+    const rut = normalizeRut(customer.rut);
+    if (!rut) return NextResponse.json({ error: "El RUT no es válido" }, { status: 400 });
+    customer.rut = rut;
+  }
+  const dwelling = isDwelling(body.customer?.dwelling) ? body.customer.dwelling : "casa";
+  if (dwelling !== "casa" && !customer.unit) {
+    return NextResponse.json({ error: "Falta el número del depto u oficina" }, { status: 400 });
+  }
+  customer.dwelling = DWELLINGS[dwelling];
+  // La dirección en una línea, como la leen los correos, el panel y el courier.
+  customer.address = addressLine({
+    street: customer.street,
+    number: customer.number,
+    dwelling,
+    unit: customer.unit,
+    villa: customer.villa,
+  });
 
   const requested = body.items.map((i) => ({
     productId: String(i.productId),
@@ -118,20 +149,33 @@ export async function POST(request: Request) {
       );
     }
     customer.commune_id = String(commune.id);
+    // Si Shipit no pudo cotizar (tarifa fija), el courier es el que eligió el cliente.
+    if (isShippingZone(option.courier)) {
+      if (!isFixedCourier(body.preferredCourier)) {
+        return NextResponse.json({ error: "Elige con qué courier quieres recibirlo" }, { status: 400 });
+      }
+      customer.courier = courierLabel(body.preferredCourier);
+    } else {
+      customer.courier = option.label;
+    }
     shipping = {
       zone: isShippingZone(option.courier) ? option.courier : `shipit:${option.courier}`,
-      label: `${option.label} a ${commune.name}`,
+      label: `${customer.courier} a ${commune.name}`,
       price: option.price,
       quote: option.cost ?? option.price,
       fund: fundTotal,
     };
   } else {
     const zone = body.shippingZone as keyof typeof SHIPPING_ZONES;
+    if (!isFixedCourier(body.preferredCourier)) {
+      return NextResponse.json({ error: "Elige con qué courier quieres recibirlo" }, { status: 400 });
+    }
+    customer.courier = courierLabel(body.preferredCourier);
     const fund = (await getShippingFund()) * lines.reduce((n, l) => n + l.quantity, 0);
     const { label, price } = SHIPPING_ZONES[zone];
     shipping = {
       zone,
-      label: fund > 0 && zone === "rm" ? `Envío gratis (${label})` : label,
+      label: `${customer.courier} (${label})`,
       price: fund > 0 ? (zone === "rm" ? 0 : Math.max(0, price - fund)) : price,
       quote: price,
       fund,

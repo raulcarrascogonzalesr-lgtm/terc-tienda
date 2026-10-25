@@ -22,13 +22,14 @@ export function isMetropolitana(region: string) {
   return region.startsWith("Metropolitana");
 }
 
-// Lo que paga el cliente por cada opción. En la RM se ofrece solo la más barata, gratis;
-// en regiones, cada opción con el descuento (nunca menos de $0). `cost` guarda lo que cobra el courier.
+// Lo que paga el cliente por cada opción (nunca menos de $0). `cost` guarda lo que cobra el courier.
+// En regiones, a cada opción se le descuenta el fondo. En la RM el cliente igual elige courier:
+// la más barata siempre sale gratis, y las demás también, salvo que cuesten más que lo que
+// cubre TERC (el fondo o la más barata, lo que sea mayor); ahí el cliente paga solo la diferencia.
 export function withShippingFund(options: ShippingOption[], region: string, fundTotal: number): ShippingOption[] {
   if (fundTotal <= 0 || options.length === 0) return options;
-  if (isMetropolitana(region)) {
-    const cheapest = options.reduce((a, b) => (b.price < a.price ? b : a));
-    return [{ ...cheapest, label: "Envío gratis", price: 0, cost: cheapest.price }];
-  }
-  return options.map((o) => ({ ...o, price: Math.max(0, o.price - fundTotal), cost: o.price }));
+  const covered = isMetropolitana(region)
+    ? Math.max(fundTotal, Math.min(...options.map((o) => o.price)))
+    : fundTotal;
+  return options.map((o) => ({ ...o, price: Math.max(0, o.price - covered), cost: o.price }));
 }
