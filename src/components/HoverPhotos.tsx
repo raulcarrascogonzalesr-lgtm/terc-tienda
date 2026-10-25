@@ -49,7 +49,7 @@ export function HoverPhotos({ product }: { product: Product }) {
             key={src}
             src={src}
             alt={i === 0 ? product.name : ""}
-            className={`absolute inset-0 h-full w-full object-contain p-[1.5%] transition-[opacity,transform] ease-in-out ${
+            className={`absolute inset-0 h-full w-full object-contain p-[1.5%] mix-blend-multiply transition-[opacity,transform] ease-in-out ${
               i === index ? "opacity-100 scale-100" : "opacity-0 scale-[0.985]"
             }`}
             style={{ transitionDuration: `${FADE_MS}ms` }}
