@@ -10,6 +10,7 @@ import { TrackView } from "@/components/TrackView";
 import { CONDITION, formatCLP, offer, savings } from "@/lib/format";
 import { getProductBySlug } from "@/lib/products";
 import { boxFor } from "@/lib/shipping";
+import { getShippingFund } from "@/lib/shipping-fund";
 import { SITE, whatsappLink } from "@/lib/site";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProductPage({ params }: Props) {
-  const product = await getProductBySlug((await params).slug);
+  const [product, fund] = await Promise.all([getProductBySlug((await params).slug), getShippingFund()]);
   if (!product) notFound();
 
   const sale = offer(product);
@@ -36,9 +37,12 @@ export default async function ProductPage({ params }: Props) {
     { icon: "card", text: "Pago seguro con Mercado Pago, también en cuotas" },
     {
       icon: "truck",
-      text: product.on_demand
-        ? `Envío a todo Chile. Despacho en ${SITE.onDemandLeadTime}`
-        : "Envío a todo Chile",
+      text: [
+        fund > 0 ? "Envío gratis en toda la Región Metropolitana y más barato a regiones" : "Envío a todo Chile",
+        product.on_demand ? `Despacho en ${SITE.onDemandLeadTime}` : "",
+      ]
+        .filter(Boolean)
+        .join(". "),
     },
   ];
 
@@ -194,7 +198,7 @@ export default async function ProductPage({ params }: Props) {
               <dd className="text-ink">
                 {box.weight.toLocaleString("es-CL")} kg · {box.length} × {box.width} × {box.height} cm
                 <span className="block text-xs text-muted mt-0.5">
-                  Aproximado, con caja y protección. El costo del envío se calcula en el carrito según tu comuna.
+                  Aproximado, con caja y protección. {fund > 0 ? "En la Región Metropolitana el envío es gratis; a regiones se calcula en el carrito, con descuento." : "El costo del envío se calcula en el carrito según tu comuna."}
                 </span>
               </dd>
             </div>

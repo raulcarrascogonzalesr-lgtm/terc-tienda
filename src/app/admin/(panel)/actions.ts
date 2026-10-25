@@ -600,3 +600,30 @@ export async function deleteCoupon(code: string) {
   if (error) throw error;
   revalidatePath("/admin/cupones");
 }
+
+// Fondo de envío: cuánto trae cada equipo para pagar su envío (envío gratis en la RM). 0 lo apaga.
+export async function saveShippingFund(_prev: SaveResult, form: FormData): Promise<SaveResult> {
+  await requireAdmin();
+  const raw = String(form.get("shipping_fund") ?? "").replace(/[$.\s]/g, "");
+  const amount = raw === "" ? 0 : Number(raw);
+  if (!Number.isInteger(amount) || amount < 0 || amount > 50_000) {
+    return { error: "Escribe el monto en pesos, por ejemplo 7000 (o 0 para apagar el envío gratis)" };
+  }
+  const { error } = await db()
+    .from("settings")
+    .upsert({ key: "shipping_fund", value: String(amount), updated_at: new Date().toISOString() });
+  if (error) return { error: error.message };
+  revalidatePath("/", "layout");
+  return null;
+}
+
+// Lo que realmente se le pagó al courier por un pedido (si fue distinto a lo que cotizó Shipit).
+export async function saveShippingReal(id: string, form: FormData) {
+  await requireAdmin();
+  const raw = String(form.get("shipping_real") ?? "").replace(/[$.\s]/g, "");
+  const amount = raw === "" ? null : Number(raw);
+  if (amount !== null && (!Number.isInteger(amount) || amount < 0)) throw new Error("Monto no válido");
+  const { error } = await db().from("orders").update({ shipping_real: amount }).eq("id", id);
+  if (error) throw error;
+  revalidatePath("/admin", "layout");
+}

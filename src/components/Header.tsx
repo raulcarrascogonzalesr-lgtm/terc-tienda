@@ -34,11 +34,13 @@ export function Header({
   offerPercent,
   limitedOffers,
   offerName,
+  freeShipping,
 }: {
   categories: string[];
   offerPercent: number; // mayor descuento en oferta; 0 si no hay ofertas
   limitedOffers: boolean; // alguna oferta tiene fecha de término
   offerName: string | null; // nombre de la promoción, si tiene
+  freeShipping: boolean; // envío gratis en la Región Metropolitana
 }) {
   const { count } = useCart();
   // Al bajar, la franja de arriba se va con la página y el menú queda fijo, más compacto y con sombra.
@@ -72,13 +74,13 @@ export function Header({
       ) : (
         <div className="bg-pine text-[13px] text-white/85">
           <div className="shell h-9 flex items-center justify-center gap-6">
-            <span className="flex items-center gap-1.5">
+            <span className={`${freeShipping ? "hidden sm:flex" : "flex"} items-center gap-1.5`}>
               <StoreIcon name="shield" className="w-4 h-4 text-gold" />
               Todos los equipos con garantía
             </span>
-            <span className="hidden sm:flex items-center gap-1.5">
+            <span className={`${freeShipping ? "flex font-semibold text-white" : "hidden sm:flex"} items-center gap-1.5`}>
               <StoreIcon name="truck" className="w-4 h-4 text-gold" />
-              Envíos a todo Chile
+              {freeShipping ? "Envío gratis en toda la Región Metropolitana" : "Envíos a todo Chile"}
             </span>
             <span className="hidden md:flex items-center gap-1.5">
               <StoreIcon name="card" className="w-4 h-4 text-gold" />

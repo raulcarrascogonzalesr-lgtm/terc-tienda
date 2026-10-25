@@ -1,5 +1,6 @@
 import { courierLabel, ORIGIN_COMMUNE, packageFor, SHIPPING_ZONES, type Commune, type ShippingOption } from "./shipping";
 import { SAMPLE_COMMUNES, sampleOptions } from "./shipit-sample";
+import { getShippingFund, withShippingFund } from "./shipping-fund";
 
 // Conexión con Shipit (https://developers.shipit.cl) para cotizar envíos.
 // Las credenciales se cargan en cPanel: SHIPIT_EMAIL y SHIPIT_TOKEN.
@@ -138,4 +139,19 @@ async function shipitRates(
     if (!seen || option.price < seen.price) byCourier.set(courier, option);
   }
   return [...byCourier.values()].sort((a, b) => a.price - b.price);
+}
+
+// Opciones de envío como las ve el cliente: con el envío gratis en la RM y el descuento en
+// regiones según lo que trae cada equipo (fondo de envío × cantidad de equipos).
+export async function quoteWithFund(
+  destinyId: number,
+  lines: Parameters<typeof packageFor>[0],
+): Promise<{ options: ShippingOption[]; fundTotal: number }> {
+  const [options, fund, destiny] = await Promise.all([
+    quoteShipping(destinyId, lines),
+    getShippingFund(),
+    findCommune(destinyId),
+  ]);
+  const fundTotal = fund * lines.reduce((n, l) => n + l.quantity, 0);
+  return { options: destiny ? withShippingFund(options, destiny.region, fundTotal) : options, fundTotal };
 }

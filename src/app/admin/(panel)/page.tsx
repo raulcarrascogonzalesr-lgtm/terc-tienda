@@ -4,6 +4,7 @@ import { formatCLP, formatDateTime, ORDER_STATUS_LABELS } from "@/lib/format";
 import { countNewQuotes, loadBusiness } from "./data";
 import {
   campaignStats,
+  fundOrders,
   cashBalance,
   lastMonths,
   loanStatus,
@@ -16,7 +17,7 @@ import {
 import { ICONS } from "./icons";
 import { SalesChart } from "./SalesChart";
 import { StoreSwitch } from "./StoreSwitch";
-import { Badge, Card, Icon, PageHeader, Stat } from "./ui";
+import { Badge, Card, Icon, PageHeader, Result, Stat } from "./ui";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,8 @@ export default async function HomePage() {
     .filter((p) => p.active && p.stock <= 1)
     .sort((a, b) => a.stock - b.stock);
   const activeCampaigns = campaigns.filter((c) => c.active);
+  const fund = fundOrders(orders);
+  const fundLeft = fund.reduce((s, r) => s + r.left, 0);
 
   const steps = [
     {
@@ -188,6 +191,22 @@ export default async function HomePage() {
           }
         />
       </div>
+
+      {fund.length > 0 && (
+        <Link
+          href="/admin/envios"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#e4e2dc] bg-white px-5 py-3 text-sm transition hover:border-[#b5b2a8]"
+        >
+          <span>
+            <span className="font-semibold">Fondo de envío</span>
+            <span className="text-[#6b716f]"> · {fund.length} {fund.length === 1 ? "venta" : "ventas"} con envío gratis o con descuento</span>
+          </span>
+          <span className="font-semibold">
+            {fundLeft >= 0 ? "Te queda " : "Te falta "}
+            <Result value={fundLeft} />
+          </span>
+        </Link>
+      )}
 
       <Link
         href="/admin/iva"

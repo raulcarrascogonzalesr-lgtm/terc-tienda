@@ -10,6 +10,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { PromoCarousel } from "@/components/PromoCarousel";
 import { formatCLP, offer, savings } from "@/lib/format";
 import { listProducts } from "@/lib/products";
+import { getShippingFund } from "@/lib/shipping-fund";
 import type { Product } from "@/lib/types";
 
 export const revalidate = 60;
@@ -217,7 +218,11 @@ export default async function HomePage({ searchParams }: Props) {
   const onlyOffers = params.ofertas === "1";
   const sort: Sort = params.orden && params.orden in SORTS ? (params.orden as Sort) : "recientes";
 
-  const all = await listProducts();
+  const [all, fund] = await Promise.all([listProducts(), getShippingFund()]);
+  const freeShipping = fund > 0;
+  const benefits = freeShipping
+    ? BENEFITS.map((b) => (b.icon === "truck" ? { ...b, title: "Envío gratis en la RM", text: "Y más barato a regiones" } : b))
+    : BENEFITS;
   const query = normalize(q.trim());
   const filtered = sortProducts(
     all.filter(
@@ -282,9 +287,13 @@ export default async function HomePage({ searchParams }: Props) {
                 <ProductSlide key={p.id} product={p} />
               ))}
               <BrandSlide
-                eyebrow="Envíos a todo Chile"
-                title="Tu equipo, directo a tu puerta."
-                text="Despachamos a todo el país, bien embalado y con garantía."
+                eyebrow={freeShipping ? "Envío gratis en la Región Metropolitana" : "Envíos a todo Chile"}
+                title={freeShipping ? "En Santiago, el envío va por nuestra cuenta." : "Tu equipo, directo a tu puerta."}
+                text={
+                  freeShipping
+                    ? "Gratis a cualquier comuna de la Región Metropolitana. A regiones, con descuento en cada equipo."
+                    : "Despachamos a todo el país, bien embalado y con garantía."
+                }
                 icon="truck"
                 href="#equipos"
                 cta="Ver equipos"
@@ -329,9 +338,37 @@ export default async function HomePage({ searchParams }: Props) {
         </section>
       )}
 
+      {freeShipping && !filtering && (
+        <section className="shell pt-4">
+          <div
+            data-reveal
+            className="relative flex flex-wrap items-center gap-x-6 gap-y-3 overflow-hidden rounded-3xl bg-gold px-5 py-5 text-pine sm:px-8 sm:py-6"
+          >
+            <StoreIcon name="truck" className="absolute -right-6 -bottom-8 h-40 w-40 text-pine/10" />
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-pine text-gold">
+              <StoreIcon name="truck" className="h-7 w-7" />
+            </span>
+            <div className="relative min-w-0 flex-1">
+              <p className="font-[family-name:var(--font-display)] text-2xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+                Envío gratis a toda la Región Metropolitana
+              </p>
+              <p className="mt-1 text-sm font-semibold text-pine/75 sm:text-base">
+                Cualquier comuna, cualquier equipo. Y a regiones, más barato: ya te descontamos parte del envío.
+              </p>
+            </div>
+            <Link
+              href="#equipos"
+              className="relative inline-flex items-center gap-2 rounded-full bg-pine px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cta"
+            >
+              Ver equipos <StoreIcon name="arrow" className="w-4 h-4" />
+            </Link>
+          </div>
+        </section>
+      )}
+
       <section className="shell pt-4">
         <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {BENEFITS.map((b, i) => (
+          {benefits.map((b, i) => (
             <li
               key={b.title}
               data-reveal
