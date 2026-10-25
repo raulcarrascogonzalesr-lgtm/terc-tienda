@@ -9,6 +9,10 @@ export const SHIPPING_ZONES = {
 
 export type ShippingZone = keyof typeof SHIPPING_ZONES;
 
+// Con el envío gratis en la RM, a regiones el cliente paga al menos esto por el envío.
+// Lo que sobra sobre el costo del courier queda en el fondo y ayuda a tapar las comunas caras de la RM.
+export const MIN_REGION_SHIPPING = 2000;
+
 export function isShippingZone(value: unknown): value is ShippingZone {
   return typeof value === "string" && value in SHIPPING_ZONES;
 }

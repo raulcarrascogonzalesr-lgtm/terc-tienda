@@ -8,7 +8,7 @@ import { createWebpayTransaction, getWebpayConfig } from "@/lib/webpay";
 import { getProductsByIds } from "@/lib/products";
 import { findCommune, quoteWithFund } from "@/lib/shipit";
 import { getShippingFund } from "@/lib/shipping-fund";
-import { isShippingZone, SHIPPING_ZONES } from "@/lib/shipping";
+import { isShippingZone, MIN_REGION_SHIPPING, SHIPPING_ZONES } from "@/lib/shipping";
 import { storeIsOpen } from "@/lib/store-status";
 import { getAdminClient } from "@/lib/supabase";
 import { sanitizeUtm } from "@/lib/utm";
@@ -132,7 +132,7 @@ export async function POST(request: Request) {
     shipping = {
       zone,
       label: fund > 0 && zone === "rm" ? `Envío gratis (${label})` : label,
-      price: fund > 0 ? (zone === "rm" ? 0 : Math.max(0, price - fund)) : price,
+      price: fund > 0 ? (zone === "rm" ? 0 : Math.max(MIN_REGION_SHIPPING, price - fund)) : price,
       quote: price,
       fund,
     };
