@@ -8,15 +8,11 @@ import { useEffect, useState } from "react";
 // aunque tenga partes blancas por dentro, porque solo se borra el blanco conectado al borde.
 // Si algo falla (por ejemplo, la foto no permite leerse), se muestra la foto tal cual.
 
-const MAX_SIDE = 900; // suficiente para el banner y mucho más liviano que la original
+const MAX_SIDE = 1200; // suficiente para el banner y mucho más liviano que la original
+const WHITE = 246; // desde aquí un píxel cuenta como fondo (más bajo se come el plateado)
+const STEP = 10; // el relleno no cruza un cambio de color mayor a este entre vecinos
+const FEATHER = 2; // pasadas de suavizado del borde (cada una ~1 px)
 const cache = new Map<string, string>();
-
-function isBackground(p: Uint8ClampedArray, i: number) {
-  const r = p[i * 4];
-  const g = p[i * 4 + 1];
-  const b = p[i * 4 + 2];
-  return r > 230 && g > 230 && b > 230 && Math.max(r, g, b) - Math.min(r, g, b) < 16;
-}
 
 async function removeWhiteBackground(src: string): Promise<string> {
   const img = new Image();
@@ -26,6 +22,7 @@ async function removeWhiteBackground(src: string): Promise<string> {
   const scale = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
   const W = Math.round(img.naturalWidth * scale);
   const H = Math.round(img.naturalHeight * scale);
+  const N = W * H;
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
@@ -34,31 +31,63 @@ async function removeWhiteBackground(src: string): Promise<string> {
   const data = ctx.getImageData(0, 0, W, H);
   const p = data.data;
 
-  // Relleno desde los bordes hacia adentro.
-  const cleared = new Uint8Array(W * H);
+  const isBackground = (i: number) => {
+    const r = p[i * 4];
+    const g = p[i * 4 + 1];
+    const b = p[i * 4 + 2];
+    if (p[i * 4 + 3] < 8) return true;
+    return Math.min(r, g, b) >= WHITE && Math.max(r, g, b) - Math.min(r, g, b) < 12;
+  };
+  const step = (i: number, j: number) =>
+    Math.abs(p[i * 4] - p[j * 4]) + Math.abs(p[i * 4 + 1] - p[j * 4 + 1]) + Math.abs(p[i * 4 + 2] - p[j * 4 + 2]);
+
+  // Relleno desde los bordes hacia adentro. Se detiene en cualquier cambio brusco, así no
+  // entra en las partes plateadas casi blancas que tocan el fondo (bisagras, bordes).
+  const background = new Uint8Array(N);
   const stack: number[] = [];
   for (let x = 0; x < W; x++) stack.push(x, (H - 1) * W + x);
   for (let y = 0; y < H; y++) stack.push(y * W, y * W + W - 1);
   while (stack.length) {
     const i = stack.pop()!;
-    if (cleared[i] || !isBackground(p, i)) continue;
-    cleared[i] = 1;
-    p[i * 4 + 3] = 0;
+    if (background[i] || !isBackground(i)) continue;
+    background[i] = 1;
     const x = i % W;
-    if (x > 0) stack.push(i - 1);
-    if (x < W - 1) stack.push(i + 1);
-    if (i >= W) stack.push(i - W);
-    if (i < W * (H - 1)) stack.push(i + W);
+    for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, i >= W ? i - W : -1, i < N - W ? i + W : -1]) {
+      if (j >= 0 && !background[j] && (step(i, j) <= STEP || p[j * 4 + 3] < 8)) stack.push(j);
+    }
   }
-  // Borde suave: los píxeles claros que tocan el fondo quedan semitransparentes.
-  for (let i = 0; i < W * H; i++) {
-    if (cleared[i]) continue;
-    const x = i % W;
-    const touches =
-      (x > 0 && cleared[i - 1]) || (x < W - 1 && cleared[i + 1]) || cleared[i - W] || cleared[i + W];
-    if (!touches) continue;
-    const light = Math.min(p[i * 4], p[i * 4 + 1], p[i * 4 + 2]);
-    if (light > 200) p[i * 4 + 3] = Math.round((255 * (255 - light)) / 55);
+
+  // Borde suave: se difumina la máscara un par de píxeles (sin serrucho) y se le quita al
+  // borde el blanco del fondo original, para que no quede un halo claro sobre el verde.
+  let alpha = new Float32Array(N);
+  for (let i = 0; i < N; i++) alpha[i] = background[i] ? 0 : 1;
+  for (let pass = 0; pass < FEATHER; pass++) {
+    const blurred = new Float32Array(N);
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        let sum = 0;
+        let n = 0;
+        for (let dy = -1; dy <= 1; dy++) {
+          const yy = y + dy;
+          if (yy < 0 || yy >= H) continue;
+          for (let dx = -1; dx <= 1; dx++) {
+            const xx = x + dx;
+            if (xx < 0 || xx >= W) continue;
+            sum += alpha[yy * W + xx];
+            n++;
+          }
+        }
+        blurred[y * W + x] = sum / n;
+      }
+    }
+    alpha = blurred;
+  }
+  for (let i = 0; i < N; i++) {
+    const a = background[i] ? 0 : Math.min(1, alpha[i] * 1.6);
+    if (a > 0 && a < 1) {
+      for (let c = 0; c < 3; c++) p[i * 4 + c] = Math.max(0, Math.min(255, (p[i * 4 + c] - 255 * (1 - a)) / a));
+    }
+    p[i * 4 + 3] = Math.round(a * p[i * 4 + 3]);
   }
   ctx.putImageData(data, 0, 0);
   return canvas.toDataURL("image/png");
