@@ -58,8 +58,9 @@ export type Commune = { id: number; name: string; region: string };
 export type ShippingOption = {
   courier: string; // courier en Shipit, ej. "starken"; o "rm"/"regiones" para la tarifa fija
   label: string; // nombre para mostrar, ej. "Starken"
-  price: number;
+  price: number; // lo que paga el cliente
   days: number | null;
+  cost?: number; // lo que cobra el courier, cuando es distinto (envío gratis en la RM o descuento en regiones)
 };
 
 const COURIER_LABELS: Record<string, string> = {

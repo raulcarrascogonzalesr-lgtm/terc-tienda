@@ -174,7 +174,7 @@ export default function CartPage() {
         <dl className="text-sm space-y-1 border-t border-line/10 pt-4">
           <Row label="Productos" value={formatCLP(total)} />
           {activeCoupon && <Row label={`Cupón ${activeCoupon.code}`} value={`−${formatCLP(discount)}`} />}
-          <Row label="Envío" value={shipping === null ? "Elige tu comuna" : formatCLP(shipping)} />
+          <Row label="Envío" value={shipping === null ? "Elige tu comuna" : shipping === 0 ? "Gratis" : formatCLP(shipping)} />
           <Row label="Total" value={formatCLP(total - discount + (shipping ?? 0))} bold />
         </dl>
 

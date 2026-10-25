@@ -6,7 +6,8 @@ import { checkCoupon, countCouponUses } from "@/lib/coupons";
 import { getMercadoPagoClient } from "@/lib/mercadopago";
 import { createWebpayTransaction, getWebpayConfig } from "@/lib/webpay";
 import { getProductsByIds } from "@/lib/products";
-import { findCommune, quoteShipping } from "@/lib/shipit";
+import { findCommune, quoteWithFund } from "@/lib/shipit";
+import { getShippingFund } from "@/lib/shipping-fund";
 import { isShippingZone, SHIPPING_ZONES } from "@/lib/shipping";
 import { storeIsOpen } from "@/lib/store-status";
 import { getAdminClient } from "@/lib/supabase";
@@ -104,10 +105,11 @@ export async function POST(request: Request) {
     lines.push({ product, quantity: item.quantity });
   }
 
-  let shipping: { zone: string; label: string; price: number };
+  // quote: lo que cobra el courier; fund: lo que trajeron los equipos para el envío (envío gratis en la RM).
+  let shipping: { zone: string; label: string; price: number; quote: number; fund: number };
   if (commune) {
     // El precio del envío también se vuelve a cotizar aquí, nunca se toma del navegador.
-    const options = await quoteShipping(commune.id, lines);
+    const { options, fundTotal } = await quoteWithFund(commune.id, lines);
     const option = options.find((o) => o.courier === body.shipping?.courier);
     if (!option) {
       return NextResponse.json(
@@ -120,10 +122,20 @@ export async function POST(request: Request) {
       zone: isShippingZone(option.courier) ? option.courier : `shipit:${option.courier}`,
       label: `${option.label} a ${commune.name}`,
       price: option.price,
+      quote: option.cost ?? option.price,
+      fund: fundTotal,
     };
   } else {
     const zone = body.shippingZone as keyof typeof SHIPPING_ZONES;
-    shipping = { zone, ...SHIPPING_ZONES[zone] };
+    const fund = (await getShippingFund()) * lines.reduce((n, l) => n + l.quantity, 0);
+    const { label, price } = SHIPPING_ZONES[zone];
+    shipping = {
+      zone,
+      label: fund > 0 && zone === "rm" ? `Envío gratis (${label})` : label,
+      price: fund > 0 ? (zone === "rm" ? 0 : Math.max(0, price - fund)) : price,
+      quote: price,
+      fund,
+    };
   }
   const subtotal = lines.reduce((sum, l) => sum + l.product.price * l.quantity, 0);
   const orderId = randomUUID();
@@ -155,6 +167,8 @@ export async function POST(request: Request) {
       customer,
       shipping_zone: shipping.zone,
       shipping_cost: shipping.price,
+      // Solo con el envío gratis activo (antes de correr envio-gratis.sql estas columnas no existen).
+      ...(shipping.fund > 0 ? { shipping_fund: shipping.fund, shipping_quote: shipping.quote } : {}),
       subtotal,
       discount,
       coupon_code: coupon?.code ?? null,
@@ -225,13 +239,18 @@ export async function POST(request: Request) {
             ...(l.quantity - (discounted ? 1 : 0) > 0 ? [{ ...full, quantity: l.quantity - (discounted ? 1 : 0) }] : []),
           ];
         }),
-        {
-          id: `envio-${shipping.zone}`,
-          title: `Envío ${shipping.label}`,
-          quantity: 1,
-          unit_price: shipping.price,
-          currency_id: "CLP",
-        },
+        // Mercado Pago no acepta líneas de $0: con envío gratis, el envío no va como línea.
+        ...(shipping.price > 0
+          ? [
+              {
+                id: `envio-${shipping.zone}`,
+                title: `Envío ${shipping.label}`,
+                quantity: 1,
+                unit_price: shipping.price,
+                currency_id: "CLP",
+              },
+            ]
+          : []),
       ],
       payer: { name: customer.name, email: customer.email },
       back_urls: {

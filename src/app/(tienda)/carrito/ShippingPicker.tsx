@@ -32,13 +32,22 @@ export function ShippingPicker({
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [courier, setCourier] = useState<string | null>(null);
   const [zone, setZone] = useState<ShippingZone>("rm");
+  const [fund, setFund] = useState(0); // lo que trae cada equipo para el envío (envío gratis en la RM)
 
   useEffect(() => {
     fetch("/api/envio")
       .then((r) => r.json())
-      .then((d) => setCommunes(d.communes ?? null))
+      .then((d) => {
+        setCommunes(d.communes ?? null);
+        setFund(Number(d.fund) || 0);
+      })
       .catch(() => setCommunes(null));
   }, []);
+
+  // Tarifa fija (sin Shipit) con el mismo descuento que hace el servidor al pagar.
+  const units = items.reduce((n, i) => n + i.quantity, 0);
+  const zonePrice = (z: ShippingZone) =>
+    fund > 0 ? (z === "rm" ? 0 : Math.max(0, SHIPPING_ZONES[z].price - fund * units)) : SHIPPING_ZONES[z].price;
 
   const regions = useMemo(() => [...new Set((communes ?? []).map((c) => c.region))], [communes]);
   const cartKey = items.map((i) => `${i.productId}x${i.quantity}`).join(",");
@@ -74,12 +83,12 @@ export function ShippingPicker({
 
   const selected = options?.find((o) => o.courier === courier) ?? null;
   useEffect(() => {
-    if (communes === null) onChange({ price: SHIPPING_ZONES[zone].price, payload: { shippingZone: zone } });
+    if (communes === null) onChange({ price: zonePrice(zone), payload: { shippingZone: zone } });
     else if (communeId && selected)
       onChange({ price: selected.price, payload: { shipping: { communeId, courier: selected.courier } } });
     else onChange(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [communes, zone, communeId, selected?.courier, selected?.price]);
+  }, [communes, zone, communeId, selected?.courier, selected?.price, fund, units]);
 
   if (communes === undefined) {
     return <p className="text-sm text-muted">Cargando comunas…</p>;
@@ -94,7 +103,7 @@ export function ShippingPicker({
           <select value={zone} onChange={(e) => setZone(e.target.value as ShippingZone)} className={field}>
             {Object.entries(SHIPPING_ZONES).map(([key, z]) => (
               <option key={key} value={key}>
-                {z.label} ({formatCLP(z.price)})
+                {z.label} ({zonePrice(key as ShippingZone) === 0 ? "gratis" : formatCLP(zonePrice(key as ShippingZone))})
               </option>
             ))}
           </select>
@@ -187,7 +196,14 @@ export function ShippingPicker({
                   )}
                   {daysLabel(o.days) && <span className="block text-xs text-muted">{daysLabel(o.days)}</span>}
                 </span>
-                <span className="font-semibold text-ink">{formatCLP(o.price)}</span>
+                <span className="text-right">
+                  {o.cost !== undefined && o.cost > o.price && (
+                    <span className="block text-xs text-muted line-through">{formatCLP(o.cost)}</span>
+                  )}
+                  <span className={`font-semibold ${o.price === 0 ? "text-pine-700" : "text-ink"}`}>
+                    {o.price === 0 ? "Gratis" : formatCLP(o.price)}
+                  </span>
+                </span>
               </label>
             ))
           )}

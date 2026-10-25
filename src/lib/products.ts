@@ -1,4 +1,5 @@
 import { todayInChile } from "./format";
+import { getShippingFund } from "./shipping-fund";
 import { getPublicClient } from "./supabase";
 import { SAMPLE_PRODUCTS } from "./sample-products";
 import type { Product } from "./types";
@@ -15,18 +16,26 @@ function withOfferExpiry(product: Product): Product {
   return { ...product, price: before, compare_price: null, offer_ends_at: null, offer_name: null };
 }
 
+// El cliente ve el precio con el fondo de envío incluido (también el precio "antes" de una oferta,
+// para que el descuento siga siendo el mismo). El panel sigue mostrando el precio guardado.
+function withFund(fund: number) {
+  return (product: Product): Product => {
+    const p = withOfferExpiry(product);
+    if (fund <= 0) return p;
+    return { ...p, price: p.price + fund, compare_price: p.compare_price ? p.compare_price + fund : p.compare_price };
+  };
+}
+
 export async function listProducts(): Promise<Product[]> {
   const supabase = getPublicClient();
   if (!supabase) return SAMPLE_PRODUCTS.map(withOfferExpiry);
 
-  const { data, error } = await supabase
-    .from("products")
-    .select(PRODUCT_COLUMNS)
-    .eq("active", true)
-    .gt("stock", 0)
-    .order("created_at", { ascending: false });
+  const [{ data, error }, fund] = await Promise.all([
+    supabase.from("products").select(PRODUCT_COLUMNS).eq("active", true).gt("stock", 0).order("created_at", { ascending: false }),
+    getShippingFund(),
+  ]);
   if (error) throw error;
-  return (data as Product[]).map(withOfferExpiry);
+  return (data as Product[]).map(withFund(fund));
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
@@ -36,14 +45,12 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     return sample ? withOfferExpiry(sample) : null;
   }
 
-  const { data, error } = await supabase
-    .from("products")
-    .select(PRODUCT_COLUMNS)
-    .eq("slug", slug)
-    .eq("active", true)
-    .maybeSingle();
+  const [{ data, error }, fund] = await Promise.all([
+    supabase.from("products").select(PRODUCT_COLUMNS).eq("slug", slug).eq("active", true).maybeSingle(),
+    getShippingFund(),
+  ]);
   if (error) throw error;
-  return data ? withOfferExpiry(data as Product) : null;
+  return data ? withFund(fund)(data as Product) : null;
 }
 
 export async function getProductsByIds(ids: string[]): Promise<Product[]> {
@@ -51,11 +58,10 @@ export async function getProductsByIds(ids: string[]): Promise<Product[]> {
   if (!supabase) return SAMPLE_PRODUCTS.filter((p) => ids.includes(p.id)).map(withOfferExpiry);
 
   // Solo productos visibles: si uno se ocultó mientras estaba en un carrito, ya no se puede pagar.
-  const { data, error } = await supabase
-    .from("products")
-    .select(PRODUCT_COLUMNS)
-    .in("id", ids)
-    .eq("active", true);
+  const [{ data, error }, fund] = await Promise.all([
+    supabase.from("products").select(PRODUCT_COLUMNS).in("id", ids).eq("active", true),
+    getShippingFund(),
+  ]);
   if (error) throw error;
-  return (data as Product[]).map(withOfferExpiry);
+  return (data as Product[]).map(withFund(fund));
 }

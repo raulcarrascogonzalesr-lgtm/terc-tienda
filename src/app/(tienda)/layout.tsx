@@ -8,6 +8,7 @@ import { UtmCapture } from "@/components/UtmCapture";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { offer } from "@/lib/format";
 import { listProducts } from "@/lib/products";
+import { getShippingFund } from "@/lib/shipping-fund";
 import { storeIsOpen } from "@/lib/store-status";
 
 // Las páginas fijas de la tienda (carrito, Por qué TERC, Empresas) se rehacen cada minuto.
@@ -17,7 +18,7 @@ import { storeIsOpen } from "@/lib/store-status";
 export const revalidate = 60;
 
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
-  const [products, open] = await Promise.all([listProducts(), storeIsOpen()]);
+  const [products, open, fund] = await Promise.all([listProducts(), storeIsOpen(), getShippingFund()]);
   const categories = [...new Set(products.map((p) => p.category))].sort();
   const offers = products.filter((p) => offer(p));
   // "Solo por tiempo limitado" se dice únicamente de las ofertas que tienen fecha de término.
@@ -32,7 +33,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
       <ScrollReveal />
       <div className="min-h-screen flex flex-col bg-paper text-ink">
         {!open && <PreparingBanner />}
-        <Header categories={categories} offerPercent={offerPercent} limitedOffers={limitedOffers} offerName={offerName} />
+        <Header categories={categories} offerPercent={offerPercent} limitedOffers={limitedOffers} offerName={offerName} freeShipping={fund > 0} />
         <main className="flex-1 w-full">{children}</main>
         <Footer categories={categories} />
       </div>

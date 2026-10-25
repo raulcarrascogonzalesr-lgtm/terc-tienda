@@ -75,6 +75,9 @@ export type Order = {
   utm: Record<string, string> | null;
   coupon_code?: string | null; // cupón usado en el pedido
   discount?: number; // pesos descontados con el cupón (con IVA); total = subtotal − descuento + envío
+  shipping_fund?: number; // lo que trajeron los equipos para el envío (envío gratis en la RM), ya incluido en el subtotal
+  shipping_quote?: number | null; // lo que cotizó el courier al pagar
+  shipping_real?: number | null; // lo que realmente se le pagó al courier, si se corrigió en el panel
 };
 
 // Cupón de descuento para un equipo. Solo lo ve el panel.

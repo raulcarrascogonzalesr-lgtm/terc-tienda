@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import { getProductsByIds } from "@/lib/products";
-import { getCommunes, quoteShipping } from "@/lib/shipit";
+import { getCommunes, quoteWithFund } from "@/lib/shipit";
+import { getShippingFund } from "@/lib/shipping-fund";
 
 export const dynamic = "force-dynamic";
 
 // Comunas a las que se puede enviar. communes es null cuando Shipit no está disponible:
-// el carrito usa entonces las tarifas fijas.
+// el carrito usa entonces las tarifas fijas. fund es lo que trae cada equipo para el envío.
 export async function GET() {
-  return NextResponse.json({ communes: await getCommunes() });
+  const [communes, fund] = await Promise.all([getCommunes(), getShippingFund()]);
+  return NextResponse.json({ communes, fund });
 }
 
 // Cotiza el envío del carrito a una comuna.
@@ -26,5 +28,6 @@ export async function POST(request: Request) {
     const quantity = Math.max(1, Math.floor(Number(i.quantity)) || 1);
     return product ? [{ product, quantity }] : [];
   });
-  return NextResponse.json({ options: await quoteShipping(communeId, lines) });
+  const { options } = await quoteWithFund(communeId, lines);
+  return NextResponse.json({ options });
 }

@@ -126,6 +126,19 @@ export function isSold(order: Order): boolean {
   return SOLD.has(order.status);
 }
 
+// Fondo de envío de un pedido: lo que entró para el envío (lo que trajeron los equipos + lo que
+// pagó el cliente) menos lo que cuesta el courier (lo corregido a mano o lo que cotizó Shipit al pagar).
+export function shippingFundResult(order: Order) {
+  const came = (order.shipping_fund ?? 0) + order.shipping_cost;
+  const paid = order.shipping_real ?? order.shipping_quote ?? 0;
+  return { came, paid, left: came - paid };
+}
+
+// Pedidos vendidos con envío gratis o con descuento (los que usan el fondo de envío).
+export function fundOrders(orders: Order[]) {
+  return orders.filter((o) => isSold(o) && (o.shipping_fund ?? 0) > 0).map((o) => ({ order: o, ...shippingFundResult(o) }));
+}
+
 export function saleMonth(order: Order): string {
   return monthOf(order.paid_at ?? order.created_at);
 }
