@@ -3,6 +3,14 @@
 Reglas que se usan cada vez que llega la lista de precios del proveedor.
 Si una regla cambia (por ejemplo, el margen), se cambia aquí y vale desde la próxima lista.
 
+## Lo que no se carga
+
+- **No cargar monitores de la lista del proveedor** (decisión de Raúl, 26-10-2026: dejan poca
+  ganancia y si llegan rotos se pierde plata). Las filas de monitores se saltan; no se
+  publican ni se vuelven a activar. Los que ya estaban quedaron con `active = false`.
+- La categoría "Monitores" desaparece sola del menú, los filtros y la portada cuando no hay
+  monitores activos con stock, porque las categorías salen de los productos visibles.
+
 ## Productos del proveedor
 
 - Los productos de la lista **no son stock propio**: se guardan con `on_demand = true`.
