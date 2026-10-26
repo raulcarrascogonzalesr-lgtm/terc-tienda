@@ -29,6 +29,12 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
   return (
     <form action={action} className="bg-white rounded-xl border border-[#e4e2dc] p-6 space-y-5">
       {product && <input type="hidden" name="id" value={product.id} />}
+      {product && (
+        <p className="text-sm text-[#6b716f]">
+          SKU <span className="font-mono font-semibold text-[#1f2a27]">{product.sku}</span>
+          <span className="block text-xs">Lo pone la tienda sola y no cambia.</span>
+        </p>
+      )}
 
       <Field label="Nombre" hint="Ej: iPhone 12 128 GB Azul">
         <input name="name" required defaultValue={product?.name} className="input" />

@@ -5,6 +5,7 @@ import type { Product } from "./types";
 export const SAMPLE_PRODUCTS: Product[] = [
   {
     id: "demo-1",
+    sku: "TERC-00001",
     slug: "iphone-12-128gb-azul",
     name: "iPhone 12 128 GB Azul",
     brand: "Apple",
@@ -29,6 +30,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
   },
   {
     id: "demo-2",
+    sku: "TERC-00002",
     slug: "lenovo-thinkpad-t480-i5-16gb",
     name: "Lenovo ThinkPad T480 i5 16 GB 256 GB SSD",
     brand: "Lenovo",
@@ -53,6 +55,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
   },
   {
     id: "demo-3",
+    sku: "TERC-00003",
     slug: "samsung-galaxy-s21-128gb",
     name: "Samsung Galaxy S21 128 GB Gris",
     brand: "Samsung",
@@ -77,6 +80,7 @@ export const SAMPLE_PRODUCTS: Product[] = [
   },
   {
     id: "demo-4",
+    sku: "TERC-00004",
     slug: "ipad-9-64gb-wifi",
     name: "iPad 9ª generación 64 GB Wi-Fi",
     brand: "Apple",

@@ -106,6 +106,7 @@ export default async function ProductPage({ params }: Props) {
             </div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
               {product.brand}
+              <span className="ml-2 font-normal normal-case tracking-normal">SKU {product.sku}</span>
             </p>
             <h1 className="text-3xl font-semibold leading-tight tracking-tight text-ink">
               {product.name}
