@@ -33,6 +33,7 @@ function firstName(order: Order): string {
 }
 
 function courierOf(order: Order): string | null {
+  if (order.customer.courier) return order.customer.courier;
   if (order.shipping_zone.startsWith("shipit:")) return courierLabel(order.shipping_zone.slice(7));
   return isShippingZone(order.shipping_zone) ? null : order.shipping_zone;
 }
@@ -282,7 +283,7 @@ export function saleNotice(order: Order, info: Map<string, ItemInfo>) {
     title: `¡Nueva venta ${number}!`,
     intro: `${formatCLP(order.total)} · ${escapeHtml(c.name ?? "")}`,
     body: `${itemsCard(order, info)}
-      ${infoBox("Cliente", `${escapeHtml(c.name ?? "")}<br>${escapeHtml(c.email ?? "")} · ${escapeHtml(c.phone ?? "")}<br>${escapeHtml(addressOf(order))}`)}
+      ${infoBox("Cliente", `${escapeHtml(c.name ?? "")}${c.rut ? ` · RUT ${escapeHtml(c.rut)}` : ""}<br>${escapeHtml(c.email ?? "")} · ${escapeHtml(c.phone ?? "")}<br>${escapeHtml(addressOf(order))}${c.references ? `<br>Indicaciones: ${escapeHtml(c.references)}` : ""}${c.courier ? `<br>Courier que eligió: <strong>${escapeHtml(c.courier)}</strong>` : ""}`)}
       <p style="margin:0;text-align:center">${button(link, "Ver el pedido en el panel")}</p>`,
   });
   const text = [
@@ -290,8 +291,10 @@ export function saleNotice(order: Order, info: Map<string, ItemInfo>) {
     "",
     itemsText(order),
     "",
-    `Cliente: ${c.name ?? ""} · ${c.email ?? ""} · ${c.phone ?? ""}`,
+    `Cliente: ${c.name ?? ""}${c.rut ? ` · RUT ${c.rut}` : ""} · ${c.email ?? ""} · ${c.phone ?? ""}`,
     addressOf(order),
+    ...(c.references ? [`Indicaciones: ${c.references}`] : []),
+    ...(c.courier ? [`Courier que eligió: ${c.courier}`] : []),
     "",
     `Ver el pedido: ${link}`,
   ].join("\n");
