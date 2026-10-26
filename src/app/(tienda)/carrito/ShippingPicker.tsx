@@ -1,15 +1,31 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { FIXED_COURIERS } from "@/lib/address";
 import { formatCLP } from "@/lib/format";
-import { MIN_REGION_SHIPPING, SHIPPING_ZONES, type Commune, type ShippingOption, type ShippingZone } from "@/lib/shipping";
+import {
+  courierLabel,
+  isShippingZone,
+  MIN_REGION_SHIPPING,
+  SHIPPING_ZONES,
+  type Commune,
+  type ShippingOption,
+  type ShippingZone,
+} from "@/lib/shipping";
 import type { CartItem } from "@/lib/types";
 
 // Lo que el carrito manda al pagar: el envío cotizado con Shipit o, si Shipit no está
-// disponible, una de las tarifas fijas.
-export type ShippingChoice =
-  | { price: number; payload: { shipping: { communeId: number; courier: string } } }
-  | { price: number; payload: { shippingZone: ShippingZone } };
+// disponible, una de las tarifas fijas. Con tarifa fija el cliente igual elige courier
+// (preferredCourier), para saber con quién despachar.
+export type ShippingChoice = {
+  price: number;
+  region: string;
+  comuna: string;
+  courier: string; // nombre del courier para mostrar, ej. "Starken"
+  payload:
+    | { shipping: { communeId: number; courier: string }; preferredCourier?: string }
+    | { shippingZone: ShippingZone; preferredCourier: string };
+};
 
 const field = "mt-1 w-full border border-line/20 rounded px-3 py-2 bg-surface";
 
@@ -32,6 +48,9 @@ export function ShippingPicker({
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [courier, setCourier] = useState<string | null>(null);
   const [zone, setZone] = useState<ShippingZone>("rm");
+  const [fixedRegion, setFixedRegion] = useState("");
+  const [fixedComuna, setFixedComuna] = useState("");
+  const [preferred, setPreferred] = useState<string>(FIXED_COURIERS[0]);
   const [fund, setFund] = useState(0); // lo que trae cada equipo para el envío (envío gratis en la RM)
 
   useEffect(() => {
@@ -82,13 +101,58 @@ export function ShippingPicker({
   }, [communeId, cartKey]);
 
   const selected = options?.find((o) => o.courier === courier) ?? null;
+  // Si Shipit no pudo cotizar, la opción es una tarifa fija y el cliente elige el courier aparte.
+  const fixedQuote = selected ? isShippingZone(selected.courier) : false;
   useEffect(() => {
-    if (communes === null) onChange({ price: zonePrice(zone), payload: { shippingZone: zone } });
-    else if (communeId && selected)
-      onChange({ price: selected.price, payload: { shipping: { communeId, courier: selected.courier } } });
-    else onChange(null);
+    if (communes === null) {
+      onChange(
+        fixedRegion.trim() && fixedComuna.trim()
+          ? {
+              price: zonePrice(zone),
+              region: fixedRegion.trim(),
+              comuna: fixedComuna.trim(),
+              courier: courierLabel(preferred),
+              payload: { shippingZone: zone, preferredCourier: preferred },
+            }
+          : null,
+      );
+    } else if (communeId && selected) {
+      const commune = communes?.find((c) => c.id === communeId);
+      onChange({
+        price: selected.price,
+        region: commune?.region ?? "",
+        comuna: commune?.name ?? "",
+        courier: fixedQuote ? courierLabel(preferred) : selected.label,
+        payload: {
+          shipping: { communeId, courier: selected.courier },
+          ...(fixedQuote ? { preferredCourier: preferred } : {}),
+        },
+      });
+    } else onChange(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [communes, zone, communeId, selected?.courier, selected?.price, fund, units]);
+  }, [communes, zone, communeId, selected?.courier, selected?.price, fund, units, fixedRegion, fixedComuna, preferred]);
+
+  // Elección de courier cuando el envío va con tarifa fija (mismo precio para todos).
+  const courierChooser = (
+    <fieldset className="space-y-2">
+      <legend className="mb-1 text-sm">¿Con qué courier lo enviamos?</legend>
+      {FIXED_COURIERS.map((c) => (
+        <label
+          key={c}
+          className="flex cursor-pointer items-center gap-3 rounded-xl border border-line/10 px-3 py-2.5 text-sm has-[:checked]:border-pine-700 has-[:checked]:bg-mint-50"
+        >
+          <input
+            type="radio"
+            name="preferred-courier"
+            checked={preferred === c}
+            onChange={() => setPreferred(c)}
+            className="accent-pine-700"
+          />
+          <span className="font-semibold text-ink">{courierLabel(c)}</span>
+        </label>
+      ))}
+    </fieldset>
+  );
 
   if (communes === undefined) {
     return <p className="text-sm text-muted">Cargando comunas…</p>;
@@ -110,12 +174,13 @@ export function ShippingPicker({
         </label>
         <label className="block text-sm">
           Región
-          <input name="region" required className={field} />
+          <input value={fixedRegion} onChange={(e) => setFixedRegion(e.target.value)} required className={field} />
         </label>
         <label className="block text-sm">
           Comuna
-          <input name="comuna" required className={field} />
+          <input value={fixedComuna} onChange={(e) => setFixedComuna(e.target.value)} required className={field} />
         </label>
+        {courierChooser}
       </>
     );
   }
@@ -189,7 +254,7 @@ export function ShippingPicker({
                 />
                 <span className="flex-1">
                   <span className="font-semibold text-ink">{o.label}</span>
-                  {i === 0 && options.length > 1 && (
+                  {i === 0 && options.length > 1 && o.price > 0 && (
                     <span className="ml-2 rounded-full bg-gold/20 px-2 py-0.5 text-[11px] font-semibold text-gold-700">
                       Más barato
                     </span>
@@ -209,6 +274,7 @@ export function ShippingPicker({
           )}
         </fieldset>
       )}
+      {fixedQuote && courierChooser}
     </>
   );
 }

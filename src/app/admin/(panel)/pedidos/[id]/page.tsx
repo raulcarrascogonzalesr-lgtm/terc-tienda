@@ -11,11 +11,15 @@ export const dynamic = "force-dynamic";
 
 const CUSTOMER_LABELS: Record<string, string> = {
   name: "Nombre",
+  rut: "RUT",
   email: "Correo",
   phone: "Teléfono",
+  courier: "Courier que eligió",
   region: "Región",
   comuna: "Comuna",
   address: "Dirección",
+  dwelling: "Tipo de lugar",
+  references: "Indicaciones",
 };
 
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
@@ -37,7 +41,8 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       <div className="grid md:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl border border-[#e4e2dc] p-4 space-y-2 text-sm">
           <h2 className="font-semibold">Cliente</h2>
-          {Object.entries(CUSTOMER_LABELS).map(([key, label]) => (
+          {/* Los pedidos antiguos no tienen todos los datos: se muestran solo los que hay. */}
+          {Object.entries(CUSTOMER_LABELS).filter(([key]) => order.customer[key]).map(([key, label]) => (
             <p key={key}>
               <span className="text-[#6b716f]">{label}:</span> {order.customer[key]}
             </p>
