@@ -6,7 +6,7 @@ import type { Product } from "./types";
 
 // Columnas públicas. El costo del proveedor nunca se envía al navegador.
 const PRODUCT_COLUMNS =
-  "id, slug, name, brand, category, grade, price, list_price, compare_price, offer_ends_at, offer_name, stock, on_demand, battery_health, warranty_months, description, image_url, images, ship_weight_kg, ship_length_cm, ship_width_cm, ship_height_cm";
+  "id, sku, slug, name, brand, category, grade, price, list_price, compare_price, offer_ends_at, offer_name, stock, on_demand, battery_health, warranty_months, description, image_url, images, ship_weight_kg, ship_length_cm, ship_width_cm, ship_height_cm";
 
 // Cuando pasa el último día de la oferta, el equipo vuelve solo a su precio de antes
 // (también al pagar, porque el pago lee el precio desde aquí).

@@ -19,12 +19,28 @@ function marginOf(price: number, cost: number | null, category: string, extraCos
   return { value, percent: net ? Math.round((value / net) * 100) : 0 };
 }
 
-export default async function ProductsPage() {
-  const [products, extraCosts] = await Promise.all([listAllProducts(), listExtraCosts()]);
+// Para buscar sin importar mayúsculas, tildes ni guiones.
+const simple = (text: string) =>
+  text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+
+export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const [{ q = "" }, all, extraCosts] = await Promise.all([searchParams, listAllProducts(), listExtraCosts()]);
+  // Busca por SKU, nombre, marca o código del proveedor. Un SKU exacto muestra solo ese producto.
+  const query = simple(q);
+  const exact = all.filter((p) => p.sku === query);
+  const products = !query
+    ? all
+    : exact.length
+      ? exact
+      : all.filter((p) => simple(`${p.sku} ${p.name} ${p.brand} ${p.supplier_sku ?? ""}`).includes(query));
   const today = todayInChile();
   const ours = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/productos/`;
   const isExternal = (url: string | null) => !!url?.startsWith("https://") && !url.startsWith(ours);
-  const externalPhotos = products.filter(
+  const externalPhotos = all.filter(
     (p) => isExternal(p.image_url) || p.images.some(isExternal),
   ).length;
   return (
@@ -39,6 +55,27 @@ export default async function ProductsPage() {
         </Link>
       </PageHeader>
       <ImportPhotosButton pending={externalPhotos} />
+      <form className="flex flex-wrap items-center gap-2" role="search">
+        <input
+          name="q"
+          type="search"
+          defaultValue={q}
+          placeholder="Buscar por SKU (10012), nombre o marca"
+          aria-label="Buscar productos"
+          className="input max-w-md flex-1"
+        />
+        <button className="btn-primary">Buscar</button>
+        {q && (
+          <>
+            <Link href="/admin/productos" className="text-sm text-[#288868] underline">
+              Ver todos
+            </Link>
+            <span className="text-sm text-[#6b716f]">
+              {products.length === 1 ? "1 producto" : `${products.length} productos`}
+            </span>
+          </>
+        )}
+      </form>
       <div className="bg-white rounded-xl border border-[#e4e2dc] overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-[#6b716f] border-b border-[#e4e2dc]">
@@ -75,6 +112,7 @@ export default async function ProductsPage() {
                     <Link href={`/admin/productos/${p.id}`} className="text-[#288868] underline">
                       {p.name}
                     </Link>
+                    <span className="block font-mono text-xs text-[#6b716f]">{p.sku}</span>
                   </td>
                   <td className="p-3">{p.grade}</td>
                   <td className="p-3 text-right whitespace-nowrap">
@@ -127,6 +165,13 @@ export default async function ProductsPage() {
                 </tr>
               );
             })}
+            {products.length === 0 && (
+              <tr>
+                <td colSpan={9} className="p-6 text-center text-[#6b716f]">
+                  {q ? `No hay productos que coincidan con "${q}".` : "Todavía no hay productos."}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

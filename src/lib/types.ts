@@ -3,6 +3,7 @@ export type Grade = "A" | "B" | "C";
 
 export type Product = {
   id: string;
+  sku: string; // código propio de TERC, solo números (10001), lo pone la base de datos
   slug: string;
   name: string;
   brand: string;
