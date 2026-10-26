@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Montserrat } from "next/font/google";
+import { DEFAULT_DESCRIPTION, SITE_URL } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 import "./globals.css";
 
@@ -14,10 +15,10 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
   // Para que la imagen al compartir (opengraph-image.png) use la dirección real de la tienda.
-  metadataBase: new URL("https://terc.cl"),
-  title: "TERC | Tecnología reacondicionada",
-  description:
-    "Equipos reacondicionados con garantía, revisados y listos para usar. Envíos a todo Chile.",
+  metadataBase: new URL(SITE_URL),
+  title: "TERC | Computadores reacondicionados con garantía en Chile",
+  description: DEFAULT_DESCRIPTION,
+  openGraph: { siteName: "TERC", locale: "es_CL", type: "website" },
   other: { "facebook-domain-verification": SITE.metaDomainVerification },
   verification: { google: SITE.googleSiteVerification },
 };
