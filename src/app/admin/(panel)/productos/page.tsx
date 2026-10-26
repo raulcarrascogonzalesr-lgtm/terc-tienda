@@ -19,7 +19,7 @@ function marginOf(price: number, cost: number | null, category: string, extraCos
   return { value, percent: net ? Math.round((value / net) * 100) : 0 };
 }
 
-// Para buscar sin importar mayúsculas, tildes ni guiones (tercc00012 encuentra TERC-00012).
+// Para buscar sin importar mayúsculas, tildes ni guiones.
 const simple = (text: string) =>
   text
     .normalize("NFD")
@@ -29,16 +29,14 @@ const simple = (text: string) =>
 
 export default async function ProductsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const [{ q = "" }, all, extraCosts] = await Promise.all([searchParams, listAllProducts(), listExtraCosts()]);
-  // Busca por SKU, nombre, marca o código del proveedor. Solo números (12) busca el SKU TERC-00012.
+  // Busca por SKU, nombre, marca o código del proveedor. Un SKU exacto muestra solo ese producto.
   const query = simple(q);
-  const skuNumber = /^\d+$/.test(query) ? `terc${query.padStart(5, "0")}` : null;
-  const products = query
-    ? all.filter(
-        (p) =>
-          (skuNumber && simple(p.sku) === skuNumber) ||
-          simple(`${p.sku} ${p.name} ${p.brand} ${p.supplier_sku ?? ""}`).includes(query),
-      )
-    : all;
+  const exact = all.filter((p) => p.sku === query);
+  const products = !query
+    ? all
+    : exact.length
+      ? exact
+      : all.filter((p) => simple(`${p.sku} ${p.name} ${p.brand} ${p.supplier_sku ?? ""}`).includes(query));
   const today = todayInChile();
   const ours = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/productos/`;
   const isExternal = (url: string | null) => !!url?.startsWith("https://") && !url.startsWith(ours);
@@ -62,7 +60,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           name="q"
           type="search"
           defaultValue={q}
-          placeholder="Buscar por SKU (TERC-00012 o 12), nombre o marca"
+          placeholder="Buscar por SKU (10012), nombre o marca"
           aria-label="Buscar productos"
           className="input max-w-md flex-1"
         />
