@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { CutoutImage } from "@/components/CutoutImage";
 import { DiscountSticker } from "@/components/DiscountSticker";
 import { StoreIcon, type IconName } from "@/components/icons";
@@ -239,12 +240,16 @@ export default async function HomePage({ searchParams }: Props) {
     ? BENEFITS.map((b) => (b.icon === "truck" ? { ...b, title: "Envío gratis en la RM", text: "Y más barato a regiones" } : b))
     : BENEFITS;
   const query = normalize(q.trim());
+  // Si buscan un SKU exacto (10001, "sku 10001" o "#10001"), van directo a la ficha de ese equipo.
+  const skuMatch = query.match(/^(?:sku\s*)?#?(\d+)$/);
+  const bySku = skuMatch && all.find((p) => p.sku === skuMatch[1]);
+  if (bySku) redirect(`/producto/${bySku.slug}`);
   const filtered = sortProducts(
     all.filter(
       (p) =>
         (!categoria || p.category === categoria) &&
         (!onlyOffers || offer(p)) &&
-        (!query || normalize(`${p.name} ${p.brand} ${p.category}`).includes(query)),
+        (!query || normalize(`${p.name} ${p.brand} ${p.category} sku ${p.sku}`).includes(query)),
     ),
     sort,
   );
