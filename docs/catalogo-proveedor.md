@@ -31,9 +31,11 @@ Si una regla cambia (por ejemplo, el margen), se cambia aquí y vale desde la pr
    chilenas de reacondicionados: El Container (elcontainer.cl), Mercado Libre (publicaciones
    "reacondicionado") y otras tiendas serias (con boleta y garantía), no avisos dudosos.
    Tomar el precio más bajo de esas tiendas.
-2. **Precio TERC = el mismo precio de la competencia**, redondeado a $…990. Va como **precio base**,
-   no como oferta: `compare_price` queda vacío (decisión de Raúl, 23-10-2026; antes se sumaban
-   $10.000–$20.000).
+2. **Precio TERC = el mismo precio de la competencia + el embalaje**, redondeado hacia arriba a $…990.
+   El embalaje es la suma de los costos por venta en pesos de su categoría (/admin/costos-extra: caja,
+   burbuja, cinta, cliché) × 1,19 (decisión de Raúl, 28-10-2026: el embalaje se suma al precio, no
+   se come el margen). Va como **precio base**, no como oferta: `compare_price` queda vacío
+   (decisión de Raúl, 23-10-2026; antes se sumaban $10.000–$20.000).
 3. **Piso:** el precio nunca baja de **costo con IVA × 1,15** (costo neto × 1,19 × 1,15), redondeado
    hacia arriba a $…990. Si la competencia está por debajo del piso, se usa el piso y se avisa a Raúl
    en el resumen.
