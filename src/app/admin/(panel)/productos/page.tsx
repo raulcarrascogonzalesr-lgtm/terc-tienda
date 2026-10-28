@@ -2,7 +2,7 @@ import Link from "next/link";
 import { formatCLP, shortDate, todayInChile } from "@/lib/format";
 import { listAllProducts, listExtraCosts } from "../data";
 import type { ExtraCost } from "@/lib/types";
-import { extraCostFor } from "../extra-costs";
+import { extraCostFor, suggestedPrice } from "../extra-costs";
 import { netOf } from "../finance";
 import { ICONS } from "../icons";
 import { Icon, PageHeader } from "../ui";
@@ -86,6 +86,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
               <th className="p-3 text-right">Costo neto</th>
               <th className="p-3 text-right">Costos por venta</th>
               <th className="p-3 text-right">Margen neto</th>
+              <th className="p-3 text-right">Precio sugerido</th>
               <th className="p-3 text-right">Stock</th>
               <th className="p-3">Visible</th>
               <th className="p-3">
@@ -103,6 +104,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
               const extra = extraCostFor(price, p.category, extraCosts);
               const margin = marginOf(price, p.cost, p.category, extraCosts);
               const marginBefore = before && !ended ? marginOf(before, p.cost, p.category, extraCosts) : null;
+              const suggested = suggestedPrice(price, p.cost, p.category, extraCosts);
               return (
                 <tr
                   key={p.id}
@@ -142,6 +144,18 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
                       </span>
                     )}
                   </td>
+                  <td className="p-3 text-right whitespace-nowrap">
+                    {suggested === null ? (
+                      "—"
+                    ) : (
+                      <>
+                        {formatCLP(suggested)}
+                        <span className="block text-xs text-[#6b716f]">
+                          {suggested > price ? `+${formatCLP(suggested - price)}` : "ya cubre"}
+                        </span>
+                      </>
+                    )}
+                  </td>
                   <td
                     className={`p-3 text-right whitespace-nowrap ${p.stock === 0 ? "text-[#b3362a]" : ""}`}
                   >
@@ -167,7 +181,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
             })}
             {products.length === 0 && (
               <tr>
-                <td colSpan={9} className="p-6 text-center text-[#6b716f]">
+                <td colSpan={10} className="p-6 text-center text-[#6b716f]">
                   {q ? `No hay productos que coincidan con "${q}".` : "Todavía no hay productos."}
                 </td>
               </tr>
@@ -181,7 +195,9 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         <Link href="/admin/costos-extra" className="underline">
           costos por venta
         </Link>{" "}
-        (caja, embalaje, comisión).
+        (caja, embalaje, comisión). El precio sugerido es el que te deja la misma ganancia que antes de
+        esos costos (la comisión se calcula sobre el precio nuevo), redondeado a $…990. Es solo una
+        guía: el precio lo cambias tú en cada producto.
       </p>
     </section>
   );
