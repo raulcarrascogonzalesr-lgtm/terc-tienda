@@ -13,7 +13,7 @@ export function WhatsAppButton() {
       target="_blank"
       rel="noopener"
       aria-label="¿Dudas? Escríbenos por WhatsApp"
-      className="wa-enter group fixed bottom-5 right-5 z-40 flex items-center gap-3 rounded-full bg-pine p-1.5 text-white shadow-xl shadow-pine/30 ring-1 ring-white/10 transition hover:-translate-y-0.5 hover:shadow-2xl sm:pr-5"
+      className="wa-enter wa-float group fixed bottom-5 right-5 z-40 flex items-center gap-3 rounded-full bg-pine p-1.5 text-white shadow-xl shadow-pine/30 ring-1 ring-white/10 transition hover:-translate-y-0.5 hover:shadow-2xl sm:pr-5"
     >
       {/* Terqui sentado sobre el botón, balanceando las piernas. */}
       <Terqui

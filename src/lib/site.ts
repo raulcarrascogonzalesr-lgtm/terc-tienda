@@ -9,6 +9,10 @@ export const SITE = {
   // Plazo de despacho de los productos del proveedor (se piden después de la compra).
   // La ley exige informarlo, aunque la tienda no los muestre como "a pedido".
   onDemandLeadTime: "3 a 5 días hábiles",
+  // Días hábiles aproximados desde la compra hasta que llega a la Región Metropolitana, para la
+  // fecha estimada de la ficha, el carrito y la página de gracias: [mínimo, máximo].
+  // "onDemand" son los del proveedor (se piden después de la compra); "stock", los que ya tenemos.
+  deliveryDays: { stock: [2, 4], onDemand: [4, 7] } as Record<"stock" | "onDemand", [number, number]>,
   // Enlace para dejar una reseña en Google (Perfil de Empresa > "Pedir reseñas").
   // Mientras esté vacío, el correo del día 10 pide la opinión por WhatsApp.
   reviewUrl: "",

@@ -680,3 +680,125 @@ a:hover > .terqui-peek {
     animation: none;
   }
 }
+
+/* Cortina de bienvenida de la portada (WelcomeCurtain.tsx). Solo se ve si el script de la cortina
+   marca <html data-welcome="show">: la primera visita, con JavaScript y sin "reducir movimiento". */
+.welcome {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  cursor: pointer;
+  color: #fff;
+}
+html[data-welcome="show"] .welcome,
+html[data-welcome="skip"] .welcome {
+  display: block;
+}
+.welcome-half {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50.5%;
+  overflow: hidden;
+  background: #0a2a2a;
+  animation: welcome-open-l 0.85s cubic-bezier(0.65, 0, 0.35, 1) 1.15s both;
+}
+.welcome-half::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at var(--gx) 45%, rgba(61, 181, 133, 0.28), transparent 60%);
+}
+.welcome-half::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(61, 181, 133, 0.09);
+  -webkit-mask: url("/patron-terc.svg") 0 0 / 120px 120px repeat;
+  mask: url("/patron-terc.svg") 0 0 / 120px 120px repeat;
+}
+.welcome-left {
+  left: 0;
+  --gx: 100%;
+  border-right: 2px solid rgba(179, 162, 106, 0.7);
+}
+.welcome-right {
+  right: 0;
+  --gx: 0%;
+  border-left: 2px solid rgba(179, 162, 106, 0.7);
+  animation-name: welcome-open-r;
+}
+.welcome-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  width: min(92%, 520px);
+  text-align: center;
+  animation: welcome-center 1.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.welcome-skip {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  animation: welcome-fade 0.3s ease 1s both;
+}
+html[data-welcome="skip"] .welcome-left {
+  animation: welcome-open-l 0.4s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+html[data-welcome="skip"] .welcome-right {
+  animation: welcome-open-r 0.4s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+html[data-welcome="skip"] .welcome-center,
+html[data-welcome="skip"] .welcome-skip {
+  animation: welcome-fade 0.2s ease both;
+}
+@keyframes welcome-open-l {
+  to {
+    transform: translateX(-101%);
+  }
+}
+@keyframes welcome-open-r {
+  to {
+    transform: translateX(101%);
+  }
+}
+@keyframes welcome-center {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  22%,
+  62% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  85%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.12);
+  }
+}
+@keyframes welcome-fade {
+  to {
+    opacity: 0;
+  }
+}
+
+/* En la ficha (celular), el botón de WhatsApp sube cuando aparece la barra de compra. */
+@media (max-width: 639.98px) {
+  .wa-float {
+    transition:
+      bottom 0.3s ease,
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .has-buybar .wa-float {
+    bottom: 6rem;
+  }
+}
