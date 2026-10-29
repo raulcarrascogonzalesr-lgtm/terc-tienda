@@ -33,6 +33,9 @@ export type Mail = {
   html: string;
   text: string;
   replyTo?: string;
+  // Enlace para darse de baja con un clic (encabezado List-Unsubscribe).
+  // Gmail y otros lo muestran como botón "Anular suscripción" junto al remitente.
+  listUnsubscribeUrl?: string;
 };
 
 // Envía un correo. Devuelve false si no está configurado o si el servidor lo rechazó.
@@ -47,6 +50,12 @@ export async function sendMail(mail: Mail): Promise<boolean> {
       subject: mail.subject.replace(/[\r\n]+/g, " "),
       html: mail.html,
       text: mail.text,
+      ...(mail.listUnsubscribeUrl
+        ? {
+            list: { unsubscribe: { url: mail.listUnsubscribeUrl, comment: "No quiero recibir más correos" } },
+            headers: { "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
+          }
+        : {}),
     });
     return true;
   } catch (err) {
@@ -94,12 +103,14 @@ export function layout({
   title,
   intro,
   body,
+  unsubscribeUrl,
 }: {
   preheader: string; // texto que se ve junto al asunto en la bandeja de entrada
   pose: MailPose;
   title: string;
   intro: string;
   body: string;
+  unsubscribeUrl?: string; // correos de seguimiento: muestra "No quiero recibir más correos" al pie
 }): string {
   const whatsapp = SITE.whatsapp
     ? ` · <a href="https://wa.me/${SITE.whatsapp}" style="color:${C.leaf}">WhatsApp</a>`
@@ -124,7 +135,11 @@ export function layout({
         <tr><td align="center" style="padding:18px 24px 22px;border-top:1px solid ${C.line};font-size:12px;color:${C.muted};line-height:1.6">
           <strong style="color:${C.pine}">TERC</strong> · ${escapeHtml(SITE.slogan)}<br>
           <a href="${siteUrl()}" style="color:${C.leaf}">terc.cl</a> · ${escapeHtml(SITE.email)}${whatsapp}<br>
-          ${escapeHtml(SITE.company)}
+          ${escapeHtml(SITE.company)}${
+            unsubscribeUrl
+              ? `<br><a href="${escapeHtml(unsubscribeUrl)}" style="color:${C.muted}">No quiero recibir más correos de TERC</a>`
+              : ""
+          }
         </td></tr>
       </table>
     </td></tr>

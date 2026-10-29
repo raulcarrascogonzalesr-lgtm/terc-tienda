@@ -6,6 +6,7 @@ import { addressLine, DWELLINGS, isDwelling, isFixedCourier, normalizePhone, nor
 import { checkCoupon, countCouponUses } from "@/lib/coupons";
 import { getMercadoPagoClient } from "@/lib/mercadopago";
 import { createWebpayTransaction, getWebpayConfig } from "@/lib/webpay";
+import { saveMarketingConsent } from "@/lib/email-preferences";
 import { getProductsByIds } from "@/lib/products";
 import { findCommune, quoteWithFund } from "@/lib/shipit";
 import { getShippingFund } from "@/lib/shipping-fund";
@@ -24,6 +25,7 @@ type CheckoutBody = {
   method?: unknown; // "webpay" o "mercadopago" (por defecto)
   coupon?: unknown; // código de cupón de descuento, si el cliente escribió uno
   acceptPolicy?: unknown; // casilla "acepto la política de garantía y devoluciones"
+  marketingConsent?: unknown; // casilla (sin marcar de antemano) "quiero recibir consejos y novedades"
 };
 
 type PaymentMethod = "mercadopago" | "webpay";
@@ -240,6 +242,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Ese cupón ya fue usado o hay otra compra en curso con él" }, { status: 409 });
       }
     }
+    // El permiso para novedades es aparte de la compra: solo si el cliente marcó la casilla.
+    if (body.marketingConsent === true) await saveMarketingConsent(customer.email);
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;

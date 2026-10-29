@@ -48,6 +48,12 @@ export async function updateOrder(id: string, form: FormData) {
     .eq("id", id);
   if (error) throw error;
 
+  // Día en que lo recibió: desde ahí corren la garantía y los correos de seguimiento.
+  // Solo la primera vez (antes de correr correos-seguimiento.sql la columna no existe y no pasa nada).
+  if (status === "delivered") {
+    await supabase.from("orders").update({ delivered_at: new Date().toISOString() }).eq("id", id).is("delivered_at", null);
+  }
+
   // Correos al cliente: cada uno sale una sola vez por pedido.
   if (status === "paid") after(() => sendOrderEmailOnce(id, "paid"));
   if (status === "shipped" && tracking) after(() => sendOrderEmailOnce(id, "shipped"));

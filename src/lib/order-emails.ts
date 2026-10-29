@@ -28,7 +28,7 @@ function pick<T>(seed: string, options: T[]): T {
   return options[n % options.length];
 }
 
-function firstName(order: Order): string {
+export function firstName(order: Order): string {
   return (order.customer.name ?? "").trim().split(/\s+/)[0] ?? "";
 }
 
@@ -43,7 +43,7 @@ function addressOf(order: Order): string {
   return [c.address, c.comuna, c.region].filter(Boolean).join(", ");
 }
 
-function whatsappUrl(text: string): string | null {
+export function whatsappUrl(text: string): string | null {
   return SITE.whatsapp ? `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(text)}` : null;
 }
 
@@ -108,12 +108,12 @@ function itemsText(order: Order): string {
   ].join("\n");
 }
 
-function warrantyMonths(order: Order, info: Map<string, ItemInfo>): number | null {
+export function warrantyMonths(order: Order, info: Map<string, ItemInfo>): number | null {
   const months = order.items.map((i) => info.get(i.product_id)?.warranty_months ?? 0).filter((m) => m > 0);
   return months.length ? Math.min(...months) : null;
 }
 
-const POLICY_URL = "https://terc.cl/garantia-y-devoluciones";
+export const POLICY_URL = "https://terc.cl/garantia-y-devoluciones";
 
 function warrantyCard(months: number | null): string {
   if (!months) return "";
@@ -127,7 +127,7 @@ function warrantyCard(months: number | null): string {
   </table>`;
 }
 
-function infoBox(title: string, html: string): string {
+export function infoBox(title: string, html: string): string {
   return `<p style="margin:0 0 18px"><strong>${title}</strong><br>${html}</p>`;
 }
 
@@ -301,7 +301,7 @@ export function saleNotice(order: Order, info: Map<string, ItemInfo>) {
   return { subject: `Nueva venta ${formatCLP(order.total)} · ${number}`, html, text };
 }
 
-async function itemInfo(order: Order): Promise<Map<string, ItemInfo>> {
+export async function itemInfo(order: Order): Promise<Map<string, ItemInfo>> {
   const supabase = getAdminClient();
   const ids = order.items.map((i) => i.product_id);
   if (!supabase || !ids.length) return new Map();

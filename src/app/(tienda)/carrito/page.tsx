@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/components/CartProvider";
 import { Terqui, TerquiLoader } from "@/components/Terqui";
 import { trackBeginCheckout } from "@/lib/analytics";
+import { MARKETING_CONSENT_TEXT } from "@/lib/consent";
 import { formatCLP } from "@/lib/format";
 import { UTM_MAX_AGE_MS, UTM_STORAGE_KEY } from "@/lib/utm";
 import { DeliveryForm } from "./DeliveryForm";
@@ -41,6 +42,7 @@ export default function CartPage() {
   const [methods, setMethods] = useState<PaymentMethod[]>(["mercadopago"]);
   const [method, setMethod] = useState<PaymentMethod>("mercadopago");
   const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
+  const [marketingConsent, setMarketingConsent] = useState(false); // siempre parte sin marcar
 
   // Medios de pago activos (Webpay aparece cuando está configurado).
   useEffect(() => {
@@ -125,6 +127,7 @@ export default function CartPage() {
           method,
           coupon: activeCoupon?.code,
           acceptPolicy: true, // el formulario no se envía sin marcar la casilla
+          marketingConsent,
         }),
       });
       const data = await res.json();
@@ -288,6 +291,20 @@ export default function CartPage() {
                       detalles estéticos leves, como se indica en su ficha.
                     </>
                   )}
+                </span>
+              </label>
+
+              <label className="flex items-start gap-2 text-sm">
+                {/* Opcional y sin marcar: el permiso para novedades va aparte de la compra (Ley 21.719). */}
+                <input
+                  type="checkbox"
+                  checked={marketingConsent}
+                  onChange={(e) => setMarketingConsent(e.target.checked)}
+                  className="mt-1"
+                />
+                <span>
+                  {MARKETING_CONSENT_TEXT}{" "}
+                  <span className="text-muted">Opcional. Puedes darte de baja cuando quieras.</span>
                 </span>
               </label>
 
