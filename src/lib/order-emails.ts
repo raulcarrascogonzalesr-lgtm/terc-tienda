@@ -28,7 +28,7 @@ function pick<T>(seed: string, options: T[]): T {
   return options[n % options.length];
 }
 
-function firstName(order: Order): string {
+export function firstName(order: Order): string {
   return (order.customer.name ?? "").trim().split(/\s+/)[0] ?? "";
 }
 
@@ -43,7 +43,7 @@ function addressOf(order: Order): string {
   return [c.address, c.comuna, c.region].filter(Boolean).join(", ");
 }
 
-function whatsappUrl(text: string): string | null {
+export function whatsappUrl(text: string): string | null {
   return SITE.whatsapp ? `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(text)}` : null;
 }
 
@@ -127,7 +127,7 @@ function warrantyCard(months: number | null): string {
   </table>`;
 }
 
-function infoBox(title: string, html: string): string {
+export function infoBox(title: string, html: string): string {
   return `<p style="margin:0 0 18px"><strong>${title}</strong><br>${html}</p>`;
 }
 

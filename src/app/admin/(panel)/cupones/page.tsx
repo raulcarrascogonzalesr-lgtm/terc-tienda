@@ -58,7 +58,7 @@ export default async function CouponsPage() {
               </thead>
               <tbody>
                 {coupons.map((c) => {
-                  const product = byId.get(c.product_id);
+                  const product = c.product_id ? byId.get(c.product_id) : undefined;
                   const used = uses.get(c.code) ?? 0;
                   const expired = !!c.expires_on && c.expires_on < today;
                   const status =
@@ -75,7 +75,7 @@ export default async function CouponsPage() {
                         <code className="bg-[#efede8] rounded px-1.5 py-0.5 font-semibold select-all">{c.code}</code>
                         {c.note && <p className="text-xs text-[#6b716f] mt-1">{c.note}</p>}
                       </td>
-                      <td className="p-2">{product?.name ?? "—"}</td>
+                      <td className="p-2">{c.product_id ? (product?.name ?? "—") : "Cualquier equipo"}</td>
                       <td className="p-2 text-right whitespace-nowrap">{describeCoupon(c, formatCLP)}</td>
                       <td className="p-2 text-right whitespace-nowrap">
                         {product ? formatCLP(couponUnitPrice(c, product)) : "—"}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getPreference } from "@/lib/email-preferences";
 import { formatCLP, formatDateTime, ORDER_STATUS_LABELS } from "@/lib/format";
 import { shippingLabel } from "@/lib/shipping";
 import { updateOrder } from "../../actions";
@@ -30,6 +31,11 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const zone = shippingLabel(order.shipping_zone);
   const paid = ["paid", "shipped", "delivered"].includes(order.status);
   const sentAt = (value?: string | null) => (value ? `enviado el ${formatDateTime(value)}` : null);
+  const pref = order.customer.email ? await getPreference(order.customer.email) : null;
+  const followUps: [string, string | null | undefined][] = [
+    ["Día 10 · cuidar el equipo", order.care_email_at],
+    ["Día 30 · código de amigo (solo con permiso)", order.referral_email_at],
+  ];
 
   return (
     <section className="space-y-6">
@@ -107,6 +113,24 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           sentAt={sentAt(order.delivered_email_at)}
           disabled={order.status !== "delivered"}
         />
+        <h3 className="font-semibold pt-3">Seguimiento después de la entrega</h3>
+        <p className="text-[#6b716f]">
+          {order.delivered_at ? `Entregado el ${formatDateTime(order.delivered_at)}. ` : ""}
+          Novedades:{" "}
+          {pref?.unsubscribed_at
+            ? `se dio de baja el ${formatDateTime(pref.unsubscribed_at)} (no recibe correos de seguimiento)`
+            : pref?.marketing_consent_at
+              ? `aceptó el ${formatDateTime(pref.marketing_consent_at)}`
+              : "no marcó la casilla"}
+          .
+        </p>
+        <ul className="text-[#6b716f]">
+          {followUps.map(([label, at]) => (
+            <li key={label}>
+              {label}: {at ? `revisado el ${formatDateTime(at)}` : "pendiente"}
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div className="bg-white rounded-xl border border-[#e4e2dc] p-4 text-sm space-y-2">

@@ -44,8 +44,21 @@ export async function checkCoupon(
   if (!coupon || !coupon.active) return { ok: false, error: "Ese cupón no existe o ya no está activo" };
   if (coupon.expires_on && coupon.expires_on < todayInChile()) return { ok: false, error: "Ese cupón ya venció" };
 
-  const product = products.find((p) => p.id === coupon.product_id);
-  if (!product) return { ok: false, error: "Ese cupón es para otro equipo. Agrégalo al carrito para usarlo." };
+  // Un cupón sin equipo fijo (código de amigo o su premio) descuenta en el equipo más caro del carrito.
+  const product = coupon.product_id
+    ? products.find((p) => p.id === coupon.product_id)
+    : [...products].sort((a, b) => b.price - a.price)[0];
+  if (!product) {
+    return {
+      ok: false,
+      error: coupon.product_id
+        ? "Ese cupón es para otro equipo. Agrégalo al carrito para usarlo."
+        : "Agrega un equipo al carrito para usar el cupón",
+    };
+  }
+  if (coupon.referrer_email && email && coupon.referrer_email === email.trim().toLowerCase()) {
+    return { ok: false, error: "Ese es tu propio código de amigo: es para que lo usen las personas a las que se lo compartes" };
+  }
 
   const used = await countCouponUses(supabase, code, orderId, email).catch(() => null);
   if (used === null) return { ok: false, error: "No pudimos revisar el cupón. Intenta de nuevo." };

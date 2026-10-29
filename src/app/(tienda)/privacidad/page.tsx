@@ -26,6 +26,24 @@ export default function PrivacyPage() {
       </section>
 
       <section className="space-y-2">
+        <h2 className="font-semibold text-ink">Correos que te enviamos</h2>
+        <p>
+          Los datos de tu compra los guarda {SITE.company}, la empresa a la que pertenece TERC. Con tu compra te
+          escribimos para avisarte del pago, el envío y la entrega. Después te mandamos unos pocos correos sobre el
+          equipo que compraste, como consejos para cuidarlo.
+        </p>
+        <p>
+          Solo si marcas la casilla &ldquo;Quiero recibir consejos y novedades&rdquo; al pagar (viene sin marcar), te
+          enviamos también novedades de TERC, como un código para recomendarnos a tus amigos. No vendemos ni
+          compartimos tu correo con nadie para publicidad.
+        </p>
+        <p>
+          Cada uno de estos correos trae al final el enlace &ldquo;No quiero recibir más correos de TERC&rdquo;. Con
+          un clic dejas de recibirlos. También puedes pedirlo respondiendo cualquier correo nuestro.
+        </p>
+      </section>
+
+      <section className="space-y-2">
         <h2 className="font-semibold text-ink">Cookies</h2>
         <p>
           Algunas cookies son necesarias para que la tienda funcione, como las que recuerdan tu carrito y tu elección

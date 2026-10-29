@@ -9,6 +9,9 @@ export const SITE = {
   // Plazo de despacho de los productos del proveedor (se piden después de la compra).
   // La ley exige informarlo, aunque la tienda no los muestre como "a pedido".
   onDemandLeadTime: "3 a 5 días hábiles",
+  // Enlace para dejar una reseña en Google (Perfil de Empresa > "Pedir reseñas").
+  // Mientras esté vacío, el correo del día 10 pide la opinión por WhatsApp.
+  reviewUrl: "",
   // Medición para publicidad. Son IDs públicos (se ven en el código de la página).
   // Se cargan solo si el visitante acepta las cookies. Vacío = desactivado.
   metaPixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "1923570001938469",

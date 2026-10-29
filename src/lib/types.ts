@@ -73,6 +73,10 @@ export type Order = {
   paid_email_at?: string | null; // cuándo se envió al cliente el correo de pago recibido
   shipped_email_at?: string | null; // cuándo se envió el correo con el código de seguimiento
   delivered_email_at?: string | null; // cuándo se envió el correo de "¿cómo te fue?"
+  delivered_at?: string | null; // cuándo quedó entregado: desde ahí corren los correos de seguimiento
+  care_email_at?: string | null; // correo del día 10 (cuidado del equipo)
+  referral_email_at?: string | null; // correo del día 30 (código de amigo)
+  referral_reward_at?: string | null; // cuándo se premió a quien recomendó, si el pedido usó un código de amigo
   utm: Record<string, string> | null;
   coupon_code?: string | null; // cupón usado en el pedido
   discount?: number; // pesos descontados con el cupón (con IVA); total = subtotal − descuento + envío
@@ -84,7 +88,7 @@ export type Order = {
 // Cupón de descuento para un equipo. Solo lo ve el panel.
 export type Coupon = {
   code: string; // en mayúsculas, por ejemplo PRIMERO7
-  product_id: string;
+  product_id: string | null; // vacío = sirve para cualquier equipo (códigos de amigo y sus premios)
   kind: "percent" | "amount"; // porcentaje del precio o monto fijo en pesos (con IVA)
   value: number;
   max_uses: number;
@@ -92,6 +96,7 @@ export type Coupon = {
   note: string;
   active: boolean;
   created_at: string;
+  referrer_email?: string | null; // si es el código de amigo de un cliente, su correo
 };
 
 export type MovementKind = "ingreso" | "egreso";
