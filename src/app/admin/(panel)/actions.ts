@@ -48,7 +48,7 @@ export async function updateOrder(id: string, form: FormData) {
     .eq("id", id);
   if (error) throw error;
 
-  // Día en que lo recibió: desde ahí corren la garantía y los correos de seguimiento.
+  // Día en que lo recibió: desde ahí corren los correos de seguimiento.
   // Solo la primera vez (antes de correr correos-seguimiento.sql la columna no existe y no pasa nada).
   if (status === "delivered") {
     await supabase.from("orders").update({ delivered_at: new Date().toISOString() }).eq("id", id).is("delivered_at", null);

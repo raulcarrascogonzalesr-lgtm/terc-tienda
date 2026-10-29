@@ -6,10 +6,7 @@ import { formatCLP, todayInChile } from "./format";
 import {
   firstName,
   infoBox,
-  itemInfo,
   orderNumber,
-  POLICY_URL,
-  warrantyMonths,
   whatsappUrl,
 } from "./order-emails";
 import { SITE } from "./site";
@@ -21,7 +18,6 @@ import type { Order } from "./types";
 //
 //   Día 10:  consejos para cuidar el equipo + pedir reseña        (a todos, salvo quien se dio de baja)
 //   Día 30:  código para recomendar a un amigo                     (solo a quien aceptó recibir novedades)
-//   Un mes antes de que venza la garantía: aviso para revisarlo   (a todos, salvo quien se dio de baja)
 //   Cuando un amigo compra con el código (y pasan 10 días desde que le llega): premio para quien recomendó.
 
 // Descuento del código de amigo y premio para quien recomienda, en pesos con IVA.
@@ -34,16 +30,10 @@ const MAX_SENDS_PER_RUN = 20;
 
 const DAY = 24 * 60 * 60 * 1000;
 
-type FollowUpKind = "care" | "referral" | "warranty";
-const COLUMN = { care: "care_email_at", referral: "referral_email_at", warranty: "warranty_email_at" } as const;
+type FollowUpKind = "care" | "referral";
+const COLUMN = { care: "care_email_at", referral: "referral_email_at" } as const;
 
 const longDate = new Intl.DateTimeFormat("es-CL", { dateStyle: "long", timeZone: "America/Santiago" });
-
-function addMonths(iso: string, months: number): Date {
-  const d = new Date(iso);
-  d.setUTCMonth(d.getUTCMonth() + months);
-  return d;
-}
 
 // --- los correos ---
 
@@ -131,37 +121,6 @@ export function referralEmail(order: Order, code: string, unsubscribe: string) {
     `No quiero recibir más correos: ${unsubscribe}`,
   ].join("\n");
   return { subject: `Un regalo para tus amigos (y para ti): ${amount}`, html, text };
-}
-
-export function warrantyEmail(order: Order, ends: Date, unsubscribe: string) {
-  const name = firstName(order);
-  const date = longDate.format(ends);
-  const wa = whatsappUrl(`Hola TERC, quiero revisar mi equipo antes de que venza la garantía (pedido ${orderNumber(order.id)}):`);
-  const html = layout({
-    preheader: `Si notas algo raro en tu equipo, escríbenos antes del ${date}.`,
-    pose: "lupa",
-    title: `Tu garantía vence el ${date}`,
-    intro: `${name ? `${escapeHtml(name)}, te` : "Te"} avisamos con tiempo para que la aproveches si la necesitas.`,
-    body: `${infoBox(
-        "¿Notas algo raro?",
-        "Una batería que dura menos, un ruido nuevo, una tecla que falla, algo en la pantalla o en los puertos. Si es así, escríbenos antes de esa fecha y lo revisamos sin costo, según la política de garantía.",
-      )}
-      ${infoBox("¿Todo bien?", "¡Genial! No tienes que hacer nada. Igual seguimos aquí si nos necesitas más adelante.")}
-      ${wa ? `<p style="margin:0 0 10px;text-align:center">${button(wa, "Quiero que revisen mi equipo", C.whatsapp)}</p>` : ""}
-      <p style="margin:0;text-align:center;font-size:14px"><a href="${POLICY_URL}" style="color:${C.pine}">Así funciona la garantía</a></p>`,
-    unsubscribeUrl: unsubscribe,
-  });
-  const text = [
-    `Tu garantía TERC vence el ${date}.`,
-    "",
-    "Si notas algo raro (batería, ruidos, teclado, pantalla o puertos), escríbenos antes de esa fecha y lo revisamos sin costo, según la política de garantía.",
-    `Pedido ${orderNumber(order.id)}. Responde este correo${SITE.whatsapp ? ` o escríbenos por WhatsApp: https://wa.me/${SITE.whatsapp}` : "."}`,
-    `Así funciona la garantía: ${POLICY_URL}`,
-    "",
-    "TERC · terc.cl",
-    `No quiero recibir más correos: ${unsubscribe}`,
-  ].join("\n");
-  return { subject: `Tu garantía TERC vence el ${date}`, html, text };
 }
 
 export function rewardEmail(code: string, expires: string, unsubscribe: string) {
@@ -284,7 +243,7 @@ export async function runFollowUps(now = new Date()): Promise<FollowUpReport | {
   if (!supabase) return { error: "Falta SUPABASE_SERVICE_ROLE_KEY" };
   if (!emailEnabled()) return { error: "Falta SMTP_PASSWORD" };
 
-  const report: FollowUpReport = { sent: { care: 0, referral: 0, warranty: 0, reward: 0 }, skipped: 0, failed: 0 };
+  const report: FollowUpReport = { sent: { care: 0, referral: 0, reward: 0 }, skipped: 0, failed: 0 };
   const total = () => Object.values(report.sent).reduce((a, b) => a + b, 0) + report.failed;
   const ago = (days: number) => new Date(now.getTime() - days * DAY).toISOString();
 
@@ -293,7 +252,7 @@ export async function runFollowUps(now = new Date()): Promise<FollowUpReport | {
     .select("*")
     .eq("status", "delivered")
     .not("delivered_at", "is", null)
-    .gte("delivered_at", ago(26 * 31)) // garantías de hasta 24 meses
+    .gte("delivered_at", ago(120)) // más atrás ya no queda nada por enviar
     .lte("delivered_at", ago(10))
     .order("delivered_at");
   if (error) return { error: `No se pudieron leer los pedidos (¿falta ejecutar supabase/correos-seguimiento.sql?): ${error.message}` };
@@ -355,18 +314,6 @@ export async function runFollowUps(now = new Date()): Promise<FollowUpReport | {
             }
           : false,
       );
-    }
-
-    // Un mes antes de que venza la garantía (contada desde que recibió el equipo).
-    if (!order.warranty_email_at && total() < MAX_SENDS_PER_RUN) {
-      const info = await itemInfo(order);
-      const months = warrantyMonths(order, info);
-      const ends = months ? addMonths(order.delivered_at!, months) : null;
-      const left = ends ? (ends.getTime() - now.getTime()) / DAY : 0;
-      // Con garantías de 1 mes el aviso llegaría casi junto con el equipo: no se manda.
-      const useless = !ends || months! < 2 || left < 3 || unsubscribed;
-      if (useless) await once(order, "warranty", false);
-      else if (left <= 30) await once(order, "warranty", async () => ({ ...base, ...warrantyEmail(order, ends, unsubscribe) }));
     }
   }
 

@@ -73,10 +73,9 @@ export type Order = {
   paid_email_at?: string | null; // cuándo se envió al cliente el correo de pago recibido
   shipped_email_at?: string | null; // cuándo se envió el correo con el código de seguimiento
   delivered_email_at?: string | null; // cuándo se envió el correo de "¿cómo te fue?"
-  delivered_at?: string | null; // cuándo quedó entregado: desde ahí corren la garantía y los correos de seguimiento
+  delivered_at?: string | null; // cuándo quedó entregado: desde ahí corren los correos de seguimiento
   care_email_at?: string | null; // correo del día 10 (cuidado del equipo)
   referral_email_at?: string | null; // correo del día 30 (código de amigo)
-  warranty_email_at?: string | null; // aviso un mes antes de que venza la garantía
   referral_reward_at?: string | null; // cuándo se premió a quien recomendó, si el pedido usó un código de amigo
   utm: Record<string, string> | null;
   coupon_code?: string | null; // cupón usado en el pedido

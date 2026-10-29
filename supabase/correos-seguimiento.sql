@@ -1,5 +1,5 @@
--- Correos de seguimiento después de la compra (cuidado del equipo, recomendar a un amigo,
--- aviso antes de que venza la garantía) y permiso para recibir novedades.
+-- Correos de seguimiento después de la compra (cuidado del equipo, recomendar a un amigo)
+-- y permiso para recibir novedades.
 -- Ejecutar una vez en Supabase > SQL Editor (no borra nada si se repite).
 
 -- Permiso de cada cliente para recibir novedades y si pidió no recibir más correos.
@@ -14,7 +14,7 @@ create table if not exists email_preferences (
 -- Privada: sin políticas, solo el servidor (con la llave de servicio) la lee y escribe.
 alter table email_preferences enable row level security;
 
--- Día en que el pedido quedó entregado: desde ahí corren la garantía y los correos de seguimiento.
+-- Día en que el pedido quedó entregado: desde ahí corren los correos de seguimiento.
 alter table orders add column if not exists delivered_at timestamptz;
 update orders
    set delivered_at = delivered_email_at
@@ -23,7 +23,6 @@ update orders
 -- Cuándo se envió (o se decidió no enviar) cada correo de seguimiento, para no repetirlo.
 alter table orders add column if not exists care_email_at timestamptz;
 alter table orders add column if not exists referral_email_at timestamptz;
-alter table orders add column if not exists warranty_email_at timestamptz;
 -- Cuándo se le dio el premio a quien recomendó, si el pedido usó un código de amigo.
 alter table orders add column if not exists referral_reward_at timestamptz;
 

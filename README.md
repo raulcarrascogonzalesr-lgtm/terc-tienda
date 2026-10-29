@@ -84,7 +84,6 @@ Para que el cliente vuelva y nos recomiende, sin llenarlo de ofertas:
 
 - **Día 10:** "Terqui te deja 3 consejos para tu equipo" y pide su opinión (reseña en Google si `SITE.reviewUrl` tiene el enlace; si no, por WhatsApp).
 - **Día 30:** su código de amigo (`AMIGO-NOMBRE-123`): $10.000 de descuento para quien lo use. **Solo** a quien marcó la casilla "Quiero recibir consejos y novedades" al pagar.
-- **Un mes antes de que venza la garantía** (contada desde la entrega): aviso para que escriba si nota algo raro.
 - **Premio:** cuando un amigo compra con el código y pasan 10 días desde que le llega, quien recomendó recibe un cupón `GRACIAS-…` de $10.000 (un uso, vence en un año).
 
 Todos traen el enlace "No quiero recibir más correos de TERC" (y el botón de baja de Gmail). Quien se da de baja no recibe más correos de seguimiento; los del pedido (pago, envío, entrega) le siguen llegando.

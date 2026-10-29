@@ -30,7 +30,7 @@ export default function PrivacyPage() {
         <p>
           Los datos de tu compra los guarda {SITE.company}, la empresa a la que pertenece TERC. Con tu compra te
           escribimos para avisarte del pago, el envío y la entrega. Después te mandamos unos pocos correos sobre el
-          equipo que compraste: consejos para cuidarlo y un aviso antes de que venza tu garantía.
+          equipo que compraste, como consejos para cuidarlo.
         </p>
         <p>
           Solo si marcas la casilla &ldquo;Quiero recibir consejos y novedades&rdquo; al pagar (viene sin marcar), te

@@ -57,7 +57,7 @@ export default async function UnsubscribePage({ searchParams }: { searchParams: 
     body = (
       <>
         <p>
-          <strong>{email}</strong> dejará de recibir consejos, avisos de garantía y novedades. Los correos de un pedido
+          <strong>{email}</strong> dejará de recibir consejos y novedades. Los correos de un pedido
           en curso (pago, envío y entrega) igual te llegarán.
         </p>
         {one(params.error) && <p className="text-red-700">No pudimos guardarlo. Intenta de nuevo en un rato.</p>}

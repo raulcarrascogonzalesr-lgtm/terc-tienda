@@ -108,12 +108,12 @@ function itemsText(order: Order): string {
   ].join("\n");
 }
 
-export function warrantyMonths(order: Order, info: Map<string, ItemInfo>): number | null {
+function warrantyMonths(order: Order, info: Map<string, ItemInfo>): number | null {
   const months = order.items.map((i) => info.get(i.product_id)?.warranty_months ?? 0).filter((m) => m > 0);
   return months.length ? Math.min(...months) : null;
 }
 
-export const POLICY_URL = "https://terc.cl/garantia-y-devoluciones";
+const POLICY_URL = "https://terc.cl/garantia-y-devoluciones";
 
 function warrantyCard(months: number | null): string {
   if (!months) return "";
@@ -301,7 +301,7 @@ export function saleNotice(order: Order, info: Map<string, ItemInfo>) {
   return { subject: `Nueva venta ${formatCLP(order.total)} · ${number}`, html, text };
 }
 
-export async function itemInfo(order: Order): Promise<Map<string, ItemInfo>> {
+async function itemInfo(order: Order): Promise<Map<string, ItemInfo>> {
   const supabase = getAdminClient();
   const ids = order.items.map((i) => i.product_id);
   if (!supabase || !ids.length) return new Map();

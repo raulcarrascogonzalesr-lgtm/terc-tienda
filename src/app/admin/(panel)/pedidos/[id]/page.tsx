@@ -35,7 +35,6 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const followUps: [string, string | null | undefined][] = [
     ["Día 10 · cuidar el equipo", order.care_email_at],
     ["Día 30 · código de amigo (solo con permiso)", order.referral_email_at],
-    ["Aviso antes de que venza la garantía", order.warranty_email_at],
   ];
 
   return (
