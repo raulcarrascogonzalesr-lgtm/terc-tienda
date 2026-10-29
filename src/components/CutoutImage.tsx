@@ -237,12 +237,12 @@ export function cutout(p: Uint8ClampedArray, W: number, H: number): Uint8Clamped
   return out;
 }
 
-async function removeWhiteBackground(src: string): Promise<string> {
+async function cutoutCanvas(src: string, maxSide: number) {
   const img = new Image();
   img.crossOrigin = "anonymous";
   img.src = src;
   await img.decode();
-  const scale = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+  const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
   const W = Math.round(img.naturalWidth * scale);
   const H = Math.round(img.naturalHeight * scale);
   const canvas = document.createElement("canvas");
@@ -253,7 +253,39 @@ async function removeWhiteBackground(src: string): Promise<string> {
   const data = ctx.getImageData(0, 0, W, H);
   data.data.set(cutout(data.data, W, H));
   ctx.putImageData(data, 0, 0);
+  return { canvas, data };
+}
+
+async function removeWhiteBackground(src: string): Promise<string> {
+  const { canvas } = await cutoutCanvas(src, MAX_SIDE);
   return canvas.toDataURL("image/png");
+}
+
+// Para el banner de la portada: la foto sin fondo y recortada justo al equipo (sin el margen
+// transparente), así todos se ven del mismo tamaño. Devuelve la imagen y su proporción.
+export async function cutoutPhoto(src: string, maxSide = 900): Promise<{ url: string; ar: number }> {
+  const { canvas, data } = await cutoutCanvas(src, maxSide);
+  const { width: W, height: H } = canvas;
+  let x0 = W, y0 = H, x1 = -1, y1 = -1;
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      if (data.data[(y * W + x) * 4 + 3] < 24) continue;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+  }
+  if (x1 < x0) throw new Error("Foto vacía");
+  const w = x1 - x0 + 1;
+  const h = y1 - y0 + 1;
+  const crop = document.createElement("canvas");
+  crop.width = w;
+  crop.height = h;
+  crop.getContext("2d")!.drawImage(canvas, x0, y0, w, h, 0, 0, w, h);
+  const blob = await new Promise<Blob | null>((resolve) => crop.toBlob(resolve, "image/webp", 0.92));
+  if (!blob) throw new Error("No se pudo preparar la foto");
+  return { url: URL.createObjectURL(blob), ar: w / h };
 }
 
 export function CutoutImage({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {

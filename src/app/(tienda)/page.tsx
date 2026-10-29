@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CutoutImage } from "@/components/CutoutImage";
-import { DiscountSticker } from "@/components/DiscountSticker";
+import { TerquiHero } from "@/components/home/TerquiHero";
+import { WelcomeCurtain } from "@/components/home/WelcomeCurtain";
 import { StoreIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
 import { Terqui } from "@/components/Terqui";
 import { OfferCountdown } from "@/components/OfferCountdown";
-import { PriceTag } from "@/components/PriceTag";
 import { ProductCard } from "@/components/ProductCard";
-import { PromoCarousel } from "@/components/PromoCarousel";
 import { formatCLP, offer, savings } from "@/lib/format";
 import { listProducts } from "@/lib/products";
 import { jsonLdScript, storeJsonLd } from "@/lib/seo";
 import { getShippingFund } from "@/lib/shipping-fund";
+import { whatsappLink } from "@/lib/site";
+import { KIND_LABEL, productSpecs } from "@/lib/specs";
+import type { HeroItem } from "@/lib/terqui-anim/hero";
 import type { Product } from "@/lib/types";
 
 export const revalidate = 60;
@@ -70,85 +71,25 @@ function sortProducts(products: Product[], sort: Sort) {
   return list;
 }
 
-function ProductSlide({ product }: { product: Product }) {
-  const sale = offer(product);
-  const deal = sale ?? savings(product);
-  return (
-    <div className="relative grid h-full items-center gap-6 bg-pine px-7 pb-12 pt-8 text-white sm:grid-cols-[1.3fr_1fr] sm:px-16">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_50%,rgba(61,181,133,0.22),transparent_60%)]" />
-      <div className="relative space-y-3.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <span
-            className={`inline-block rounded-md px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${sale ? "bg-sale text-white" : "bg-gold text-pine"}`}
-          >
-            {sale ? (product.offer_name ?? "Oferta irresistible") : "Precio TERC"}
-          </span>
-          {sale && product.offer_ends_at && (
-            <span className="inline-flex items-center gap-1.5 rounded-md bg-white/10 px-2.5 py-1 text-xs font-semibold text-white">
-              <StoreIcon name="clock" className="w-3.5 h-3.5 text-gold" />
-              <OfferCountdown endsOn={product.offer_ends_at} />
-            </span>
-          )}
-        </div>
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">{product.brand}</p>
-          <h2 className="mt-1 line-clamp-2 text-2xl sm:text-[2rem] font-bold leading-tight tracking-tight">
-            {product.name}
-          </h2>
-          <p className="mt-2 text-sm text-white/70">
-            {product.battery_health !== null && `Batería ${product.battery_health}% · `}
-            {`${product.warranty_months} meses de garantía`}
-          </p>
-        </div>
-        <PriceTag
-          price={product.price}
-          before={deal?.before}
-          percent={deal?.percent}
-          beforeLabel={sale ? "Antes" : "Nuevo"}
-        />
-        <div>
-          <Link
-            href={`/producto/${product.slug}`}
-            className="inline-flex items-center gap-2 rounded-full bg-gold px-7 py-3.5 text-sm font-bold text-pine transition hover:bg-[#c4b47f]"
-          >
-            Comprar ahora <StoreIcon name="arrow" className="w-4 h-4" />
-          </Link>
-        </div>
-      </div>
-      <div className="relative hidden sm:block">
-        <div className="relative mx-auto aspect-square max-w-[360px]">
-          {product.image_url ? (
-            // El equipo sin fondo, flotando sobre un brillo verde y con su sombra en el "piso".
-            <div className="relative h-full w-full">
-              <div className="absolute inset-x-0 inset-y-[8%] rounded-full bg-[radial-gradient(ellipse_at_50%_55%,rgba(61,181,133,0.38),rgba(61,181,133,0.1)_45%,transparent_70%)]" />
-              <div className="absolute inset-x-[14%] bottom-[9%] h-5 rounded-[50%] bg-black/55 blur-xl" />
-              <CutoutImage
-                src={product.image_url}
-                alt={product.name}
-                className="relative h-full w-full scale-110 drop-shadow-[0_24px_22px_rgba(0,0,0,0.45)]"
-              />
-            </div>
-          ) : (
-            <div className="flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-[#f1efe8] to-[#e6ebe7] shadow-2xl shadow-black/30">
-              <Mark className="w-2/5" />
-              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-pine/60">
-                {product.brand}
-              </span>
-            </div>
-          )}
-          {deal && (
-            <DiscountSticker
-              percent={deal.percent}
-              label={sale ? "dcto." : "vs. nuevo"}
-              tone={sale ? "sale" : "gold"}
-              size="lg"
-              className="absolute -right-5 -top-5"
-            />
-          )}
-        </div>
-      </div>
-    </div>
-  );
+// Lo que el banner de Terqui necesita de cada equipo: nombre corto, características y su mejor precio.
+function heroItem(p: Product): HeroItem {
+  const specs = productSpecs(p);
+  const sale = offer(p);
+  const off = sale ? null : savings(p);
+  return {
+    id: p.id,
+    slug: p.slug,
+    kind: specs.kind,
+    brand: p.brand,
+    cat: KIND_LABEL[specs.kind],
+    name: specs.shortName,
+    chips: specs.chips.slice(0, 3),
+    price: p.price,
+    before: sale?.before ?? off?.before ?? null,
+    deal: sale ? "oferta" : off ? "nuevo" : null,
+    warranty: p.warranty_months,
+    img: p.image_url!,
+  };
 }
 
 type Tile = { name: string; count: number; from: number; photo: string | null };
@@ -184,43 +125,6 @@ function CategoryTile({ tile }: { tile: Tile }) {
         <Mark className="absolute -bottom-3 -right-3 w-2/5 opacity-20" />
       )}
     </Link>
-  );
-}
-
-function BrandSlide({
-  eyebrow,
-  title,
-  text,
-  icon,
-  href,
-  cta,
-}: {
-  eyebrow: string;
-  title: string;
-  text: string;
-  icon: IconName;
-  href: string;
-  cta: string;
-}) {
-  return (
-    <div className="relative flex h-full items-center overflow-hidden bg-pine px-7 pb-12 pt-8 text-white sm:px-16">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_40%,rgba(179,162,106,0.2),transparent_60%)]" />
-      <StoreIcon
-        name={icon}
-        className="absolute -right-6 top-1/2 hidden h-72 w-72 -translate-y-1/2 text-white/[0.07] sm:block"
-      />
-      <div className="relative max-w-md space-y-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-gold">{eyebrow}</p>
-        <h2 className="text-4xl sm:text-5xl font-semibold leading-[1.05] tracking-tight">{title}</h2>
-        <p className="text-white/75">{text}</p>
-        <Link
-          href={href}
-          className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3 text-sm font-semibold text-pine transition hover:bg-[#c4b47f]"
-        >
-          {cta} <StoreIcon name="arrow" className="w-4 h-4" />
-        </Link>
-      </div>
-    </div>
   );
 }
 
@@ -278,10 +182,15 @@ export default async function HomePage({ searchParams }: Props) {
     })
     .sort((a, b) => b.count - a.count)
     .slice(0, offers.length ? 3 : 4);
-  // El banner muestra primero los equipos en oferta y luego los con más descuento frente a uno nuevo.
-  const featured = [...all]
+  // El banner muestra primero los equipos en oferta y luego los con más descuento frente a uno nuevo
+  // (solo los que tienen foto). La garantía que cuenta Terqui es la más común del catálogo.
+  const featured = all
+    .filter((p) => p.image_url)
     .sort((a, b) => Number(Boolean(offer(b))) - Number(Boolean(offer(a))) || bestDiscount(b) - bestDiscount(a))
-    .slice(0, 3);
+    .slice(0, 8)
+    .map(heroItem);
+  const count = (months: number) => all.filter((p) => p.warranty_months === months).length;
+  const warranty = all.map((p) => p.warranty_months).sort((a, b) => count(b) - count(a))[0] ?? 6;
 
   // Arma el enlace manteniendo los filtros actuales.
   const link = (changes: Record<string, string | null>) => {
@@ -300,67 +209,52 @@ export default async function HomePage({ searchParams }: Props) {
   return (
     <div className="pb-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(storeJsonLd())} />
-      {/* Título principal para Google y lectores de pantalla; en pantalla lo reemplaza el carrusel. */}
+      {/* Título principal para Google y lectores de pantalla; en pantalla lo reemplaza el banner. */}
       <h1 className="sr-only">
         {categoria ? `${categoria} reacondicionados con garantía` : "TERC: computadores y notebooks reacondicionados con garantía en Chile"}
       </h1>
       {!filtering && (
-        <section className="shell pt-5 grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-          <div className="rise h-[420px] lg:h-[460px] min-w-0">
-            <PromoCarousel>
-              {featured.map((p) => (
-                <ProductSlide key={p.id} product={p} />
+        <>
+          <WelcomeCurtain />
+          <div className="shell pt-5">
+            <div className="rise">
+              <TerquiHero
+                items={featured}
+                warranty={warranty}
+                freeShipping={freeShipping}
+                whatsapp={whatsappLink("Hola, vengo de la portada de TERC y tengo una consulta")}
+              />
+            </div>
+          </div>
+          <section className="shell pt-4">
+            <div className="rise grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" style={delay(120)}>
+              {offers.length > 0 && (
+                <Link
+                  href="/?ofertas=1#equipos"
+                  className="group relative flex min-h-40 flex-col justify-between overflow-hidden rounded-3xl bg-sale p-4 sm:p-5 text-white transition hover:brightness-105"
+                >
+                  <StoreIcon name="tag" className="absolute -right-6 -bottom-6 h-32 w-32 text-white/10" />
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.16em] text-white/85">
+                    {offerName ?? "Ofertas irresistibles"}
+                  </span>
+                  <div className="relative">
+                    <p className="text-xs sm:text-sm font-semibold text-white/85">Hasta</p>
+                    <p className="font-[family-name:var(--font-display)] text-4xl sm:text-6xl font-extrabold leading-none tracking-tight">
+                      −{tileOffer}%
+                    </p>
+                    <p className="mt-2 flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                      {limited.length ? "Solo por tiempo limitado" : "Ver ofertas"}
+                      <StoreIcon name="arrow" className="w-4 h-4 transition group-hover:translate-x-1" />
+                    </p>
+                  </div>
+                </Link>
+              )}
+              {tiles.map((tile) => (
+                <CategoryTile key={tile.name} tile={tile} />
               ))}
-              <BrandSlide
-                eyebrow={freeShipping ? "Envío gratis en la Región Metropolitana" : "Envíos a todo Chile"}
-                title={freeShipping ? "En Santiago, el envío va por nuestra cuenta." : "Tu equipo, directo a tu puerta."}
-                text={
-                  freeShipping
-                    ? "Gratis a cualquier comuna de la Región Metropolitana. A regiones, con descuento en cada equipo."
-                    : "Despachamos a todo el país, bien embalado y con garantía."
-                }
-                icon="truck"
-                href="#equipos"
-                cta="Ver equipos"
-              />
-              <BrandSlide
-                eyebrow="Garantía TERC"
-                title="Compra tranquilo: todo tiene garantía."
-                text="Cada equipo se revisa antes de salir. Si algo falla, te respondemos nosotros."
-                icon="shield"
-                href="/por-que-terc"
-                cta="Cómo revisamos"
-              />
-            </PromoCarousel>
-          </div>
-
-          <div className="rise grid min-w-0 grid-cols-2 gap-3 sm:gap-4 lg:grid-rows-2" style={delay(120)}>
-            {offers.length > 0 && (
-              <Link
-                href="/?ofertas=1#equipos"
-                className="group relative flex min-h-40 flex-col justify-between overflow-hidden rounded-3xl bg-sale p-4 sm:p-5 text-white transition hover:brightness-105"
-              >
-                <StoreIcon name="tag" className="absolute -right-6 -bottom-6 h-32 w-32 text-white/10" />
-                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.16em] text-white/85">
-                  {offerName ?? "Ofertas irresistibles"}
-                </span>
-                <div className="relative">
-                  <p className="text-xs sm:text-sm font-semibold text-white/85">Hasta</p>
-                  <p className="font-[family-name:var(--font-display)] text-4xl sm:text-6xl font-extrabold leading-none tracking-tight">
-                    −{tileOffer}%
-                  </p>
-                  <p className="mt-2 flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
-                    {limited.length ? "Solo por tiempo limitado" : "Ver ofertas"}
-                    <StoreIcon name="arrow" className="w-4 h-4 transition group-hover:translate-x-1" />
-                  </p>
-                </div>
-              </Link>
-            )}
-            {tiles.map((tile) => (
-              <CategoryTile key={tile.name} tile={tile} />
-            ))}
-          </div>
-        </section>
+            </div>
+          </section>
+        </>
       )}
 
       {freeShipping && !filtering && (

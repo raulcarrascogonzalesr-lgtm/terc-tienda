@@ -38,6 +38,12 @@ export type CartItem = {
   quantity: number;
   maxQuantity: number;
   cosmetic?: boolean; // el equipo tiene detalles estéticos leves (grado B o C)
+  // Solo para mostrar en el carrito (los carritos guardados antes no los tienen).
+  image?: string | null;
+  specs?: string; // "Core i7 12ª gen · 16 GB RAM · SSD 512 GB"
+  onDemand?: boolean; // del proveedor: cambia la fecha estimada de llegada
+  savings?: number | null; // cuánto ahorra frente a uno nuevo, por unidad
+  warrantyMonths?: number;
 };
 
 // Datos completos que solo ve el panel de administración.
