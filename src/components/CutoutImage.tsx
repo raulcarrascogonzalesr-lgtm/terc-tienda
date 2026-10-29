@@ -17,6 +17,7 @@ const SHADOW_STEP = 16; // la sombra se oscurece de a poco (el borde de un equip
 const SHADOW_HEIGHT = 0.12; // alto máximo de la sombra, como parte del alto de la foto
 const DARK = 110; // la sombra se acepta solo si termina (a pocos px) en una parte oscura del equipo
 const GAP = 0.012; // huecos entre columnas de sombra que se rellenan, como parte del ancho
+const SHADOW_RUN = 0.15; // una sombra de verdad es ancha: al menos esta parte del ancho de la foto
 const BAND = 3; // ancho del borde que se mezcla con el fondo (px)
 const SPECK = 0.0005; // islas sueltas más chicas que esto (parte de la foto) se borran
 const cache = new Map<string, string>();
@@ -60,6 +61,7 @@ export function cutout(p: Uint8ClampedArray, W: number, H: number): Uint8Clamped
   // no cumple (pasa del blanco al gris de golpe o termina en otro plateado), así no se come.
   const maxHeight = Math.round(H * SHADOW_HEIGHT);
   const shadow = new Uint8Array(N);
+  const chains: { x: number; pixels: number[] }[] = [];
   for (let x = 0; x < W; x++) {
     for (let y = H - 1; y >= 0; y--) {
       const i = y * W + x;
@@ -85,18 +87,49 @@ export function cutout(p: Uint8ClampedArray, W: number, H: number): Uint8Clamped
           break;
         }
       }
-      if (chain.length && endsDark) {
-        for (const k of chain) {
-          bg[k] = 1;
-          shadow[k] = 1;
-        }
-      }
+      if (chain.length && endsDark) chains.push({ x, pixels: chain });
       if (chain.length) y = yy + 1;
     }
   }
+  // Solo cuenta como sombra un tramo ancho de columnas seguidas. Una franja plateada bajo
+  // puertos o botones (como el frente de un EliteDesk) da tramos angostos, uno por puerto,
+  // y no se borra.
+  const gap = Math.max(4, Math.round(W * GAP));
+  const hasChain = new Uint8Array(W);
+  for (const c of chains) hasChain[c.x] = 1;
+  const keep = new Uint8Array(W);
+  for (let x = 0; x < W; ) {
+    if (!hasChain[x]) {
+      x++;
+      continue;
+    }
+    let end = x;
+    for (let xx = x + 1; xx < W && xx - end - 1 <= gap; xx++) if (hasChain[xx]) end = xx;
+    if (end - x + 1 >= W * SHADOW_RUN) keep.fill(1, x, end + 1);
+    x = end + 1;
+  }
+  const candidate = new Uint8Array(N);
+  for (const c of chains) if (keep[c.x]) for (const k of c.pixels) candidate[k] = 1;
+  // Y una sombra va debajo del equipo: si en esa fila hay equipo a la izquierda y a la derecha,
+  // es parte del equipo (la franja plateada entre el logo y el botón de encendido).
+  for (let y = 0; y < H; y++) {
+    let left = -1;
+    let right = -1;
+    for (let x = 0; x < W; x++) {
+      const i = y * W + x;
+      if (bg[i] || candidate[i]) continue;
+      if (left < 0) left = x;
+      right = x;
+    }
+    if (left >= 0) candidate.fill(0, y * W + left + 1, y * W + right);
+  }
+  for (let k = 0; k < N; k++) {
+    if (!candidate[k]) continue;
+    bg[k] = 1;
+    shadow[k] = 1;
+  }
   // Entre columnas de sombra quedan a veces rayitas sin borrar: se rellenan si son gris de sombra.
   const isShade = (k: number) => bg[k] || (neutral(k) && lum(k) >= SHADOW_MIN);
-  const gap = Math.max(4, Math.round(W * GAP));
   for (let y = 0; y < H; y++) {
     let last = -1;
     for (let x = 0; x < W; x++) {

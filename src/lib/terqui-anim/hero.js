@@ -22,10 +22,10 @@ const TQ = 560; // tamaño del dibujo de Terqui en el escenario
 // Dos escenarios fijos que se escalan al ancho del banner: computador y celular.
 const LAYOUTS = {
   d: { W: 1440, H: 640, tx: 96, ty: 84, tw: 720, cy: 488, py: 584, pw: 560, h1: 58, p: 21, chip: 16, price: 46, small: 14, btn: 17, bub: 24,
-       TX: 1236, G: 590, S: 0.7, prod: { x: 960, y: 520 }, maxW: 560, maxH: 380, ring: { x: 960, y: 300, r: 170 }, stamp: { x: 790, y: 290 }, bx: -24,
+       TX: 1236, G: 590, S: 0.7, prod: { x: 915, y: 520 }, maxW: 520, maxH: 380, ring: { x: 960, y: 300, r: 170 }, stamp: { x: 680, y: 300 }, bx: -24,
        card: { x: 770, y: 250 }, route: { x: 700, y: 260, w: 480 } },
   m: { W: 720, H: 1100, tx: 44, ty: 118, tw: 632, cy: 508, py: 1040, pw: 632, h1: 62, p: 26, chip: 22, price: 52, small: 19, btn: 23, bub: 28,
-       TX: 588, G: 1015, S: 0.66, prod: { x: 315, y: 925 }, maxW: 560, maxH: 330, ring: { x: 330, y: 780, r: 150 }, stamp: { x: 112, y: 690 }, bx: 30,
+       TX: 588, G: 1015, S: 0.66, prod: { x: 300, y: 925 }, maxW: 500, maxH: 330, ring: { x: 330, y: 780, r: 150 }, stamp: { x: 112, y: 690 }, bx: 30,
        card: { x: 44, y: 725 }, route: { x: 10, y: 700, w: 470 } },
 };
 export const HERO_RATIO = { d: LAYOUTS.d.H / LAYOUTS.d.W, m: LAYOUTS.m.H / LAYOUTS.m.W };
