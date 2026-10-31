@@ -126,7 +126,7 @@ export function Header({
               aria-label="Categorías"
               className="border-t border-line/[0.06] bg-mint-50/70"
             >
-              <div className="shell h-11 flex items-center gap-1 overflow-x-auto text-sm">
+              <div className="scroll-fade shell h-11 flex items-center gap-1 overflow-x-auto text-sm">
                 <Link
                   href="/#equipos"
                   className="shrink-0 rounded-full px-3 py-1.5 font-medium text-ink hover:bg-surface"
