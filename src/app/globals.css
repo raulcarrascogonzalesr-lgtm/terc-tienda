@@ -802,3 +802,16 @@ html[data-welcome="skip"] .welcome-skip {
     bottom: 6rem;
   }
 }
+
+/* Filas que se deslizan de lado en celular (categorías, filtros): el borde derecho se desvanece
+   para que se note que hay más, y sin barra de desplazamiento. */
+@media (max-width: 1023.98px) {
+  .scroll-fade {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    scrollbar-width: none;
+  }
+  .scroll-fade::-webkit-scrollbar {
+    display: none;
+  }
+}

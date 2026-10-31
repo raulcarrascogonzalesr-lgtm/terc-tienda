@@ -273,16 +273,17 @@ export default async function HomePage({ searchParams }: Props) {
 
       {freeShipping && !filtering && (
         <section className="shell pt-4">
+          {/* En celular: ícono y texto arriba, botón a todo el ancho abajo. Desde sm, todo en una fila. */}
           <div
             data-reveal
-            className="relative flex flex-wrap items-center gap-x-6 gap-y-3 overflow-hidden rounded-3xl bg-gold px-5 py-5 text-pine sm:px-8 sm:py-6"
+            className="relative grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-4 overflow-hidden rounded-3xl bg-gold px-5 py-5 text-pine sm:flex sm:gap-x-6 sm:px-8 sm:py-6"
           >
             <StoreIcon name="truck" className="absolute -right-6 -bottom-8 h-40 w-40 text-pine/10" />
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-pine text-gold">
-              <StoreIcon name="truck" className="h-7 w-7" />
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center self-start rounded-full bg-pine text-gold sm:h-14 sm:w-14 sm:self-center">
+              <StoreIcon name="truck" className="h-6 w-6 sm:h-7 sm:w-7" />
             </span>
-            <div className="relative min-w-0 flex-1">
-              <p className="font-[family-name:var(--font-display)] text-2xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+            <div className="relative min-w-0 sm:flex-1">
+              <p className="font-[family-name:var(--font-display)] text-xl font-extrabold leading-tight tracking-tight sm:text-4xl">
                 Envío gratis a toda la Región Metropolitana
               </p>
               <p className="mt-1 text-sm font-semibold text-pine/75 sm:text-base">
@@ -291,7 +292,7 @@ export default async function HomePage({ searchParams }: Props) {
             </div>
             <Link
               href="#equipos"
-              className="relative inline-flex items-center gap-2 rounded-full bg-pine px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cta"
+              className="relative col-span-2 inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-pine px-5 py-3 text-sm font-semibold text-white transition hover:bg-cta sm:py-2.5"
             >
               Ver equipos <StoreIcon name="arrow" className="w-4 h-4" />
             </Link>
@@ -374,7 +375,7 @@ export default async function HomePage({ searchParams }: Props) {
         </div>
 
         <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="scroll-fade flex gap-2 overflow-x-auto pb-1">
             <Link
               href={link({ categoria: null, ofertas: null })}
               className={`shrink-0 rounded-full border px-4 py-1.5 text-sm ${!categoria && !onlyOffers ? "border-pine bg-pine text-white" : "border-line/10 bg-surface text-ink hover:border-pine-700/40"}`}
@@ -399,7 +400,7 @@ export default async function HomePage({ searchParams }: Props) {
               </Link>
             ))}
           </div>
-          <div className="flex items-center gap-1 overflow-x-auto text-sm">
+          <div className="scroll-fade flex items-center gap-1 overflow-x-auto text-sm">
             <span className="shrink-0 text-muted">Ordenar:</span>
             {Object.entries(SORTS).map(([key, label]) => (
               <Link
