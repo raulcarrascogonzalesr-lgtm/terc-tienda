@@ -5,6 +5,12 @@ const nextConfig: NextConfig = {
   output: "standalone",
   // No anunciar en cada respuesta que la tienda está hecha con Next.js.
   poweredByHeader: false,
+  images: {
+    // Las fotos de los equipos están en Supabase; el servidor las achica (ver src/lib/photo.ts).
+    remotePatterns: [{ protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" }],
+    // Cada foto subida tiene un nombre único, así que la versión achicada no cambia nunca.
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+  },
   async headers() {
     return [
       {

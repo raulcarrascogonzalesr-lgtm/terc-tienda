@@ -9,7 +9,9 @@ import { Terqui } from "@/components/Terqui";
 import { OfferCountdown } from "@/components/OfferCountdown";
 import { ProductCard } from "@/components/ProductCard";
 import { formatCLP, offer, savings } from "@/lib/format";
+import { photoProps } from "@/lib/photo";
 import { listProducts } from "@/lib/products";
+import { productRanking } from "@/lib/ranking";
 import { jsonLdScript, storeJsonLd } from "@/lib/seo";
 import { getShippingFund } from "@/lib/shipping-fund";
 import { whatsappLink } from "@/lib/site";
@@ -37,6 +39,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 }
 
 const SORTS = {
+  destacados: "Destacados",
   recientes: "Más nuevos",
   "menor-precio": "Menor precio",
   "mayor-precio": "Mayor precio",
@@ -63,8 +66,10 @@ function bestDiscount(p: Product) {
   return offer(p)?.percent ?? savings(p)?.percent ?? 0;
 }
 
-function sortProducts(products: Product[], sort: Sort) {
+function sortProducts(products: Product[], sort: Sort, rank: Map<string, number>) {
   const list = [...products];
+  // Los que más ganancia dejan, primero (ver lib/ranking.ts). Sin datos, quedan los más nuevos primero.
+  if (sort === "destacados") list.sort((a, b) => (rank.get(b.id) ?? 0) - (rank.get(a.id) ?? 0));
   if (sort === "menor-precio") list.sort((a, b) => a.price - b.price);
   if (sort === "mayor-precio") list.sort((a, b) => b.price - a.price);
   if (sort === "descuento") list.sort((a, b) => bestDiscount(b) - bestDiscount(a));
@@ -88,6 +93,7 @@ function heroItem(p: Product): HeroItem {
     before: sale?.before ?? off?.before ?? null,
     deal: sale ? "oferta" : off ? "nuevo" : null,
     warranty: p.warranty_months,
+    // La foto original: el recorte del banner sale mejor sin la compresión de las versiones achicadas.
     img: p.image_url!,
   };
 }
@@ -116,8 +122,10 @@ function CategoryTile({ tile }: { tile: Tile }) {
         <div className="photo-stage absolute -bottom-[14%] -right-[8%] aspect-square w-[52%] overflow-hidden rounded-full sm:w-[60%]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={tile.photo}
+            {...photoProps(tile.photo, "(min-width: 640px) 200px, 120px", 384)}
             alt=""
+            loading="lazy"
+            decoding="async"
             className="absolute inset-0 h-full w-full object-contain p-[12%] pb-[22%] pr-[18%] mix-blend-multiply transition duration-500 group-hover:scale-105"
           />
         </div>
@@ -136,9 +144,9 @@ export default async function HomePage({ searchParams }: Props) {
   const q = params.q ?? "";
   const categoria = params.categoria ?? "";
   const onlyOffers = params.ofertas === "1";
-  const sort: Sort = params.orden && params.orden in SORTS ? (params.orden as Sort) : "recientes";
+  const sort: Sort = params.orden && params.orden in SORTS ? (params.orden as Sort) : "destacados";
 
-  const [all, fund] = await Promise.all([listProducts(), getShippingFund()]);
+  const [all, fund, rank] = await Promise.all([listProducts(), getShippingFund(), productRanking().catch(() => new Map<string, number>())]);
   const freeShipping = fund > 0;
   const benefits = freeShipping
     ? BENEFITS.map((b) => (b.icon === "truck" ? { ...b, title: "Envío gratis en la RM", text: "Y más barato a regiones" } : b))
@@ -156,6 +164,7 @@ export default async function HomePage({ searchParams }: Props) {
         (!query || normalize(`${p.name} ${p.brand} ${p.category} sku ${p.sku}`).includes(query)),
     ),
     sort,
+    rank,
   );
   const filtering = Boolean(query || categoria || onlyOffers);
   const categories = [...new Set(all.map((p) => p.category))].sort();
@@ -182,11 +191,16 @@ export default async function HomePage({ searchParams }: Props) {
     })
     .sort((a, b) => b.count - a.count)
     .slice(0, offers.length ? 3 : 4);
-  // El banner muestra primero los equipos en oferta y luego los con más descuento frente a uno nuevo
+  // El banner muestra primero los equipos en oferta y luego los destacados, los que más ganancia dejan
   // (solo los que tienen foto). La garantía que cuenta Terqui es la más común del catálogo.
   const featured = all
     .filter((p) => p.image_url)
-    .sort((a, b) => Number(Boolean(offer(b))) - Number(Boolean(offer(a))) || bestDiscount(b) - bestDiscount(a))
+    .sort(
+      (a, b) =>
+        Number(Boolean(offer(b))) - Number(Boolean(offer(a))) ||
+        (rank.get(b.id) ?? 0) - (rank.get(a.id) ?? 0) ||
+        bestDiscount(b) - bestDiscount(a),
+    )
     .slice(0, 8)
     .map(heroItem);
   const count = (months: number) => all.filter((p) => p.warranty_months === months).length;
@@ -197,7 +211,7 @@ export default async function HomePage({ searchParams }: Props) {
     const current = {
       q,
       categoria,
-      orden: sort === "recientes" ? "" : sort,
+      orden: sort === "destacados" ? "" : sort,
       ofertas: onlyOffers ? "1" : "",
     };
     const next = new URLSearchParams();
@@ -390,7 +404,7 @@ export default async function HomePage({ searchParams }: Props) {
             {Object.entries(SORTS).map(([key, label]) => (
               <Link
                 key={key}
-                href={link({ orden: key === "recientes" ? null : key })}
+                href={link({ orden: key === "destacados" ? null : key })}
                 className={`shrink-0 rounded-full px-3 py-1.5 ${sort === key ? "bg-surface font-semibold text-ink ring-1 ring-line/10" : "text-muted hover:text-ink"}`}
               >
                 {label}

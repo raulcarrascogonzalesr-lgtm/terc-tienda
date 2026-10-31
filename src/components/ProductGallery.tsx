@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { photoProps } from "@/lib/photo";
 import type { Product } from "@/lib/types";
 import { StoreIcon, type IconName } from "./icons";
 import { Mark } from "./Mark";
@@ -63,7 +64,11 @@ export function ProductGallery({ product, badges }: { product: Product; badges?:
         ) : current ? (
           <div className={`aspect-square w-full ${PHOTO_BACKDROP}`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={current} alt={product.name} className="h-full w-full object-contain p-[1%] mix-blend-multiply" />
+            <img
+              {...photoProps(current, "(min-width: 1024px) 560px, 100vw")}
+              alt={product.name}
+              className="h-full w-full object-contain p-[1%] mix-blend-multiply"
+            />
           </div>
         ) : (
           <ProductImage product={{ ...product, image_url: null }} />
@@ -108,7 +113,12 @@ export function ProductGallery({ product, badges }: { product: Product; badges?:
             ) : view ? (
               <span className={`block h-full w-full ${PHOTO_BACKDROP}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={view} alt="" className="h-full w-full object-contain p-1 mix-blend-multiply" />
+                <img
+                  {...photoProps(view, "64px", 256)}
+                  alt=""
+                  loading="lazy"
+                  className="h-full w-full object-contain p-1 mix-blend-multiply"
+                />
               </span>
             ) : (
               <span className="relative flex h-full w-full items-center justify-center photo-stage">

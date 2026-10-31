@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { cutoutPhoto } from "@/components/CutoutImage";
 import { WhatsAppIcon } from "@/components/icons";
 import type { HeroItem } from "@/lib/terqui-anim/hero";
+import { cutoutPhotos } from "./cutout-photos";
 import "./terqui-hero.css";
 
 // Banner de la portada con Terqui. El HTML está aquí y la animación en lib/terqui-anim/hero.js,
@@ -65,6 +65,9 @@ export function TerquiHero({
     // Si se está mostrando la cortina de bienvenida, Terqui entra justo cuando se abre.
     const welcomeAt = document.documentElement.dataset.welcome === "show" ? window.__tercWelcomeAt : undefined;
     const startDelay = welcomeAt === undefined ? 0 : Math.max(0, OPEN_AT - (performance.now() - welcomeAt) / 1000);
+    const photos = cutoutPhotos();
+    // Con calma, se borran del navegador los recortes de equipos que ya no salen en el banner.
+    const prune = setTimeout(() => photos.prune(items.map((p) => p.img)), 8000);
     const skip = () => hero?.start();
     window.addEventListener("terc:welcome-skip", skip);
     import("@/lib/terqui-anim/hero").then(({ startHero }) => {
@@ -74,13 +77,15 @@ export function TerquiHero({
         warranty,
         music: "/terqui/banner-musica.mp3",
         startDelay,
-        cutout: (src) => cutoutPhoto(src),
+        cutout: (src) => photos.cut(src),
       });
     });
     return () => {
       cancelled = true;
       window.removeEventListener("terc:welcome-skip", skip);
+      clearTimeout(prune);
       hero?.stop();
+      photos.stop();
     };
   }, [items, warranty]);
 
@@ -91,7 +96,9 @@ export function TerquiHero({
           <div className="hx-glow" data-h="g1" />
           <div className="hx-glow" data-h="g2" />
           <div className="hx-glow" data-h="g3" />
-          <div className="hx-floor" data-h="floor" />
+          <div className="hx-floor" data-h="floor">
+            <div className="hx-grid" data-h="grid" />
+          </div>
           <div className="hx-spot" data-h="spot" />
           <div data-h="motes" />
           <div className="hx-podium" data-h="podium" />

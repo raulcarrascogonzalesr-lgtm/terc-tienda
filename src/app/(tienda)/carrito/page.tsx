@@ -10,6 +10,7 @@ import { trackBeginCheckout } from "@/lib/analytics";
 import { MARKETING_CONSENT_TEXT } from "@/lib/consent";
 import { deliveryShort } from "@/lib/delivery";
 import { formatCLP } from "@/lib/format";
+import { photoProps } from "@/lib/photo";
 import { whatsappLink } from "@/lib/site";
 import { UTM_MAX_AGE_MS, UTM_STORAGE_KEY } from "@/lib/utm";
 import { DeliveryForm } from "./DeliveryForm";
@@ -232,7 +233,7 @@ export default function CartPage() {
               >
                 {item.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.image} alt="" className="h-full w-full object-contain p-2 mix-blend-multiply" />
+                  <img {...photoProps(item.image, "120px", 384)} alt="" className="h-full w-full object-contain p-2 mix-blend-multiply" />
                 ) : (
                   <Mark className="absolute inset-[28%] opacity-50" ink="#0a2a2a" />
                 )}
