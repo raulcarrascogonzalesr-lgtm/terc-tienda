@@ -305,14 +305,15 @@ export function startHero(root, opts) {
     const u = ease.io(seg(lt, s.dur - 0.6, s.dur));
     const [r, g, b] = colorOf(s).map((c, k) => Math.round(lerp(c, colorOf(nx)[k], u)));
     const glow = (id, x, y, bg) => {
-      const st = $(id).style;
-      st.transform = `translate(${x}px, ${y}px)`;
-      st.background = bg;
+      const el = $(id);
+      el.style.transform = `translate(${x}px, ${y}px)`;
+      // el color se cambia solo cuando cambia: pintar de nuevo una luz tan grande cuesta
+      if (el._bg !== bg) el.style.background = el._bg = bg;
     };
     glow("g1", l.prod.x - 450 + Math.sin(t * 0.4) * 60, l.prod.y - 640 + Math.cos(t * 0.3) * 40, `radial-gradient(circle, rgba(${r},${g},${b},.42), transparent 65%)`);
     glow("g2", -120 + Math.cos(t * 0.25) * 80, -200 + Math.sin(t * 0.35) * 60, "radial-gradient(circle, rgba(179,162,106,.22), transparent 65%)");
     glow("g3", l.W - 420 + Math.sin(t * 0.3) * 70, l.H - 380 + Math.cos(t * 0.45) * 50, `radial-gradient(circle, rgba(229,86,107,${isOffer(s) ? 0.3 : 0.12}), transparent 65%)`);
-    $("floor").style.backgroundPosition = `0 ${(t * 22) % 90}px, ${(t * 4) % 90}px 0`;
+    $("grid").style.transform = `translate(${(t * 4) % 90}px, ${(t * 22) % 90}px)`;
     for (const m of motes) {
       const y = 1 - ((t * m.sp + m.ph) % 1);
       const x = m.x * l.W + Math.sin(t * 0.8 + m.ph * 9) * 30;
@@ -392,7 +393,7 @@ export function startHero(root, opts) {
     // navegación
     const label = s.type === "prod" ? `${s.p.brand} ${s.p.name}` : LABELS[s.type];
     if ($("navLabel").textContent !== label) $("navLabel").textContent = label;
-    $("navBar").style.width = clamp(lt / s.dur) * 100 + "%";
+    $("navBar").style.transform = `scaleX(${clamp(lt / s.dur)})`;
     // Terqui
     const stt = P.state(t);
     stt.rig.gloss = 1;

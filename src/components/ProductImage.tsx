@@ -1,8 +1,12 @@
+import { photoProps } from "@/lib/photo";
 import type { Product } from "@/lib/types";
 import { Mark } from "./Mark";
 
 // Escenario verde con hojas de TERC detrás de cada foto (clase .photo-stage en globals.css).
 export const PHOTO_BACKDROP = "relative photo-stage";
+
+// Ancho de la foto en las tarjetas del catálogo (2 columnas en celular, hasta 5 en pantalla grande).
+export const CARD_SIZES = "(min-width: 1280px) 20vw, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw";
 
 export function ProductImage({ product }: { product: Product }) {
   if (!product.image_url) {
@@ -21,8 +25,10 @@ export function ProductImage({ product }: { product: Product }) {
     <div className={`aspect-square w-full ${PHOTO_BACKDROP}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={product.image_url}
+        {...photoProps(product.image_url, CARD_SIZES, 828)}
         alt={product.name}
+        loading="lazy"
+        decoding="async"
         className="h-full w-full object-contain p-[1.5%] mix-blend-multiply"
       />
     </div>

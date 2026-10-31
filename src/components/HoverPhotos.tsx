@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { photoProps } from "@/lib/photo";
 import type { Product } from "@/lib/types";
-import { PHOTO_BACKDROP, ProductImage } from "./ProductImage";
+import { CARD_SIZES, PHOTO_BACKDROP, ProductImage } from "./ProductImage";
 
 const INTERVAL_MS = 3200; // tiempo que se queda cada foto
 const FADE_MS = 1600; // duración del fundido entre fotos
@@ -47,8 +48,10 @@ export function HoverPhotos({ product }: { product: Product }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             key={src}
-            src={src}
+            {...photoProps(src, CARD_SIZES, 828)}
             alt={i === 0 ? product.name : ""}
+            loading="lazy"
+            decoding="async"
             className={`absolute inset-0 h-full w-full object-contain p-[1.5%] mix-blend-multiply transition-[opacity,transform] ease-in-out ${
               i === index ? "opacity-100 scale-100" : "opacity-0 scale-[0.985]"
             }`}

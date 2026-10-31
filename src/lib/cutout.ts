@@ -1,14 +1,6 @@
-"use client";
+// Quita el fondo blanco de una foto de equipo (ver CutoutImage.tsx y cutout.worker.ts).
+// Es solo cálculo sobre los píxeles, sin tocar la página, así puede correr en segundo plano.
 
-import { useEffect, useState } from "react";
-
-// Las fotos de los equipos vienen sobre fondo blanco. Para mostrarlas sobre un fondo oscuro
-// (el banner de la portada), se quita ese blanco en el navegador: se pinta la foto en un
-// canvas y se vuelve transparente el blanco que toca los bordes. El equipo queda intacto
-// aunque tenga partes blancas por dentro, porque solo se borra el blanco conectado al borde.
-// Si algo falla (por ejemplo, la foto no permite leerse), se muestra la foto tal cual.
-
-const MAX_SIDE = 1200; // suficiente para el banner y mucho más liviano que la original
 const LIGHT = 230; // desde aquí un píxel gris claro puede ser fondo (el blanco de estudio no es parejo)
 const NEUTRAL = 14; // el fondo y las sombras son grises: sin color
 const STEP = 10; // el relleno no cruza un cambio de color mayor a este entre vecinos
@@ -20,7 +12,6 @@ const GAP = 0.012; // huecos entre columnas de sombra que se rellenan, como part
 const SHADOW_RUN = 0.15; // una sombra de verdad es ancha: al menos esta parte del ancho de la foto
 const BAND = 3; // ancho del borde que se mezcla con el fondo (px)
 const SPECK = 0.0005; // islas sueltas más chicas que esto (parte de la foto) se borran
-const cache = new Map<string, string>();
 
 export function cutout(p: Uint8ClampedArray, W: number, H: number): Uint8ClampedArray {
   const N = W * H;
@@ -270,35 +261,49 @@ export function cutout(p: Uint8ClampedArray, W: number, H: number): Uint8Clamped
   return out;
 }
 
-async function cutoutCanvas(src: string, maxSide: number) {
-  const img = new Image();
-  img.crossOrigin = "anonymous";
-  img.src = src;
-  await img.decode();
-  const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
-  const W = Math.round(img.naturalWidth * scale);
-  const H = Math.round(img.naturalHeight * scale);
-  const canvas = document.createElement("canvas");
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(img, 0, 0, W, H);
+// ---------- foto lista para el banner ----------
+
+// Los recortes se guardan en el navegador: la segunda visita no vuelve a calcular nada.
+// Cambiar el número si cambia el recorte, para no seguir usando los guardados.
+export const CUTOUT_CACHE = "terc-recortes-1";
+
+type AnyCanvas = OffscreenCanvas | HTMLCanvasElement;
+const makeCanvas = (w: number, h: number): AnyCanvas =>
+  typeof OffscreenCanvas !== "undefined" ? new OffscreenCanvas(w, h) : Object.assign(document.createElement("canvas"), { width: w, height: h });
+const context = (c: AnyCanvas) => c.getContext("2d", { willReadFrequently: true }) as OffscreenCanvasRenderingContext2D;
+const toBlob = (c: AnyCanvas): Promise<Blob | null> =>
+  "convertToBlob" in c ? c.convertToBlob({ type: "image/webp", quality: 0.92 }) : new Promise((r) => c.toBlob(r, "image/webp", 0.92));
+
+async function openCache() {
+  try {
+    return await caches.open(CUTOUT_CACHE);
+  } catch {
+    return null; // sin caché (modo privado, http): se calcula igual
+  }
+}
+
+/**
+ * La foto sin fondo y recortada justo al equipo (sin el margen transparente), así todos se ven
+ * del mismo tamaño. Funciona en un worker (en segundo plano) o en la página.
+ */
+export async function cutoutBlob(src: string, maxSide = 900): Promise<{ blob: Blob; ar: number }> {
+  const store = await openCache();
+  const hit = await store?.match(src).catch(() => undefined);
+  if (hit) return { blob: await hit.blob(), ar: Number(hit.headers.get("x-ar")) };
+
+  const res = await fetch(src, { mode: "cors" });
+  if (!res.ok) throw new Error(`Foto no disponible (${res.status})`);
+  const bmp = await createImageBitmap(await res.blob());
+  const scale = Math.min(1, maxSide / Math.max(bmp.width, bmp.height));
+  const W = Math.round(bmp.width * scale);
+  const H = Math.round(bmp.height * scale);
+  const canvas = makeCanvas(W, H);
+  const ctx = context(canvas);
+  ctx.drawImage(bmp, 0, 0, W, H);
+  bmp.close();
   const data = ctx.getImageData(0, 0, W, H);
   data.data.set(cutout(data.data, W, H));
-  ctx.putImageData(data, 0, 0);
-  return { canvas, data };
-}
 
-async function removeWhiteBackground(src: string): Promise<string> {
-  const { canvas } = await cutoutCanvas(src, MAX_SIDE);
-  return canvas.toDataURL("image/png");
-}
-
-// Para el banner de la portada: la foto sin fondo y recortada justo al equipo (sin el margen
-// transparente), así todos se ven del mismo tamaño. Devuelve la imagen y su proporción.
-export async function cutoutPhoto(src: string, maxSide = 900): Promise<{ url: string; ar: number }> {
-  const { canvas, data } = await cutoutCanvas(src, maxSide);
-  const { width: W, height: H } = canvas;
   let x0 = W, y0 = H, x1 = -1, y1 = -1;
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
@@ -312,48 +317,11 @@ export async function cutoutPhoto(src: string, maxSide = 900): Promise<{ url: st
   if (x1 < x0) throw new Error("Foto vacía");
   const w = x1 - x0 + 1;
   const h = y1 - y0 + 1;
-  const crop = document.createElement("canvas");
-  crop.width = w;
-  crop.height = h;
-  crop.getContext("2d")!.drawImage(canvas, x0, y0, w, h, 0, 0, w, h);
-  const blob = await new Promise<Blob | null>((resolve) => crop.toBlob(resolve, "image/webp", 0.92));
+  const crop = makeCanvas(w, h);
+  context(crop).putImageData(data, -x0, -y0, x0, y0, w, h);
+  const blob = await toBlob(crop);
   if (!blob) throw new Error("No se pudo preparar la foto");
-  return { url: URL.createObjectURL(blob), ar: w / h };
-}
-
-export function CutoutImage({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
-  const [state, setState] = useState<{ src: string; result: string | null } | null>(() =>
-    cache.has(src) ? { src, result: cache.get(src)! } : null,
-  );
-
-  useEffect(() => {
-    if (cache.has(src)) return;
-    let current = true;
-    removeWhiteBackground(src)
-      .then((url) => {
-        cache.set(src, url);
-        if (current) setState({ src, result: url });
-      })
-      .catch(() => current && setState({ src, result: null }));
-    return () => {
-      current = false;
-    };
-  }, [src]);
-
-  const ready = state?.src === src;
-  if (ready && state.result === null) {
-    // Sin recorte: la foto original dentro de un recuadro claro.
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={src} alt={alt} className={`rounded-3xl bg-white object-contain p-4 ${className}`} />
-    );
-  }
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={ready ? state.result! : src}
-      alt={alt}
-      className={`object-contain transition-opacity duration-500 ${ready ? "opacity-100" : "opacity-0"} ${className}`}
-    />
-  );
+  const ar = w / h;
+  await store?.put(src, new Response(blob, { headers: { "content-type": blob.type, "x-ar": String(ar) } })).catch(() => {});
+  return { blob, ar };
 }

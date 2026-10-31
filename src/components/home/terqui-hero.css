@@ -39,7 +39,6 @@
   left: 0;
   top: 0;
   border-radius: 50%;
-  filter: blur(10px);
   will-change: transform;
 }
 .hx-floor {
@@ -49,12 +48,19 @@
   transform-origin: 50% 100%;
   transform: perspective(700px) rotateX(68deg);
   opacity: 0.55;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 85%);
+  mask-image: linear-gradient(to top, #000 0%, transparent 85%);
+}
+/* La cuadrícula se mueve con transform (sin volver a pintarla en cada cuadro). */
+.hx-grid {
+  position: absolute;
+  inset: -90px 0 0 -90px;
   background-image:
     linear-gradient(rgba(61, 181, 133, 0.28) 1.5px, transparent 1.5px),
     linear-gradient(90deg, rgba(61, 181, 133, 0.28) 1.5px, transparent 1.5px);
   background-size: 90px 90px;
-  -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 85%);
-  mask-image: linear-gradient(to top, #000 0%, transparent 85%);
+  will-change: transform;
 }
 .hx-podium {
   border-radius: 50%;
@@ -97,6 +103,7 @@
 .hx-mote {
   left: 0;
   top: 0;
+  will-change: transform, opacity;
   width: 14px;
   height: 9px;
   border-radius: 0 100% 0 100%;
@@ -197,6 +204,7 @@
 .hx-stamp {
   left: 0;
   top: 0;
+  will-change: transform, opacity;
   width: 132px;
   height: 132px;
   border-radius: 50%;
@@ -297,6 +305,7 @@
 .hx-bubble {
   left: 0;
   top: 0;
+  will-change: transform, opacity;
   background: #fff;
   color: #0a2a2a;
   font: 800 var(--bub) / 1.15 var(--font-display);
@@ -310,6 +319,7 @@
 .hx-terqui {
   left: 0;
   top: 0;
+  will-change: transform;
 }
 
 .hx-ctas {
@@ -390,8 +400,9 @@
 .hx-bar i {
   display: block;
   height: 100%;
-  width: 0;
   background: var(--hx-gold);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
 }
 .hx-compact .hx-hide-m {
   display: none;

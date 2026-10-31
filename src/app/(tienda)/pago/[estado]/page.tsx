@@ -4,6 +4,7 @@ import { Mark } from "@/components/Mark";
 import { Terqui, type TerquiPose } from "@/components/Terqui";
 import { deliveryShort } from "@/lib/delivery";
 import { formatCLP } from "@/lib/format";
+import { photoProps } from "@/lib/photo";
 import { orderNumber } from "@/lib/order-emails";
 import { getProductsByIds } from "@/lib/products";
 import { whatsappLink } from "@/lib/site";
@@ -159,7 +160,7 @@ export default async function PaymentResultPage({
                 <span className="photo-stage relative block aspect-square overflow-hidden rounded-2xl">
                   {photo ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={photo} alt="" className="h-full w-full object-contain p-1.5 mix-blend-multiply" />
+                    <img {...photoProps(photo, "64px", 256)} alt="" className="h-full w-full object-contain p-1.5 mix-blend-multiply" />
                   ) : (
                     <Mark className="absolute inset-[28%] opacity-50" ink="#0a2a2a" />
                   )}

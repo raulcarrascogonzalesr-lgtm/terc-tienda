@@ -9,6 +9,7 @@ import { Terqui } from "@/components/Terqui";
 import { OfferCountdown } from "@/components/OfferCountdown";
 import { ProductCard } from "@/components/ProductCard";
 import { formatCLP, offer, savings } from "@/lib/format";
+import { photoProps } from "@/lib/photo";
 import { listProducts } from "@/lib/products";
 import { jsonLdScript, storeJsonLd } from "@/lib/seo";
 import { getShippingFund } from "@/lib/shipping-fund";
@@ -88,6 +89,7 @@ function heroItem(p: Product): HeroItem {
     before: sale?.before ?? off?.before ?? null,
     deal: sale ? "oferta" : off ? "nuevo" : null,
     warranty: p.warranty_months,
+    // La foto original: el recorte del banner sale mejor sin la compresión de las versiones achicadas.
     img: p.image_url!,
   };
 }
@@ -116,8 +118,10 @@ function CategoryTile({ tile }: { tile: Tile }) {
         <div className="photo-stage absolute -bottom-[14%] -right-[8%] aspect-square w-[52%] overflow-hidden rounded-full sm:w-[60%]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={tile.photo}
+            {...photoProps(tile.photo, "(min-width: 640px) 200px, 120px", 384)}
             alt=""
+            loading="lazy"
+            decoding="async"
             className="absolute inset-0 h-full w-full object-contain p-[12%] pb-[22%] pr-[18%] mix-blend-multiply transition duration-500 group-hover:scale-105"
           />
         </div>
