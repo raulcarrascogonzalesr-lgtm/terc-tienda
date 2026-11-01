@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { TerquiHero } from "@/components/home/TerquiHero";
 import { PeaceOfMind } from "@/components/home/PeaceOfMind";
+import { ServiceCard, services, withServices } from "@/components/home/ServiceCard";
 import { WelcomeCurtain } from "@/components/home/WelcomeCurtain";
 import { StoreIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
@@ -213,6 +214,13 @@ export default async function HomePage({ searchParams }: Props) {
         : b,
   );
 
+  // Lo que Terqui cuenta entre los equipos: garantía, soporte, revisión, asesoría y envío.
+  const serviceCards = services({
+    warranty,
+    whatsapp: whatsappLink("Hola, quiero hablar con el soporte de TERC"),
+    freeShipping,
+  });
+
   // Arma el enlace manteniendo los filtros actuales.
   const link = (changes: Record<string, string | null>) => {
     const current = {
@@ -275,40 +283,11 @@ export default async function HomePage({ searchParams }: Props) {
               ))}
             </div>
           </section>
-          <PeaceOfMind warranty={warranty} whatsapp={whatsappLink("Hola, quiero hablar con el soporte de TERC")} />
         </>
       )}
 
-      {freeShipping && !filtering && (
-        <section className="shell pt-4">
-          {/* En celular: ícono y texto arriba, botón a todo el ancho abajo. Desde sm, todo en una fila. */}
-          <div
-            data-reveal
-            className="relative grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-4 overflow-hidden rounded-3xl bg-gold px-5 py-5 text-pine sm:flex sm:gap-x-6 sm:px-8 sm:py-6"
-          >
-            <StoreIcon name="truck" className="absolute -right-6 -bottom-8 h-40 w-40 text-pine/10" />
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center self-start rounded-full bg-pine text-gold sm:h-14 sm:w-14 sm:self-center">
-              <StoreIcon name="truck" className="h-6 w-6 sm:h-7 sm:w-7" />
-            </span>
-            <div className="relative min-w-0 sm:flex-1">
-              <p className="font-[family-name:var(--font-display)] text-xl font-extrabold leading-tight tracking-tight sm:text-4xl">
-                Envío gratis a toda la Región Metropolitana
-              </p>
-              <p className="mt-1 text-sm font-semibold text-pine/75 sm:text-base">
-                Cualquier comuna, cualquier equipo. Y a regiones, más barato: ya te descontamos parte del envío.
-              </p>
-            </div>
-            <Link
-              href="#equipos"
-              className="relative col-span-2 inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-pine px-5 py-3 text-sm font-semibold text-white transition hover:bg-cta sm:py-2.5"
-            >
-              Ver equipos <StoreIcon name="arrow" className="w-4 h-4" />
-            </Link>
-          </div>
-        </section>
-      )}
-
-      {/* En la portada esto ya lo cuenta en grande "Lo que compras en TERC"; en búsquedas y categorías va resumido. */}
+      {/* En la portada los servicios van como tarjetas de Terqui entre los equipos y en grande después de ellos;
+          en búsquedas y categorías van resumidos aquí. */}
       {filtering && (
         <section className="shell pt-4">
           <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -334,7 +313,7 @@ export default async function HomePage({ searchParams }: Props) {
       )}
 
       {!filtering && offers.length > 0 && (
-        <section className="mt-12 bg-gradient-to-b from-sale-50 to-paper py-10">
+        <section className="mt-8 bg-gradient-to-b from-sale-50 to-paper py-10">
           <div className="shell">
             <div data-reveal className="mb-6 flex flex-wrap items-end justify-between gap-4">
               <div>
@@ -437,14 +416,54 @@ export default async function HomePage({ searchParams }: Props) {
           </div>
         ) : (
           <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
-            {filtered.map((p, i) => (
-              <div key={p.id} data-reveal style={delay((i % 5) * 70)}>
-                <ProductCard product={p} />
-              </div>
-            ))}
+            {withServices(filtered, q ? [] : serviceCards).map((cell, i) =>
+              cell.kind === "product" ? (
+                <div key={cell.item.id} data-reveal style={delay((i % 5) * 70)}>
+                  <ProductCard product={cell.item} />
+                </div>
+              ) : (
+                <div key={cell.service.key} data-reveal style={delay((i % 5) * 70)}>
+                  <ServiceCard service={cell.service} />
+                </div>
+              ),
+            )}
           </div>
         )}
       </section>
+
+      {/* Después de ver los equipos: la garantía de 1 año y el soporte post venta, en grande. */}
+      {!filtering && (
+        <PeaceOfMind warranty={warranty} whatsapp={whatsappLink("Hola, quiero hablar con el soporte de TERC")} />
+      )}
+
+      {freeShipping && !filtering && (
+        <section className="shell pt-4">
+          {/* En celular: ícono y texto arriba, botón a todo el ancho abajo. Desde sm, todo en una fila. */}
+          <div
+            data-reveal
+            className="relative grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-4 overflow-hidden rounded-3xl bg-gold px-5 py-5 text-pine sm:flex sm:gap-x-6 sm:px-8 sm:py-6"
+          >
+            <StoreIcon name="truck" className="absolute -right-6 -bottom-8 h-40 w-40 text-pine/10" />
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center self-start rounded-full bg-pine text-gold sm:h-14 sm:w-14 sm:self-center">
+              <StoreIcon name="truck" className="h-6 w-6 sm:h-7 sm:w-7" />
+            </span>
+            <div className="relative min-w-0 sm:flex-1">
+              <p className="font-[family-name:var(--font-display)] text-xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+                Envío gratis a toda la Región Metropolitana
+              </p>
+              <p className="mt-1 text-sm font-semibold text-pine/75 sm:text-base">
+                Cualquier comuna, cualquier equipo. Y a regiones, más barato: ya te descontamos parte del envío.
+              </p>
+            </div>
+            <Link
+              href="#equipos"
+              className="relative col-span-2 inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-pine px-5 py-3 text-sm font-semibold text-white transition hover:bg-cta sm:py-2.5"
+            >
+              Ver equipos <StoreIcon name="arrow" className="w-4 h-4" />
+            </Link>
+          </div>
+        </section>
+      )}
 
       {!filtering && (
         <section data-reveal className="shell pt-14">
