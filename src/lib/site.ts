@@ -20,9 +20,9 @@ export const SITE = {
   // Raúl lo puede cambiar aquí; los textos de la portada, la ficha y la garantía lo toman de aquí.
   support: {
     name: "Soporte TERC por WhatsApp",
-    hours: "Lunes a viernes de 10:00 a 19:00 y sábado de 10:00 a 14:00",
-    hoursShort: "Lun a vie 10 a 19 h · sáb 10 a 14 h",
-    response: "normalmente en menos de 2 horas en horario de atención",
+    hours: "Lunes a sábado de 9:00 a 22:00",
+    hoursShort: "Lun a sáb 9 a 22 h",
+    response: "el mismo día dentro del horario",
     videoCallMinutes: 30,
   },
   // Enlace para dejar una reseña en Google (Perfil de Empresa > "Pedir reseñas").
