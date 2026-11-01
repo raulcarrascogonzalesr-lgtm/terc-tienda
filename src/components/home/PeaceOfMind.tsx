@@ -19,7 +19,7 @@ const PILLARS: { icon: IconName; title: string; text: string }[] = [
   {
     icon: "chat",
     title: "Soporte por WhatsApp",
-    text: "Te responde una persona, normalmente en menos de 2 horas en horario de atención.",
+    text: "Te responde una persona, el mismo día, de lunes a sábado de 9:00 a 22:00.",
   },
   {
     icon: "video",

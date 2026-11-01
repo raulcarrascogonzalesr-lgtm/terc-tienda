@@ -192,7 +192,7 @@ export default function WarrantyPage() {
             {
               icon: "clock" as IconName,
               title: "Horario",
-              text: `${SITE.support.hours}. Normalmente respondemos en menos de 2 horas dentro de ese horario. Si escribes fuera de horario, te respondemos al día hábil siguiente.`,
+              text: `${SITE.support.hours}. Te respondemos el mismo día dentro de ese horario. Si escribes fuera de horario o un domingo, te respondemos al día siguiente desde las 9:00.`,
             },
             {
               icon: "heart" as IconName,
