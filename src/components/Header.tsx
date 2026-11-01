@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SITE } from "@/lib/site";
+import { warrantyLabel } from "@/lib/warranty";
 import { useCart } from "./CartProvider";
 import { StoreIcon } from "./icons";
 import { Logo } from "./Logo";
@@ -76,7 +78,11 @@ export function Header({
           <div className="shell h-9 flex items-center justify-center gap-6">
             <span className={`${freeShipping ? "hidden sm:flex" : "flex"} items-center gap-1.5`}>
               <StoreIcon name="shield" className="w-4 h-4 text-gold" />
-              Todos los equipos con garantía
+              {warrantyLabel(SITE.warrantyMonths)} de garantía en todos los equipos
+            </span>
+            <span className="hidden lg:flex items-center gap-1.5">
+              <StoreIcon name="chat" className="w-4 h-4 text-gold" />
+              Soporte por WhatsApp
             </span>
             <span className={`${freeShipping ? "flex font-semibold text-white" : "hidden sm:flex"} items-center gap-1.5`}>
               <StoreIcon name="truck" className="w-4 h-4 text-gold" />

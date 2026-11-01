@@ -2,6 +2,8 @@
 // Dibujado en SVG con los colores de la marca. Lleva un borde blanco para verse también sobre fondos oscuros.
 // Las animaciones viven en globals.css (clases terqui-*) y se apagan con "reducir movimiento".
 
+import { DESK, HEADSET } from "@/lib/terqui-anim/rig";
+
 const INK = "#0a2a2a";
 const LEAF = "#288868";
 const LEAF_LIGHT = "#3db585";
@@ -22,7 +24,8 @@ export type TerquiPose =
   | "caja" // corriendo con un paquete
   | "corazon" // con un corazón en las manos
   | "lupa" // revisando con una lupa
-  | "guino"; // guiñando un ojo
+  | "guino" // guiñando un ojo
+  | "soporte"; // con audífonos detrás de su escritorio, atendiendo por WhatsApp (usar con crop="escritorio")
 
 export const TERQUI_POSES: TerquiPose[] = [
   "hola",
@@ -38,6 +41,7 @@ export const TERQUI_POSES: TerquiPose[] = [
   "corazon",
   "lupa",
   "guino",
+  "soporte",
 ];
 
 type Point = [number, number];
@@ -95,6 +99,10 @@ const ARMS: Record<TerquiPose, [Point[], Point[]]> = {
     [[70, 118], [58, 136], [56, 150]],
     [[130, 112], [150, 106], [160, 94]],
   ],
+  soporte: [
+    [[70, 118], [49, 113], [58, 100]],
+    [[130, 118], [143, 138], [134, 152]],
+  ],
 };
 
 // Poses que sostienen algo delante: los brazos van por encima del cuerpo.
@@ -114,6 +122,7 @@ const LEAN: Record<TerquiPose, number> = {
   corazon: -3,
   lupa: 4,
   guino: -5,
+  soporte: 0,
 };
 
 // Cada trazo se dibuja dos veces: blanco grueso debajo (el borde) y oscuro encima.
@@ -151,7 +160,8 @@ function Leg({ side, className }: { side: "l" | "r"; className?: string }) {
 }
 
 function Face({ pose, look }: { pose: TerquiPose; look: number }) {
-  const happy = pose === "listo" || pose === "colgando" || pose === "caja" || pose === "celebra" || pose === "corazon";
+  const happy =
+    pose === "listo" || pose === "colgando" || pose === "caja" || pose === "celebra" || pose === "corazon" || pose === "soporte";
   const eyeY = happy ? 102 : 103;
   const brows =
     {
@@ -165,6 +175,7 @@ function Face({ pose, look }: { pose: TerquiPose; look: number }) {
       lupa: "M81 96 L94 96 M106 91 L118 91",
       guino: "M81 93 L93 92 M107 96 L119 96",
       caja: "M81 94 L93 91 M107 91 L119 94",
+      soporte: "M81 92 L93 90 M107 90 L119 92",
     }[pose as string] ?? "M81 95 L94 94 M106 94 L119 95";
   return (
     <>
@@ -328,6 +339,35 @@ function Props({ pose }: { pose: TerquiPose }) {
           <Grip at={[150, 92]} />
         </g>
       );
+    case "soporte":
+      return (
+        <>
+          <g dangerouslySetInnerHTML={{ __html: HEADSET }} />
+          <Grip at={[58, 100]} />
+          <g dangerouslySetInnerHTML={{ __html: DESK }} />
+          {/* la conversación: el cliente pregunta y TERC responde */}
+          <g className="terqui-chat">
+            <path d="M-36 20 h66 a10 10 0 0 1 10 10 v18 a10 10 0 0 1 -10 10 h-50 l-12 9 v-9 h-4 a10 10 0 0 1 -10 -10 v-18 a10 10 0 0 1 10 -10z" fill="#fff" stroke="#d6e6df" strokeWidth={1.5} />
+            <rect x="-34" y="31" width="52" height="5" rx="2.5" fill={INK} opacity=".25" />
+            <rect x="-34" y="42" width="36" height="5" rx="2.5" fill={INK} opacity=".25" />
+            <text x="20" y="51" style={{ fontFamily: "var(--font-montserrat), Montserrat, sans-serif" }} fontWeight={800} fontSize={16} fill={GOLD}>
+              ?
+            </text>
+          </g>
+          <g className="terqui-chat terqui-chat-2">
+            <path d="M166 50 h66 a10 10 0 0 1 10 10 v18 a10 10 0 0 1 -10 10 h-4 v9 l-12 -9 h-50 a10 10 0 0 1 -10 -10 v-18 a10 10 0 0 1 10 -10z" fill="#d9fdd3" stroke="#bfe8b8" strokeWidth={1.5} />
+            <rect x="166" y="61" width="58" height="5" rx="2.5" fill={INK} opacity=".3" />
+            <rect x="166" y="72" width="40" height="5" rx="2.5" fill={INK} opacity=".3" />
+            <path d="M212 76 l3 3 l6 -7 M218 76 l3 3 l6 -7" stroke="#34b7f1" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          </g>
+          <g className="terqui-chat terqui-chat-3">
+            <rect x="-30" y="80" width="40" height="20" rx="10" fill="#fff" stroke="#d6e6df" strokeWidth={1.5} />
+            <circle className="terqui-dot" cx="-19" cy="90" r="3" fill={LEAF} />
+            <circle className="terqui-dot terqui-dot-2" cx="-10" cy="90" r="3" fill={LEAF} />
+            <circle className="terqui-dot terqui-dot-3" cx="-1" cy="90" r="3" fill={LEAF} />
+          </g>
+        </>
+      );
     case "guino":
       return (
         <path
@@ -345,7 +385,8 @@ function Props({ pose }: { pose: TerquiPose }) {
 }
 
 // "asoma" recorta el dibujo para que solo se vea desde la cintura hacia arriba, como asomándose.
-const VIEWBOX = { full: "0 0 200 200", asoma: "40 8 145 130" };
+// "escritorio" deja espacio a los lados para el escritorio y la conversación de la pose "soporte".
+const VIEWBOX = { full: "0 0 200 200", asoma: "40 8 145 130", escritorio: "-46 10 292 206" };
 
 export function Terqui({
   pose = "hola",
@@ -380,10 +421,11 @@ export function Terqui({
     colgando: ["terqui-dangle", "terqui-dangle"],
     caja: ["terqui-step-l", "terqui-step-r"],
   }[pose as string];
-  const rightArm = { hola: "terqui-wave", apunta: "terqui-nudge", guino: "terqui-wave" }[pose as string];
+  const rightArm = { hola: "terqui-wave", apunta: "terqui-nudge", guino: "terqui-wave", soporte: "terqui-type" }[pose as string];
+  const leftArm = { carrito: "terqui-scratch" }[pose as string];
   const arms = (
     <>
-      <Arm points={left} className={pose === "carrito" ? "terqui-scratch" : undefined} />
+      <Arm points={left} className={leftArm} />
       {pose !== "lupa" && <Arm points={right} className={rightArm} />}
       {pose === "lupa" && <Arm points={right} className="terqui-scan" />}
     </>
@@ -396,7 +438,7 @@ export function Terqui({
       aria-label={title}
       aria-hidden={title ? undefined : true}
     >
-      {pose !== "colgando" && pose !== "sentado" && crop === "full" && (
+      {pose !== "colgando" && pose !== "sentado" && pose !== "soporte" && crop === "full" && (
         <ellipse className={pose === "celebra" ? "terqui-shadow" : undefined} cx="100" cy="194" rx="34" ry="4" fill={INK} opacity=".08" />
       )}
       <Leg side="l" className={legs?.[0]} />

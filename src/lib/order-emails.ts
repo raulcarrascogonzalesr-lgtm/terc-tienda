@@ -4,6 +4,7 @@ import { courierLabel, isShippingZone } from "./shipping";
 import { SITE } from "./site";
 import { getAdminClient } from "./supabase";
 import type { Order, Quote } from "./types";
+import { warrantyLabel } from "./warranty";
 
 export type EmailKind = "paid" | "shipped" | "delivered";
 const COLUMN = { paid: "paid_email_at", shipped: "shipped_email_at", delivered: "delivered_email_at" } as const;
@@ -120,7 +121,7 @@ function warrantyCard(months: number | null): string {
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 18px;border:2px dashed ${C.gold};border-radius:14px">
     <tr><td style="padding:14px 16px;font-size:14px;line-height:1.5">
       <div style="font-size:12px;letter-spacing:1px;color:${C.gold};font-weight:bold">TU GARANTÍA TERC</div>
-      <div style="font-size:20px;font-weight:bold;margin:2px 0">${months} ${months === 1 ? "mes" : "meses"}</div>
+      <div style="font-size:20px;font-weight:bold;margin:2px 0">${warrantyLabel(months)}</div>
       Guarda este correo: es el respaldo de tu compra si alguna vez necesitas usar la garantía.
       <a href="${POLICY_URL}" style="color:${C.pine}">Así funciona la garantía</a>.
     </td></tr>
@@ -263,7 +264,7 @@ export function deliveredEmail(order: Order, info: Map<string, ItemInfo>) {
     `¡Llegó tu pedido${name ? `, ${name}` : ""}!`,
     `Esperamos que disfrutes tu compra (pedido ${number}).`,
     "¿Cómo te fue? Responde este correo o escríbenos por WhatsApp, nos encanta saber.",
-    months ? `Recuerda: tu equipo tiene ${months} meses de garantía TERC.` : "",
+    months ? `Recuerda: tu equipo tiene ${warrantyLabel(months)} de garantía TERC y soporte por WhatsApp.` : "",
     "",
     helpText,
     "",

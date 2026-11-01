@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SITE, whatsappLink } from "@/lib/site";
+import { warrantyLabel } from "@/lib/warranty";
 import { StoreIcon, WhatsAppIcon } from "./icons";
 import { Logo } from "./Logo";
 import { ThemeSwitch } from "./ThemeToggle";
@@ -14,7 +15,14 @@ export function Footer({ categories }: { categories: string[] }) {
         <div className="space-y-4 lg:col-span-2">
           <Logo variant="light" className="h-16 w-auto" />
           <p className="max-w-sm text-sm leading-relaxed">
-            Tecnología reacondicionada, revisada uno por uno y con garantía. {SITE.slogan}.
+            Tecnología reacondicionada, revisada uno por uno, con {warrantyLabel(SITE.warrantyMonths)} de garantía y
+            soporte por WhatsApp después de la compra. {SITE.slogan}.
+          </p>
+          <p className="flex items-start gap-2 text-xs text-white/60">
+            <StoreIcon name="clock" className="mt-0.5 h-4 w-4 text-gold" />
+            <span>
+              {SITE.support.name}: {SITE.support.hours.toLowerCase()}.
+            </span>
           </p>
         </div>
         {categories.length > 0 && (
@@ -37,7 +45,7 @@ export function Footer({ categories }: { categories: string[] }) {
             {whatsapp && (
               <li>
                 <a href={whatsapp} target="_blank" rel="noopener" className="flex items-center gap-2 hover:text-white">
-                  <WhatsAppIcon className="w-4 h-4" /> WhatsApp
+                  <WhatsAppIcon className="w-4 h-4" /> WhatsApp y soporte
                 </a>
               </li>
             )}

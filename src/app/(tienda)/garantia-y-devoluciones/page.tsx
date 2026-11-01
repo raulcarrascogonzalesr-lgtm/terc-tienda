@@ -1,24 +1,30 @@
 import type { Metadata } from "next";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
+import { Terqui } from "@/components/Terqui";
 import { SITE, whatsappLink } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Garantía y devoluciones | TERC",
   description:
-    "Cómo funciona la garantía de los equipos reacondicionados de TERC, cuándo devolvemos el dinero y cómo pedirlo.",
+    "1 año de garantía en todos los equipos reacondicionados de TERC y soporte por WhatsApp. Qué cubre, cuándo devolvemos el dinero y cómo pedirla.",
 };
 
 // Resumen que se lee de un vistazo, antes del detalle.
 const SUMMARY: { icon: IconName; title: string; text: string }[] = [
   {
-    icon: "leaf",
-    title: "Son equipos reacondicionados",
-    text: "Revisados uno por uno y 100% operativos. El estado de cada uno está en su ficha.",
+    icon: "shield",
+    title: "1 año de garantía",
+    text: "Todos nuestros equipos tienen 12 meses de garantía, contados desde que lo recibes.",
   },
   {
-    icon: "shield",
-    title: "Garantía por fallas técnicas",
-    text: "Si falla, tú eliges: reparación gratis, cambio o devolución del dinero. El envío lo pagamos nosotros.",
+    icon: "repair",
+    title: "Si falla, lo solucionamos",
+    text: "Reparación gratis, cambio o devolución del dinero. Los envíos los pagamos nosotros.",
+  },
+  {
+    icon: "chat",
+    title: "Soporte por WhatsApp",
+    text: "Personas reales te ayudan con cualquier duda de tu equipo, antes y después de la garantía.",
   },
   {
     icon: "receipt",
@@ -41,6 +47,7 @@ const NOT_COVERED = [
   "Equipos abiertos, modificados o reparados por otra persona.",
   "Problemas de programas, virus o archivos que instalaste tú.",
   "El desgaste normal por uso después de la compra.",
+  "El desgaste de la batería después de los primeros 6 meses.",
 ];
 
 const STEPS = [
@@ -50,15 +57,15 @@ const STEPS = [
   },
   {
     title: "Lo revisamos contigo",
-    text: "Te respondemos normalmente dentro de 2 días hábiles. Muchas veces se soluciona a distancia, sin enviar nada.",
+    text: "Te respondemos por WhatsApp, normalmente el mismo día. Muchas veces se soluciona a distancia o en una videollamada, sin enviar nada.",
   },
   {
     title: "Te mandamos el envío pagado",
     text: "Si hay que revisarlo, te enviamos la etiqueta de despacho pagada por TERC, desde cualquier parte de Chile.",
   },
   {
-    title: "Tú eliges la solución",
-    text: "Si la falla está cubierta, lo reparamos gratis, te lo cambiamos o te devolvemos el dinero. Tú decides.",
+    title: "Lo solucionamos",
+    text: "Si la falla está cubierta, lo reparamos gratis, te lo cambiamos o te devolvemos el dinero, según el tramo de la garantía.",
   },
 ];
 
@@ -66,15 +73,22 @@ export default function WarrantyPage() {
   const whatsapp = whatsappLink("Hola TERC, necesito ayuda con la garantía de mi pedido");
   return (
     <div className="shell max-w-3xl py-10 space-y-8 text-muted leading-relaxed">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-ink">Garantía y devoluciones</h1>
-        <p>
+      <div className="relative overflow-hidden rounded-[2rem] bg-pine p-7 text-white sm:p-10">
+        <StoreIcon name="shield" className="absolute -right-10 -top-6 h-64 w-64 text-white/[0.05]" />
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-mint">Garantía y devoluciones</p>
+        <h1 className="mt-2 font-[family-name:var(--font-display)] text-5xl font-extrabold leading-none tracking-tight text-gold sm:text-7xl">
+          1 año de garantía
+        </h1>
+        <p className="mt-2 font-[family-name:var(--font-display)] text-2xl font-extrabold tracking-tight sm:text-3xl">
+          en cada equipo, y soporte por WhatsApp.
+        </p>
+        <p className="mt-3 max-w-xl text-white/80">
           Queremos que compres tranquilo. Aquí te explicamos, en simple, qué cubre la garantía de tu equipo y cuándo
           devolvemos el dinero. Léela antes de comprar: al pagar, aceptas estas condiciones.
         </p>
       </div>
 
-      <ul className="grid gap-3 sm:grid-cols-3">
+      <ul className="grid gap-3 sm:grid-cols-2">
         {SUMMARY.map((s) => (
           <li key={s.title} className="rounded-2xl bg-mint-50 border border-pine-700/15 p-5">
             <StoreIcon name={s.icon} className="w-6 h-6 text-pine-700" />
@@ -101,8 +115,30 @@ export default function WarrantyPage() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-ink">2. La garantía TERC</h2>
         <p>
-          Cada equipo tiene la garantía que aparece en su ficha, contada desde el día en que lo recibes. Cubre las
-          fallas técnicas que el equipo tenga y que no te hayamos informado antes de la compra.
+          Todos los equipos de TERC tienen <strong className="text-ink">1 año de garantía (12 meses)</strong>, contado
+          desde el día en que recibes tu pedido. Cubre las fallas técnicas que el equipo tenga y que no te hayamos
+          informado antes de la compra.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl bg-mint-50 border border-pine-700/15 p-5">
+            <p className="text-sm font-semibold text-ink">Primeros 6 meses</p>
+            <p className="mt-1 text-sm">
+              Si la falla está cubierta, <strong className="text-ink">tú eliges</strong>: reparar el equipo sin costo,
+              cambiarlo por otro igual o equivalente, o que te devolvamos el dinero que pagaste por él.
+            </p>
+          </div>
+          <div className="rounded-2xl bg-mint-50 border border-pine-700/15 p-5">
+            <p className="text-sm font-semibold text-ink">Del mes 7 al mes 12</p>
+            <p className="mt-1 text-sm">
+              Reparamos el equipo sin costo. Si no se puede reparar, te lo cambiamos por uno igual o mejor. Y si tampoco
+              tenemos uno para cambiarlo, te devolvemos el dinero.
+            </p>
+          </div>
+        </div>
+        <p>
+          <strong className="text-ink">Batería y cargador.</strong> Tienen 6 meses de garantía, porque se gastan con el
+          uso, igual que los neumáticos de un auto. Si en esos 6 meses la batería deja de cargar o dura mucho menos de
+          lo informado en la ficha, la cambiamos.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-2xl bg-surface border border-line/[0.06] p-5">
@@ -123,14 +159,60 @@ export default function WarrantyPage() {
           </div>
         </div>
         <p>
-          Si la falla está cubierta, <strong className="text-ink">tú eliges</strong> entre: reparar el equipo sin
-          costo, cambiarlo por otro igual o equivalente, o que te devolvamos el dinero que pagaste por él. Los costos
-          de envío de la garantía, de ida y de vuelta, los paga TERC.
+          En los dos tramos, los envíos de ida y vuelta de la garantía los paga TERC, desde cualquier parte de Chile.
         </p>
       </section>
 
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold text-ink">3. {SITE.support.name}</h2>
+        <div className="rounded-3xl bg-mint-50 px-2 pt-3">
+          <Terqui
+            pose="soporte"
+            crop="escritorio"
+            className="mx-auto block h-auto w-full max-w-[420px]"
+            title="Terqui con audífonos en su escritorio, atendiendo a un cliente por WhatsApp"
+          />
+        </div>
+        <p>
+          Comprar en TERC no termina cuando llega tu equipo. Si tienes una duda, algo no te funciona o necesitas ayuda
+          para configurarlo, escríbenos por WhatsApp: te responde una persona del equipo TERC, no un bot.
+        </p>
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {[
+            {
+              icon: "chat" as IconName,
+              title: "Qué te ayudamos a resolver",
+              text: "Dudas de uso, configuración inicial (Windows, correo, impresora, Wi-Fi), problemas que aparezcan y revisar si algo está cubierto por la garantía.",
+            },
+            {
+              icon: "video" as IconName,
+              title: "Asesoría por videollamada",
+              text: `Si es más fácil verlo juntos, agendamos una videollamada gratis de hasta ${SITE.support.videoCallMinutes} minutos.`,
+            },
+            {
+              icon: "clock" as IconName,
+              title: "Horario",
+              text: `${SITE.support.hours}. Normalmente respondemos en menos de 2 horas dentro de ese horario. Si escribes fuera de horario, te respondemos al día hábil siguiente.`,
+            },
+            {
+              icon: "heart" as IconName,
+              title: "Para quién",
+              text: "Para todos los que compraron un equipo en TERC, durante la garantía y después.",
+            },
+          ].map((item) => (
+            <li key={item.title} className="flex gap-3 rounded-2xl bg-surface border border-line/[0.06] p-5">
+              <StoreIcon name={item.icon} className="mt-0.5 h-6 w-6 text-pine-700" />
+              <div>
+                <p className="text-sm font-semibold text-ink">{item.title}</p>
+                <p className="mt-1 text-sm">{item.text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <section className="space-y-2">
-        <h2 className="text-lg font-semibold text-ink">3. Sin devoluciones por arrepentimiento</h2>
+        <h2 className="text-lg font-semibold text-ink">4. Sin devoluciones por arrepentimiento</h2>
         <p>
           Conforme al artículo 3 bis letra b) de la Ley 19.496, en las compras en terc.cl{" "}
           <strong className="text-ink">no aplica el derecho a retracto</strong>. Esto significa que no aceptamos
@@ -144,7 +226,7 @@ export default function WarrantyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-ink">4. Cómo pedir la garantía</h2>
+        <h2 className="text-lg font-semibold text-ink">5. Cómo pedir la garantía</h2>
         <ol className="grid gap-3 sm:grid-cols-2">
           {STEPS.map((s, i) => (
             <li key={s.title} className="flex gap-3 rounded-2xl bg-surface border border-line/[0.06] p-5">
@@ -165,7 +247,7 @@ export default function WarrantyPage() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-lg font-semibold text-ink">5. Si el paquete llega dañado</h2>
+        <h2 className="text-lg font-semibold text-ink">6. Si el paquete llega dañado</h2>
         <p>
           Revisa la caja apenas la recibas. Si viene abierta, mojada o golpeada, sácale fotos y escríbenos lo antes
           posible, idealmente el mismo día. Nosotros hacemos el reclamo con la empresa de envíos y lo solucionamos.
@@ -173,7 +255,7 @@ export default function WarrantyPage() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-lg font-semibold text-ink">6. Cómo devolvemos el dinero</h2>
+        <h2 className="text-lg font-semibold text-ink">7. Cómo devolvemos el dinero</h2>
         <p>
           Cuando corresponde devolver el dinero, lo hacemos por el mismo medio con que pagaste (Mercado Pago o
           Webpay) y emitimos la nota de crédito de tu boleta o factura. El tiempo en que lo ves reflejado depende de
@@ -182,7 +264,7 @@ export default function WarrantyPage() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-lg font-semibold text-ink">7. Tus derechos</h2>
+        <h2 className="text-lg font-semibold text-ink">8. Tus derechos</h2>
         <p>
           Vende {SITE.company}, a través de su marca TERC. Esta política no limita los derechos que te da la Ley
           19.496 sobre Protección de los Derechos de los Consumidores. Si no quedas conforme con nuestra respuesta,

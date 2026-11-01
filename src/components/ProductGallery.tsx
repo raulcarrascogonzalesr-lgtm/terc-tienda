@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { photoProps } from "@/lib/photo";
 import type { Product } from "@/lib/types";
+import { warrantyLabel } from "@/lib/warranty";
 import { StoreIcon, type IconName } from "./icons";
 import { Mark } from "./Mark";
 import { PHOTO_BACKDROP, ProductImage } from "./ProductImage";
@@ -11,8 +12,8 @@ import { PHOTO_BACKDROP, ProductImage } from "./ProductImage";
 function TrustSlide({ product }: { product: Product }) {
   const points: { icon: IconName; text: string }[] = [
     { icon: "checklist", text: product.on_demand ? "Revisado antes de enviártelo" : "Revisado uno por uno" },
+    { icon: "chat", text: "Soporte por WhatsApp después de la compra" },
     { icon: "truck", text: "Envío a todo Chile" },
-    { icon: "card", text: "Pago seguro, también en cuotas" },
   ];
   return (
     <div className="relative flex aspect-square w-full flex-col justify-between overflow-hidden bg-pine px-14 py-6 text-white sm:px-16 sm:py-10">
@@ -27,10 +28,18 @@ function TrustSlide({ product }: { product: Product }) {
       <div className="relative">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-mint">Garantía TERC</p>
         <p className="mt-1 text-5xl font-bold tracking-tight sm:text-7xl">
-          {product.warranty_months} <span className="text-2xl sm:text-4xl">meses</span>
+          {product.warranty_months % 12 === 0 ? (
+            <>
+              {product.warranty_months / 12} <span className="text-2xl sm:text-4xl">{product.warranty_months === 12 ? "año" : "años"}</span>
+            </>
+          ) : (
+            <>
+              {product.warranty_months} <span className="text-2xl sm:text-4xl">meses</span>
+            </>
+          )}
         </p>
         <p className="mt-2 max-w-xs text-xs text-white/75 sm:text-sm">
-          Si algo falla, te respondemos nosotros. Sin letra chica.
+          Si algo falla, lo reparamos, te lo cambiamos o te devolvemos tu plata. Y el envío lo pagamos nosotros.
         </p>
       </div>
       <ul className="relative space-y-1.5 sm:space-y-2.5">
@@ -108,7 +117,7 @@ export function ProductGallery({ product, badges }: { product: Product; badges?:
             {view === "terc" ? (
               <span className="flex h-full w-full flex-col items-center justify-center bg-pine text-white">
                 <StoreIcon name="shield" className="w-5 h-5 text-gold" />
-                <span className="text-[10px] font-semibold">{product.warranty_months} meses</span>
+                <span className="text-[10px] font-semibold">{warrantyLabel(product.warranty_months)}</span>
               </span>
             ) : view ? (
               <span className={`block h-full w-full ${PHOTO_BACKDROP}`}>

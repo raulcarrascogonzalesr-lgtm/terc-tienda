@@ -52,6 +52,7 @@ const DEFAULT = {
   mouth: { w: 9.5, open: 0, smile: 1.5 },
   sprout: 0, flutter: 0, sproutGrow: 1,
   prop: null, propAngle: 0, armsFront: false, shadow: 1, gloss: 0,
+  headset: 0, desk: 0, // 0 a 1: audífonos de soporte y escritorio (escena "soporte")
 };
 
 export function TerquiRig(host, size = 560) {
@@ -106,6 +107,9 @@ export function TerquiRig(host, size = 560) {
   const mouthFill = el("path", { fill: INK, stroke: INK, "stroke-width": 2.4, "stroke-linejoin": "round" }, face);
   const tongue = el("ellipse", { fill: CORAL, "clip-path": `url(#${id}m)` }, face);
   const mouthLine = el("path", { stroke: INK, "stroke-width": 3.2, "stroke-linecap": "round", fill: "none" }, face);
+  // audífonos con micrófono: Terqui atendiendo el soporte
+  const headset = el("g", {}, body);
+  headset.innerHTML = HEADSET;
   const armsFront = el("g", {}, body);
   const arm = {};
   for (const s of ["l", "r"]) {
@@ -114,6 +118,9 @@ export function TerquiRig(host, size = 560) {
   }
   const props = el("g", {}, body);
   const P = buildProps(props);
+  // escritorio delante de Terqui: tapa las piernas, como si estuviera atendiendo detrás de un mesón
+  const desk = el("g", {}, svg);
+  desk.innerHTML = DESK;
 
   function draw(input) {
     const st = { ...DEFAULT, ...input, mouth: { ...DEFAULT.mouth, ...(input.mouth || {}) } };
@@ -185,9 +192,36 @@ export function TerquiRig(host, size = 560) {
       tongue.setAttribute("rx", m.w * 0.55); tongue.setAttribute("ry", Math.max(1, m.open * 0.35));
     }
     P.draw(st);
+    const hs = st.headset || 0;
+    headset.style.display = hs > 0.01 ? "" : "none";
+    headset.setAttribute("opacity", Math.min(1, hs * 1.5));
+    headset.setAttribute("transform", `translate(100 52) scale(${0.85 + 0.15 * hs}) translate(-100 -52)`);
+    const dk = st.desk || 0;
+    desk.style.display = dk > 0.01 ? "" : "none";
+    desk.setAttribute("opacity", Math.min(1, dk * 2));
+    desk.setAttribute("transform", `translate(0 ${(1 - dk) * 70})`);
+    if (dk > 0.5) shadow.setAttribute("opacity", 0);
   }
   return { svg, draw, size };
 }
+
+// Audífonos y escritorio de soporte. Se comparten con el dibujo fijo de components/Terqui.tsx.
+const W2 = (d, w, c) => `<path d="${d}" stroke="#fff" stroke-width="${w + 4}" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="${d}" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
+export const HEADSET = `${W2("M63 98 C58 36 142 36 137 98", 5, INK)}
+<rect x="56" y="86" width="15" height="27" rx="7" fill="${INK}" stroke="#fff" stroke-width="3"/><rect x="60" y="92" width="6" height="15" rx="3" fill="${LEAF_LIGHT}"/>
+<rect x="129" y="86" width="15" height="27" rx="7" fill="${INK}" stroke="#fff" stroke-width="3"/><rect x="134" y="92" width="6" height="15" rx="3" fill="${LEAF_LIGHT}"/>
+${W2("M137 112 Q136 131 116 130", 3, INK)}<circle cx="114" cy="130" r="5.5" fill="${GOLD}" stroke="#fff" stroke-width="2.5"/>`;
+// Escritorio: notebook a la derecha (se ve la tapa con la hoja de TERC), taza a la izquierda y el letrero al frente.
+export const DESK = `<path d="M136 160 L138 112 Q138 108 142 108 L186 108 Q190 108 190 112 L192 160 Z" fill="#14403d" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+<path d="M164 140 C164 134 163 130 165 124" stroke="${LEAF_LIGHT}" stroke-width="2.2" stroke-linecap="round" fill="none"/><path d="M164 131 Q156 121 146 124 Q152 134 164 131Z" fill="${LEAF}"/><path d="M165 127 Q172 116 183 119 Q177 130 165 127Z" fill="${LEAF_LIGHT}"/>
+<path d="M18 160 L21 136 L41 136 L44 160 Z" fill="${CORAL}" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+<path d="M20 141 q-9 0 -9 7 q0 7 9 7" stroke="#fff" stroke-width="7" fill="none"/><path d="M20 141 q-9 0 -9 7 q0 7 9 7" stroke="${CORAL}" stroke-width="3.5" fill="none"/>
+${W2("M28 128 q-3 -5 0 -10 M36 128 q-3 -5 0 -10", 2, "#ffffff")}
+<rect x="-40" y="158" width="280" height="12" rx="5" fill="#f3e6c9" stroke="#fff" stroke-width="3"/>
+<rect x="-30" y="168" width="260" height="46" fill="${KRAFT}" stroke="#fff" stroke-width="3"/>
+<rect x="-30" y="168" width="260" height="6" fill="#c39257"/>
+<rect x="44" y="182" width="112" height="22" rx="11" fill="${INK}"/>
+<text x="100" y="197.5" text-anchor="middle" style="font-family:var(--font-montserrat),Montserrat,sans-serif" font-weight="800" font-size="10.5" letter-spacing="1.2" fill="${GOLD}">SOPORTE TERC</text>`;
 
 // Objetos que Terqui sostiene. Se dibujan en su posición original y se mueven hasta la mano.
 function buildProps(root) {

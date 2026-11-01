@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatCLP, offer, savings, shortDate } from "@/lib/format";
 import type { Product } from "@/lib/types";
+import { warrantyLabel } from "@/lib/warranty";
 import { AddToCartButton } from "./AddToCartButton";
 import { DiscountSticker } from "./DiscountSticker";
 import { StoreIcon } from "./icons";
@@ -66,7 +67,7 @@ export function ProductCard({ product }: { product: Product }) {
           )}
           <p className="mt-2 flex items-center gap-1.5 text-[11px] text-muted">
             <StoreIcon name="shield" className="w-3.5 h-3.5 text-pine-700" />
-            {product.warranty_months} meses de garantía
+            {warrantyLabel(product.warranty_months)} de garantía
           </p>
           <div className="mt-3">
             <AddToCartButton product={product} compact />

@@ -14,19 +14,19 @@ const LINES = {
   offer: ["¡Oferta de Terqui!", "¡Este está rebajado!"],
 };
 const PROD_POSES = ["apunta", "explica", "guino", "apunta", "arriba"];
-const DUR = { intro: 5, prod: 5.6, garantia: 5.4, revisado: 5.6, envio: 6.2 };
-const TRUST = ["garantia", "revisado", "envio"];
-const LABELS = { intro: "Hola", garantia: "Garantía TERC", revisado: "Revisado uno a uno", envio: "Envío a todo Chile" };
+const DUR = { intro: 5, prod: 5.6, garantia: 5.6, soporte: 6.2, revisado: 5.6, envio: 6.2 };
+const TRUST = ["garantia", "soporte", "revisado", "envio"];
+const LABELS = { intro: "Hola", garantia: "Garantía TERC", soporte: "Soporte por WhatsApp", revisado: "Revisado uno a uno", envio: "Envío a todo Chile" };
 const TQ = 560; // tamaño del dibujo de Terqui en el escenario
 
 // Dos escenarios fijos que se escalan al ancho del banner: computador y celular.
 const LAYOUTS = {
   d: { W: 1440, H: 640, tx: 96, ty: 84, tw: 720, cy: 488, py: 584, pw: 560, h1: 58, p: 21, chip: 16, price: 46, small: 14, btn: 17, bub: 24,
        TX: 1236, G: 590, S: 0.7, prod: { x: 915, y: 520 }, maxW: 520, maxH: 380, ring: { x: 960, y: 300, r: 170 }, stamp: { x: 680, y: 300 }, bx: -24,
-       card: { x: 770, y: 250 }, route: { x: 700, y: 260, w: 480 } },
+       card: { x: 770, y: 250 }, chat: { x: 770, y: 112, w: 350 }, route: { x: 700, y: 260, w: 480 } },
   m: { W: 720, H: 1100, tx: 44, ty: 118, tw: 632, cy: 508, py: 1040, pw: 632, h1: 62, p: 26, chip: 22, price: 52, small: 19, btn: 23, bub: 28,
        TX: 588, G: 1015, S: 0.66, prod: { x: 300, y: 925 }, maxW: 500, maxH: 330, ring: { x: 330, y: 780, r: 150 }, stamp: { x: 112, y: 690 }, bx: 30,
-       card: { x: 44, y: 725 }, route: { x: 10, y: 700, w: 470 } },
+       card: { x: 44, y: 725 }, chat: { x: 24, y: 640, w: 372 }, TXS: 540, SS: 0.58, route: { x: 10, y: 700, w: 470 } },
 };
 export const HERO_RATIO = { d: LAYOUTS.d.H / LAYOUTS.d.W, m: LAYOUTS.m.H / LAYOUTS.m.W };
 
@@ -143,6 +143,14 @@ export function startHero(root, opts) {
       } else if (s.type === "garantia") {
         P.jump(t + 0.05, t + 0.75, { x: l.TX }, { h: 90, land: "corazon" });
         talk(t + 1.0, "¡Compra tranquilo!");
+      } else if (s.type === "soporte") {
+        P.pose(t + 0.15, "soporte", 0.45);
+        // en celular se corre un poco a la izquierda para que el escritorio quepa entero
+        if (l.TXS) {
+          P.walk(t + 0.05, t + 0.5, { x: l.TXS, s: l.SS });
+          P.walk(t + s.dur - 0.55, t + s.dur - 0.1, { x: l.TX, s: l.S });
+        }
+        talk(t + 0.9, "¡Te ayudamos por WhatsApp!");
       } else if (s.type === "revisado") {
         P.pose(t + 0.2, "lupa", 0.3);
         talk(t + 0.8, "¡Pieza por pieza!");
@@ -162,6 +170,7 @@ export function startHero(root, opts) {
     for (const s of SEGS) {
       if (s.type === "prod") CUES.push({ t: s.t0 + 0.05, type: "whoosh" }, { t: s.t0 + 0.65, type: "sparkle" }, { t: s.t0 + 1.45, type: "pop" });
       if (s.type === "garantia") CUES.push({ t: s.t0 + 1.3, type: "ding" });
+      if (s.type === "soporte") for (let i = 0; i < 3; i++) CUES.push({ t: s.t0 + 1.2 + i * 0.8, type: "pop" });
       if (s.type === "revisado") for (let i = 0; i < 5; i++) CUES.push({ t: s.t0 + 1.2 + i * 0.45, type: "tick" });
       if (s.type === "envio") CUES.push({ t: s.t0 + 3.0, type: "ding" });
     }
@@ -196,6 +205,7 @@ export function startHero(root, opts) {
     set("ring", { left: l.ring.x - l.ring.r * 1.18 + "px", top: l.ring.y - l.ring.r * 1.18 + "px", width: l.ring.r * 2.36 + "px", height: l.ring.r * 2.36 + "px" });
     set("ringLabel", { left: l.ring.x - 150 + "px", top: l.ring.y - 95 + "px", width: "300px", height: "190px" });
     set("checkCard", { left: l.card.x + "px", top: l.card.y + "px" });
+    set("chatCard", { left: l.chat.x + "px", top: l.chat.y + "px", width: l.chat.w + "px" });
     set("route", { left: l.route.x + "px", top: l.route.y + "px", width: l.route.w + "px", height: l.route.w / 2 + "px" });
     buildTerqui();
     lastSlot = [null, null];
@@ -289,10 +299,11 @@ export function startHero(root, opts) {
     return o;
   }
 
-  const COLORS = { intro: [61, 181, 133], prod: [61, 181, 133], offer: [229, 86, 107], garantia: [179, 162, 106], revisado: [61, 181, 133], envio: [216, 173, 115] };
+  const COLORS = { intro: [61, 181, 133], prod: [61, 181, 133], offer: [229, 86, 107], garantia: [179, 162, 106], soporte: [37, 211, 102], revisado: [61, 181, 133], envio: [216, 173, 115] };
   const isOffer = (s) => s.type === "prod" && s.p.deal === "oferta";
   const colorOf = (s) => (isOffer(s) ? COLORS.offer : COLORS[s.type]);
   const ccRows = [...$("checkCard").querySelectorAll(".hx-cc-row")];
+  const chatMsgs = [...$("chatCard").querySelectorAll(".hx-msg")];
   const routePath = $("routeDraw");
   let routeLen = 0;
   let bubbleText = null, bubbleW = 0, bubbleH = 0;
@@ -363,6 +374,13 @@ export function startHero(root, opts) {
     cc.opacity = cOn ? clamp(seg(lt, 0.3, 0.5)) * (1 - cq) : 0;
     cc.transform = `translateY(${(1 - ci) * 40}px) rotate(${lerp(-4, -1.5, ci)}deg)`;
     ccRows.forEach((row, k) => row.classList.toggle("hx-ok", cOn && lt > 1.2 + k * 0.45));
+    // soporte: conversación de WhatsApp que va apareciendo
+    const wOn = s.type === "soporte";
+    const chat = $("chatCard").style;
+    const wi = wOn ? ease.back(seg(lt, 0.3, 0.9)) : 0, wq = wOn ? ease.io(seg(lt, s.dur - 0.5, s.dur - 0.1)) : 1;
+    chat.opacity = wOn ? clamp(seg(lt, 0.3, 0.5)) * (1 - wq) : 0;
+    chat.transform = `translateY(${(1 - wi) * 40}px) rotate(${lerp(4, 1.5, wi)}deg)`;
+    chatMsgs.forEach((m, k) => m.classList.toggle("hx-on", wOn && lt > 1.2 + k * 0.8));
     // envío: el camión recorre la ruta hasta la casa
     const eOn = s.type === "envio";
     $("route").style.opacity = eOn ? clamp(seg(lt, 0.9, 1.3)) * (1 - ease.io(seg(lt, s.dur - 0.5, s.dur - 0.1))) : 0;

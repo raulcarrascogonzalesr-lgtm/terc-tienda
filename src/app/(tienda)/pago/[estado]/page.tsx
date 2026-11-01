@@ -10,6 +10,7 @@ import { getProductsByIds } from "@/lib/products";
 import { whatsappLink } from "@/lib/site";
 import { getAdminClient } from "@/lib/supabase";
 import type { Order } from "@/lib/types";
+import { warrantyLabel } from "@/lib/warranty";
 import { ClearCartOnSuccess } from "./ClearCartOnSuccess";
 import { ThanksScene } from "./ThanksScene";
 import { TrackPurchase } from "./TrackPurchase";
@@ -119,7 +120,7 @@ export default async function PaymentResultPage({
         </h1>
         <p className="text-muted sm:text-lg">
           Recibimos tu pago. Elegiste bien: un equipo revisado
-          {months ? `, con ${months} meses de garantía` : " y con garantía"}
+          {months ? `, con ${warrantyLabel(months)} de garantía` : " y con garantía"}
           {saved > 0 ? `, y ahorraste ${formatCLP(saved)} frente a uno nuevo` : ""}. Te enviamos el detalle a tu correo.
         </p>
       </div>

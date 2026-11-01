@@ -179,7 +179,7 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
           <input
             name="warranty_months"
             inputMode="numeric"
-            defaultValue={product?.warranty_months ?? 6}
+            defaultValue={product?.warranty_months ?? 12}
             className="input"
           />
         </Field>

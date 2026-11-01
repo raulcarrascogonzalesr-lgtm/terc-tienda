@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { WhatsAppIcon } from "@/components/icons";
 import type { HeroItem } from "@/lib/terqui-anim/hero";
+import { SITE } from "@/lib/site";
+import { warrantyLabel } from "@/lib/warranty";
 import { cutoutPhotos } from "./cutout-photos";
 import "./terqui-hero.css";
 
@@ -32,6 +34,7 @@ const I = {
   card: "M3 5.5h18v13H3zM3 10h18M7 15h4",
   chat: "M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.1A8 8 0 1 1 20 12Z",
   arrow: "M5 12h14M13 6l6 6-6 6",
+  truck: "M2 6h12v10H2zM14 9h4l4 4v3h-8M6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
   check: "M9 6h11M9 12h11M9 18h11M3.5 6l1.2 1.2L7 5M3.5 12l1.2 1.2L7 11M3.5 18l1.2 1.2L7 17",
   pause: "M6 5h4v14H6zM14 5h4v14h-4z",
   play: "M8 5.5v13l11-6.5z",
@@ -165,6 +168,20 @@ export function TerquiHero({
             )}
           </div>
 
+          {/* Soporte: conversación de WhatsApp (de ejemplo) */}
+          <div className="hx-chat" data-h="chatCard" aria-hidden>
+            <p className="hx-chat-head">
+              <WhatsAppIcon className="hx-wa" />
+              <span>
+                Soporte TERC
+                <small>Te responde una persona</small>
+              </span>
+            </p>
+            <p className="hx-msg hx-me">Hola, ¿cómo conecto mi impresora?</p>
+            <p className="hx-msg">¡Hola! Te ayudo altiro 😊 ¿Es por Wi-Fi?</p>
+            <p className="hx-msg">Si quieres, lo vemos juntos en una videollamada.</p>
+          </div>
+
           {/* Envío: ruta hasta la casa */}
           <svg className="hx-route" data-h="route" viewBox="0 0 600 300" aria-hidden>
             <path
@@ -210,7 +227,8 @@ export function TerquiHero({
               </em>
             </h2>
             <p className="hx-sub" data-in="1.5">
-              Notebooks y computadores de empresa, revisados uno a uno y con garantía TERC.
+              Notebooks y computadores de empresa, revisados uno a uno, con {warrantyLabel(warranty)} de garantía y
+              soporte por WhatsApp.
             </p>
           </div>
           {["prodA", "prodB"].map((block) => (
@@ -227,30 +245,42 @@ export function TerquiHero({
             </span>
             <h2 className="hx-title">
               <span data-in="0.5" data-fx="word">
-                Si algo falla,
+                {warrantyLabel(warranty)} de garantía
               </span>{" "}
               <em data-in="0.85" data-fx="word">
-                te respondemos nosotros.
+                en cada equipo.
               </em>
             </h2>
             <div className="hx-chips">
               <span className="hx-chip" data-in="1.5">
                 <Icon d={I.shield} />
-                {warranty} meses de garantía
+                Reparación, cambio o devolución
               </span>
               <span className="hx-chip" data-in="1.65">
+                <Icon d={I.truck} />
+                Los envíos los pagamos nosotros
+              </span>
+              <span className="hx-chip hx-hide-m" data-in="1.8">
                 <Icon d={I.doc} />
                 Boleta o factura
               </span>
-              <span className="hx-chip" data-in="1.8">
-                <Icon d={I.card} />
-                Pago seguro, también en cuotas
-              </span>
-              <span className="hx-chip hx-hide-m" data-in="1.95">
-                <Icon d={I.chat} />
-                Te atiende una persona por WhatsApp
-              </span>
             </div>
+          </div>
+          <div className="hx-txt" data-block="soporte">
+            <span className="hx-eyebrow" data-in="0.35">
+              {SITE.support.name}
+            </span>
+            <h2 className="hx-title">
+              <span data-in="0.5" data-fx="word">
+                Te acompañamos
+              </span>{" "}
+              <em data-in="0.85" data-fx="word">
+                después de la compra.
+              </em>
+            </h2>
+            <p className="hx-sub" data-in="1.4">
+              Personas reales, no bots: dudas, problemas, configuración y asesoría por videollamada.
+            </p>
           </div>
           <div className="hx-txt" data-block="revisado">
             <span className="hx-eyebrow" data-in="0.35">

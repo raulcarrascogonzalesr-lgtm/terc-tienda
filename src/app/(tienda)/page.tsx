@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { TerquiHero } from "@/components/home/TerquiHero";
+import { PeaceOfMind } from "@/components/home/PeaceOfMind";
 import { WelcomeCurtain } from "@/components/home/WelcomeCurtain";
 import { StoreIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
@@ -18,6 +19,7 @@ import { whatsappLink } from "@/lib/site";
 import { KIND_LABEL, productSpecs } from "@/lib/specs";
 import type { HeroItem } from "@/lib/terqui-anim/hero";
 import type { Product } from "@/lib/types";
+import { warrantyLabel } from "@/lib/warranty";
 
 export const revalidate = 60;
 
@@ -47,11 +49,12 @@ const SORTS = {
 } as const;
 type Sort = keyof typeof SORTS;
 
+// El título de la garantía se completa con los meses del catálogo (ver warrantyLabel).
 const BENEFITS: { icon: IconName; title: string; text: string }[] = [
-  { icon: "shield", title: "Garantía en todo", text: "Cada equipo con su garantía TERC" },
+  { icon: "shield", title: "de garantía", text: "Reparación, cambio o devolución" },
+  { icon: "chat", title: "Soporte por WhatsApp", text: "Personas reales, antes y después" },
   { icon: "truck", title: "Envíos a todo Chile", text: "Despacho seguro a tu casa" },
   { icon: "card", title: "Paga en cuotas", text: "Tarjeta o débito con Mercado Pago" },
-  { icon: "checklist", title: "Revisado uno a uno", text: "Batería, pantalla y funciones" },
 ];
 
 function normalize(text: string) {
@@ -148,9 +151,6 @@ export default async function HomePage({ searchParams }: Props) {
 
   const [all, fund, rank] = await Promise.all([listProducts(), getShippingFund(), productRanking().catch(() => new Map<string, number>())]);
   const freeShipping = fund > 0;
-  const benefits = freeShipping
-    ? BENEFITS.map((b) => (b.icon === "truck" ? { ...b, title: "Envío gratis en la RM", text: "Y más barato a regiones" } : b))
-    : BENEFITS;
   const query = normalize(q.trim());
   // Si buscan un SKU exacto (10001, "sku 10001" o "#10001"), van directo a la ficha de ese equipo.
   const skuMatch = query.match(/^(?:sku\s*)?#?(\d+)$/);
@@ -204,7 +204,14 @@ export default async function HomePage({ searchParams }: Props) {
     .slice(0, 8)
     .map(heroItem);
   const count = (months: number) => all.filter((p) => p.warranty_months === months).length;
-  const warranty = all.map((p) => p.warranty_months).sort((a, b) => count(b) - count(a))[0] ?? 6;
+  const warranty = all.map((p) => p.warranty_months).sort((a, b) => count(b) - count(a))[0] ?? 12;
+  const benefits = BENEFITS.map((b) =>
+    b.icon === "shield"
+      ? { ...b, title: `${warrantyLabel(warranty)} de garantía` }
+      : b.icon === "truck" && freeShipping
+        ? { ...b, title: "Envío gratis en la RM", text: "Y más barato a regiones" }
+        : b,
+  );
 
   // Arma el enlace manteniendo los filtros actuales.
   const link = (changes: Record<string, string | null>) => {
@@ -268,6 +275,7 @@ export default async function HomePage({ searchParams }: Props) {
               ))}
             </div>
           </section>
+          <PeaceOfMind warranty={warranty} whatsapp={whatsappLink("Hola, quiero hablar con el soporte de TERC")} />
         </>
       )}
 
@@ -300,27 +308,30 @@ export default async function HomePage({ searchParams }: Props) {
         </section>
       )}
 
-      <section className="shell pt-4">
-        <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {benefits.map((b, i) => (
-            <li
-              key={b.title}
-              data-reveal
-              style={delay(i * 80)}
-              className="relative flex items-center gap-3 overflow-hidden rounded-2xl bg-pine px-3 py-3 text-white sm:px-4 sm:py-3.5"
-            >
-              <Mark className="absolute -right-4 -top-3 w-16 opacity-[0.07]" ink="#ffffff" />
-              <span className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-gold">
-                <StoreIcon name={b.icon} className="w-5 h-5" />
-              </span>
-              <span>
-                <span className="block text-sm font-semibold">{b.title}</span>
-                <span className="hidden sm:block text-xs text-white/70">{b.text}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* En la portada esto ya lo cuenta en grande "Lo que compras en TERC"; en búsquedas y categorías va resumido. */}
+      {filtering && (
+        <section className="shell pt-4">
+          <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {benefits.map((b, i) => (
+              <li
+                key={b.title}
+                data-reveal
+                style={delay(i * 80)}
+                className="relative flex items-center gap-3 overflow-hidden rounded-2xl bg-pine px-3 py-3 text-white sm:px-4 sm:py-3.5"
+              >
+                <Mark className="absolute -right-4 -top-3 w-16 opacity-[0.07]" ink="#ffffff" />
+                <span className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-gold">
+                  <StoreIcon name={b.icon} className="w-5 h-5" />
+                </span>
+                <span>
+                  <span className="block text-sm font-semibold">{b.title}</span>
+                  <span className="hidden sm:block text-xs text-white/70">{b.text}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {!filtering && offers.length > 0 && (
         <section className="mt-12 bg-gradient-to-b from-sale-50 to-paper py-10">
