@@ -14,7 +14,7 @@ create table if not exists products (
   cost integer,                                         -- costo del proveedor, CLP (privado)
   stock integer not null default 0 check (stock >= 0),
   battery_health integer check (battery_health between 0 and 100),
-  warranty_months integer not null default 6,
+  warranty_months integer not null default 12,
   description text not null default '',
   image_url text,
   active boolean not null default true,

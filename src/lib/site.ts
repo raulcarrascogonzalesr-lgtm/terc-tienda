@@ -13,6 +13,18 @@ export const SITE = {
   // fecha estimada de la ficha, el carrito y la página de gracias: [mínimo, máximo].
   // "onDemand" son los del proveedor (se piden después de la compra); "stock", los que ya tenemos.
   deliveryDays: { stock: [2, 4], onDemand: [4, 7] } as Record<"stock" | "onDemand", [number, number]>,
+  // Garantía de todos los equipos (31-10-2026: 1 año). Cada equipo guarda la suya en warranty_months;
+  // esta es la que se anuncia en la tienda (barra de arriba, pie de página).
+  warrantyMonths: 12,
+  // Soporte TERC por WhatsApp (post venta): horario y tiempo de respuesta que se muestran en la tienda.
+  // Raúl lo puede cambiar aquí; los textos de la portada, la ficha y la garantía lo toman de aquí.
+  support: {
+    name: "Soporte TERC por WhatsApp",
+    hours: "Lunes a viernes de 10:00 a 19:00 y sábado de 10:00 a 14:00",
+    hoursShort: "Lun a vie 10 a 19 h · sáb 10 a 14 h",
+    response: "normalmente en menos de 2 horas en horario de atención",
+    videoCallMinutes: 30,
+  },
   // Enlace para dejar una reseña en Google (Perfil de Empresa > "Pedir reseñas").
   // Mientras esté vacío, el correo del día 10 pide la opinión por WhatsApp.
   reviewUrl: "",

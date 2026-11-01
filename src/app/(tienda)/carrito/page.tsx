@@ -13,6 +13,7 @@ import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { whatsappLink } from "@/lib/site";
 import { UTM_MAX_AGE_MS, UTM_STORAGE_KEY } from "@/lib/utm";
+import { warrantyLabel } from "@/lib/warranty";
 import { DeliveryForm } from "./DeliveryForm";
 import { ShippingPicker, type ShippingChoice } from "./ShippingPicker";
 
@@ -205,7 +206,7 @@ export default function CartPage() {
   );
   const whatsapp = whatsappLink("Hola, tengo una duda sobre mi compra en TERC");
   const methodNames = methods.map((m) => METHOD_LABELS[m]).join(" o ");
-  const warranty = Math.min(...items.map((i) => i.warrantyMonths ?? 6));
+  const warranty = Math.min(...items.map((i) => i.warrantyMonths ?? 12));
 
   return (
     <div className="shell py-8">
@@ -245,7 +246,7 @@ export default function CartPage() {
                 {item.specs && <p className="mt-1 text-[13px] text-muted">{item.specs}</p>}
                 <p className="mt-2 flex flex-wrap gap-1.5">
                   <span className="rounded-full bg-mint-50 px-2 py-1 text-[11.5px] font-bold text-pine-700">
-                    {item.warrantyMonths ?? 6} meses de garantía
+                    {warrantyLabel(item.warrantyMonths ?? 12)} de garantía
                   </span>
                   <span className="rounded-full bg-mint-50 px-2 py-1 text-[11.5px] font-bold text-pine-700">Revisado por TERC</span>
                 </p>
@@ -315,7 +316,7 @@ export default function CartPage() {
           <ul className="space-y-2 text-[13px] text-muted">
             <li className="flex items-center gap-2">
               <StoreIcon name="shield" className="h-[18px] w-[18px] text-pine-700" />
-              {warranty} meses de garantía TERC
+              {warrantyLabel(warranty)} de garantía TERC
             </li>
             <li className="flex items-center gap-2">
               <StoreIcon name="lock" className="h-[18px] w-[18px] text-pine-700" />

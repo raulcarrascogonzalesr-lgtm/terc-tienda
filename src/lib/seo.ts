@@ -1,6 +1,7 @@
 import { CONDITION } from "./format";
 import { SITE } from "./site";
 import type { Product } from "./types";
+import { warrantyLabel } from "./warranty";
 
 // Dirección pública de la tienda, para enlaces que lee Google.
 export const SITE_URL = "https://terc.cl";
@@ -15,7 +16,7 @@ export function productDescription(product: Product): string {
     `${product.name} reacondicionado`,
     CONDITION[product.grade].label.toLowerCase(),
     product.battery_health ? `batería ${product.battery_health}%` : "",
-    `${product.warranty_months} meses de garantía`,
+    `${warrantyLabel(product.warranty_months)} de garantía`,
   ].filter(Boolean);
   const text = `${parts.join(", ")}. Envío a todo Chile y pago en cuotas.`;
   return text.length > 160 ? `${text.slice(0, 157).trimEnd()}…` : text;

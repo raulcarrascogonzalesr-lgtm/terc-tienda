@@ -639,7 +639,69 @@ a:hover > .terqui-peek {
   transform: translateY(-3px) rotate(-6deg);
 }
 
+/* Terqui de soporte: escribe en el notebook y la conversación va apareciendo */
+.terqui-type {
+  animation: terqui-type 0.32s ease-in-out infinite alternate;
+}
+@keyframes terqui-type {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-2.5px);
+  }
+}
+.terqui-chat {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: terqui-chat 6s cubic-bezier(0.3, 1.4, 0.5, 1) infinite both;
+}
+.terqui-chat-2 {
+  animation-delay: 1.4s;
+}
+.terqui-chat-3 {
+  animation-delay: 2.8s;
+}
+@keyframes terqui-chat {
+  0% {
+    transform: scale(0.4) translateY(8px);
+    opacity: 0;
+  }
+  8%,
+  80% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  92%,
+  100% {
+    transform: scale(1) translateY(-6px);
+    opacity: 0;
+  }
+}
+.terqui-dot {
+  animation: terqui-dot 1s ease-in-out infinite;
+}
+.terqui-dot-2 {
+  animation-delay: 0.15s;
+}
+.terqui-dot-3 {
+  animation-delay: 0.3s;
+}
+@keyframes terqui-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .terqui-type,
+  .terqui-chat,
+  .terqui-dot,
   .terqui-blink,
   .terqui-wave,
   .terqui-kick-l,
@@ -800,5 +862,18 @@ html[data-welcome="skip"] .welcome-skip {
   }
   .has-buybar .wa-float {
     bottom: 6rem;
+  }
+}
+
+/* Filas que se deslizan de lado en celular (categorías, filtros): el borde derecho se desvanece
+   para que se note que hay más, y sin barra de desplazamiento. */
+@media (max-width: 1023.98px) {
+  .scroll-fade {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    scrollbar-width: none;
+  }
+  .scroll-fade::-webkit-scrollbar {
+    display: none;
   }
 }

@@ -298,6 +298,60 @@
   border-bottom: 3px solid #fff;
   transform: translateY(-2px) rotate(-45deg);
 }
+/* Soporte: tarjeta de WhatsApp con mensajes que van apareciendo. */
+.hx-chat {
+  width: 400px;
+  padding: 22px 22px 26px;
+  border-radius: 26px;
+  background: #efeae2;
+  color: #0a2a2a;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6);
+  display: grid;
+  gap: 12px;
+  opacity: 0;
+}
+.hx-chat-head {
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font: 800 21px/1.1 var(--font-display);
+}
+.hx-chat-head small {
+  display: block;
+  font: 500 14px/1.3 var(--font-sans);
+  color: #55635f;
+}
+.hx-chat .hx-wa {
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+}
+.hx-msg {
+  margin: 0;
+  max-width: 82%;
+  padding: 11px 15px;
+  border-radius: 18px 18px 18px 6px;
+  background: #fff;
+  font: 500 18px/1.3 var(--font-sans);
+  opacity: 0;
+  transform: translateY(12px) scale(0.96);
+  transition:
+    opacity 0.3s ease,
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.3, 1.3);
+}
+.hx-msg.hx-me {
+  justify-self: end;
+  border-radius: 18px 18px 6px 18px;
+  background: #d9fdd3;
+}
+.hx-msg.hx-on {
+  opacity: 1;
+  transform: none;
+}
 .hx-route {
   overflow: visible;
   opacity: 0;

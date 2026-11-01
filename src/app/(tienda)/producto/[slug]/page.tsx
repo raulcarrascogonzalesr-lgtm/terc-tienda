@@ -16,6 +16,7 @@ import { jsonLdScript, productDescription, productJsonLd } from "@/lib/seo";
 import { getShippingFund } from "@/lib/shipping-fund";
 import { SITE, whatsappLink } from "@/lib/site";
 import { KIND_LABEL, productSpecs } from "@/lib/specs";
+import { warrantyLabel } from "@/lib/warranty";
 import { StickyBuyBar } from "./StickyBuyBar";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -59,10 +60,11 @@ export default async function ProductPage({ params }: Props) {
     desc.includes("windows") ? "Windows Pro original" : null,
     "Embalaje con caja y protección",
     "Boleta o factura",
-    `${product.warranty_months} meses de garantía TERC`,
+    `${warrantyLabel(product.warranty_months)} de garantía TERC`,
+    "Soporte por WhatsApp y asesoría por videollamada",
   ].filter((x): x is string => Boolean(x));
+  const warranty = warrantyLabel(product.warranty_months);
   const assurances: { icon: IconName; title: string; text: string }[] = [
-    { icon: "shield", title: `${product.warranty_months} meses de garantía`, text: "Si algo falla, te respondemos nosotros." },
     {
       icon: "checklist",
       title: product.on_demand ? "Revisado antes de enviarlo" : "Revisado uno a uno",
@@ -218,18 +220,46 @@ export default async function ProductPage({ params }: Props) {
             )}
           </div>
 
-          <ul className="grid gap-2.5 sm:grid-cols-3">
-            {assurances.map((a) => (
-              <li
-                key={a.title}
-                className="grid grid-cols-[auto_1fr] items-center gap-x-3 rounded-2xl bg-surface p-3.5 sm:grid-cols-1 sm:items-start sm:gap-y-1.5"
-              >
-                <StoreIcon name={a.icon} className="row-span-2 h-6 w-6 text-pine-700 sm:row-span-1" />
-                <b className="text-sm leading-tight text-ink">{a.title}</b>
-                <span className="text-[13px] text-muted">{a.text}</span>
-              </li>
-            ))}
-          </ul>
+          {/* Lo que va con el equipo: la garantía y el soporte, en grande. */}
+          <div className="overflow-hidden rounded-3xl ring-1 ring-pine-700/15">
+            <div className="grid sm:grid-cols-2">
+              <div className="relative overflow-hidden bg-pine p-5 text-white">
+                <StoreIcon name="shield" className="absolute -right-8 -bottom-8 h-36 w-36 text-white/[0.05]" />
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-mint">Garantía TERC</p>
+                <p className="mt-1 font-[family-name:var(--font-display)] text-5xl font-extrabold leading-none tracking-tight text-gold">
+                  {warranty}
+                </p>
+                <p className="mt-2 text-[13px] text-white/80">
+                  Si algo falla, lo reparamos, te lo cambiamos o te devolvemos tu plata. Los envíos los pagamos
+                  nosotros.
+                </p>
+              </div>
+              <div className="bg-mint-50 p-5">
+                <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-pine-700">
+                  <WhatsAppIcon className="h-4 w-4 text-[#25d366]" /> Soporte por WhatsApp
+                </p>
+                <p className="mt-1.5 text-lg font-extrabold leading-tight text-ink">Te acompañamos después de la compra</p>
+                <p className="mt-1.5 text-[13px] text-muted">
+                  Personas reales te ayudan con dudas, problemas y a configurarlo. Y si lo necesitas, una videollamada
+                  gratis de {SITE.support.videoCallMinutes} minutos.
+                </p>
+                <p className="mt-2 flex items-center gap-1.5 text-xs text-muted">
+                  <StoreIcon name="clock" className="h-4 w-4 text-pine-700" /> {SITE.support.hoursShort}
+                </p>
+              </div>
+            </div>
+            <ul className="grid divide-y divide-line/[0.06] bg-surface sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+              {assurances.map((a) => (
+                <li key={a.title} className="flex items-center gap-3 p-3.5">
+                  <StoreIcon name={a.icon} className="h-6 w-6 text-pine-700" />
+                  <span>
+                    <b className="block text-sm leading-tight text-ink">{a.title}</b>
+                    <span className="text-[13px] text-muted">{a.text}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
           <div className="relative overflow-hidden rounded-3xl bg-pine p-5 text-white">
             <h2 className="text-lg font-extrabold">Lo que llega a tu casa</h2>
@@ -258,9 +288,10 @@ export default async function ProductPage({ params }: Props) {
               </Row>
             )}
             <Row label="Garantía">
-              {product.warranty_months} meses por fallas
+              {warranty} por fallas, desde que lo recibes
               <small>
-                No hay cambios por arrepentimiento: por eso revisamos todo antes de enviarlo y te resolvemos cualquier
+                Los primeros 6 meses eliges reparar, cambiar o devolver. Batería y cargador: 6 meses. No hay cambios por
+                arrepentimiento: por eso revisamos todo antes de enviarlo y te resolvemos cualquier
                 duda antes de comprar.{" "}
                 <Link href="/garantia-y-devoluciones" className="underline">
                   Ver garantía y devoluciones

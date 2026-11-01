@@ -150,7 +150,7 @@ export async function saveProduct(_prev: SaveResult, form: FormData): Promise<Sa
     cost: intOrNull(form.get("cost")),
     stock,
     battery_health: battery,
-    warranty_months: intOrNull(form.get("warranty_months")) ?? 6,
+    warranty_months: intOrNull(form.get("warranty_months")) ?? 12,
     description: String(form.get("description") ?? "").trim(),
     active: form.get("active") === "on",
     on_demand: form.get("on_demand") === "on",

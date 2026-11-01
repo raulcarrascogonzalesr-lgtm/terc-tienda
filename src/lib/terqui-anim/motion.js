@@ -21,7 +21,7 @@ const REST = {
   handL: [58, 150], handR: [142, 150], footL: [86, 190], footR: [114, 190],
   lean: 0, bodyY: 0, squash: 0, sit: 0, look: [0, 0], eyeL: 1, eyeR: 1, eyeArc: 1,
   browL: [0, 0], browR: [0, 0], mouth: { w: 9.5, open: 0, smile: 1.5 },
-  prop: null, armsFront: false, elbowOutL: true, elbowOutR: true, dangle: 0, pulse: 0,
+  prop: null, armsFront: false, elbowOutL: true, elbowOutR: true, dangle: 0, pulse: 0, headset: 0, desk: 0,
 };
 const sin = Math.sin;
 const GESTURES = {
@@ -52,6 +52,9 @@ const GESTURES = {
   arriba: { handL: [58, 150], handR: [148, 64], lean: 3, look: [2, -4], browL: [2, 0], browR: [2.5, 0], mouth: { smile: 2.5 },
     osc: (t) => ({ handR: [1.5 * sin(TAU * 1.1 * t), 2 * sin(TAU * 1.1 * t)] }) },
   yo: { handL: [56, 150], handR: [114, 136], armsFront: true, lean: -3, browL: [2, 0], browR: [2.5, 0], mouth: { smile: 3 } },
+  // soporte: detrás del escritorio con audífonos, la mano izquierda en el audífono y la derecha escribiendo en el notebook
+  soporte: { handL: [58, 100], handR: [134, 152], headset: 1, desk: 1, look: [2, 0], browL: [1.5, 0], browR: [1.5, 0], mouth: { smile: 3 },
+    osc: (t) => { const k = Math.abs(sin(TAU * 3.2 * t)); return { handR: [1.5 * sin(TAU * 1.6 * t), -3 * k] }; } },
   explica: { handL: [50, 134], handR: [150, 134], browL: [1, 0], browR: [1, 0], mouth: { smile: 2 },
     osc: (t) => ({ handL: [0, 3 * sin(TAU * 1.1 * t)], handR: [0, 3 * sin(TAU * 1.1 * t + 1.3)] }) },
 };

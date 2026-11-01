@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { TerquiHero } from "@/components/home/TerquiHero";
+import { PeaceOfMind } from "@/components/home/PeaceOfMind";
 import { WelcomeCurtain } from "@/components/home/WelcomeCurtain";
 import { StoreIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
@@ -18,6 +19,7 @@ import { whatsappLink } from "@/lib/site";
 import { KIND_LABEL, productSpecs } from "@/lib/specs";
 import type { HeroItem } from "@/lib/terqui-anim/hero";
 import type { Product } from "@/lib/types";
+import { warrantyLabel } from "@/lib/warranty";
 
 export const revalidate = 60;
 
@@ -47,11 +49,12 @@ const SORTS = {
 } as const;
 type Sort = keyof typeof SORTS;
 
+// El título de la garantía se completa con los meses del catálogo (ver warrantyLabel).
 const BENEFITS: { icon: IconName; title: string; text: string }[] = [
-  { icon: "shield", title: "Garantía en todo", text: "Cada equipo con su garantía TERC" },
+  { icon: "shield", title: "de garantía", text: "Reparación, cambio o devolución" },
+  { icon: "chat", title: "Soporte por WhatsApp", text: "Personas reales, antes y después" },
   { icon: "truck", title: "Envíos a todo Chile", text: "Despacho seguro a tu casa" },
   { icon: "card", title: "Paga en cuotas", text: "Tarjeta o débito con Mercado Pago" },
-  { icon: "checklist", title: "Revisado uno a uno", text: "Batería, pantalla y funciones" },
 ];
 
 function normalize(text: string) {
@@ -148,9 +151,6 @@ export default async function HomePage({ searchParams }: Props) {
 
   const [all, fund, rank] = await Promise.all([listProducts(), getShippingFund(), productRanking().catch(() => new Map<string, number>())]);
   const freeShipping = fund > 0;
-  const benefits = freeShipping
-    ? BENEFITS.map((b) => (b.icon === "truck" ? { ...b, title: "Envío gratis en la RM", text: "Y más barato a regiones" } : b))
-    : BENEFITS;
   const query = normalize(q.trim());
   // Si buscan un SKU exacto (10001, "sku 10001" o "#10001"), van directo a la ficha de ese equipo.
   const skuMatch = query.match(/^(?:sku\s*)?#?(\d+)$/);
@@ -204,7 +204,14 @@ export default async function HomePage({ searchParams }: Props) {
     .slice(0, 8)
     .map(heroItem);
   const count = (months: number) => all.filter((p) => p.warranty_months === months).length;
-  const warranty = all.map((p) => p.warranty_months).sort((a, b) => count(b) - count(a))[0] ?? 6;
+  const warranty = all.map((p) => p.warranty_months).sort((a, b) => count(b) - count(a))[0] ?? 12;
+  const benefits = BENEFITS.map((b) =>
+    b.icon === "shield"
+      ? { ...b, title: `${warrantyLabel(warranty)} de garantía` }
+      : b.icon === "truck" && freeShipping
+        ? { ...b, title: "Envío gratis en la RM", text: "Y más barato a regiones" }
+        : b,
+  );
 
   // Arma el enlace manteniendo los filtros actuales.
   const link = (changes: Record<string, string | null>) => {
@@ -268,21 +275,23 @@ export default async function HomePage({ searchParams }: Props) {
               ))}
             </div>
           </section>
+          <PeaceOfMind warranty={warranty} whatsapp={whatsappLink("Hola, quiero hablar con el soporte de TERC")} />
         </>
       )}
 
       {freeShipping && !filtering && (
         <section className="shell pt-4">
+          {/* En celular: ícono y texto arriba, botón a todo el ancho abajo. Desde sm, todo en una fila. */}
           <div
             data-reveal
-            className="relative flex flex-wrap items-center gap-x-6 gap-y-3 overflow-hidden rounded-3xl bg-gold px-5 py-5 text-pine sm:px-8 sm:py-6"
+            className="relative grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-4 overflow-hidden rounded-3xl bg-gold px-5 py-5 text-pine sm:flex sm:gap-x-6 sm:px-8 sm:py-6"
           >
             <StoreIcon name="truck" className="absolute -right-6 -bottom-8 h-40 w-40 text-pine/10" />
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-pine text-gold">
-              <StoreIcon name="truck" className="h-7 w-7" />
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center self-start rounded-full bg-pine text-gold sm:h-14 sm:w-14 sm:self-center">
+              <StoreIcon name="truck" className="h-6 w-6 sm:h-7 sm:w-7" />
             </span>
-            <div className="relative min-w-0 flex-1">
-              <p className="font-[family-name:var(--font-display)] text-2xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+            <div className="relative min-w-0 sm:flex-1">
+              <p className="font-[family-name:var(--font-display)] text-xl font-extrabold leading-tight tracking-tight sm:text-4xl">
                 Envío gratis a toda la Región Metropolitana
               </p>
               <p className="mt-1 text-sm font-semibold text-pine/75 sm:text-base">
@@ -291,7 +300,7 @@ export default async function HomePage({ searchParams }: Props) {
             </div>
             <Link
               href="#equipos"
-              className="relative inline-flex items-center gap-2 rounded-full bg-pine px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cta"
+              className="relative col-span-2 inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-pine px-5 py-3 text-sm font-semibold text-white transition hover:bg-cta sm:py-2.5"
             >
               Ver equipos <StoreIcon name="arrow" className="w-4 h-4" />
             </Link>
@@ -299,27 +308,30 @@ export default async function HomePage({ searchParams }: Props) {
         </section>
       )}
 
-      <section className="shell pt-4">
-        <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {benefits.map((b, i) => (
-            <li
-              key={b.title}
-              data-reveal
-              style={delay(i * 80)}
-              className="relative flex items-center gap-3 overflow-hidden rounded-2xl bg-pine px-3 py-3 text-white sm:px-4 sm:py-3.5"
-            >
-              <Mark className="absolute -right-4 -top-3 w-16 opacity-[0.07]" ink="#ffffff" />
-              <span className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-gold">
-                <StoreIcon name={b.icon} className="w-5 h-5" />
-              </span>
-              <span>
-                <span className="block text-sm font-semibold">{b.title}</span>
-                <span className="hidden sm:block text-xs text-white/70">{b.text}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* En la portada esto ya lo cuenta en grande "Lo que compras en TERC"; en búsquedas y categorías va resumido. */}
+      {filtering && (
+        <section className="shell pt-4">
+          <ul className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {benefits.map((b, i) => (
+              <li
+                key={b.title}
+                data-reveal
+                style={delay(i * 80)}
+                className="relative flex items-center gap-3 overflow-hidden rounded-2xl bg-pine px-3 py-3 text-white sm:px-4 sm:py-3.5"
+              >
+                <Mark className="absolute -right-4 -top-3 w-16 opacity-[0.07]" ink="#ffffff" />
+                <span className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-gold">
+                  <StoreIcon name={b.icon} className="w-5 h-5" />
+                </span>
+                <span>
+                  <span className="block text-sm font-semibold">{b.title}</span>
+                  <span className="hidden sm:block text-xs text-white/70">{b.text}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {!filtering && offers.length > 0 && (
         <section className="mt-12 bg-gradient-to-b from-sale-50 to-paper py-10">
@@ -374,7 +386,7 @@ export default async function HomePage({ searchParams }: Props) {
         </div>
 
         <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="scroll-fade flex gap-2 overflow-x-auto pb-1">
             <Link
               href={link({ categoria: null, ofertas: null })}
               className={`shrink-0 rounded-full border px-4 py-1.5 text-sm ${!categoria && !onlyOffers ? "border-pine bg-pine text-white" : "border-line/10 bg-surface text-ink hover:border-pine-700/40"}`}
@@ -399,7 +411,7 @@ export default async function HomePage({ searchParams }: Props) {
               </Link>
             ))}
           </div>
-          <div className="flex items-center gap-1 overflow-x-auto text-sm">
+          <div className="scroll-fade flex items-center gap-1 overflow-x-auto text-sm">
             <span className="shrink-0 text-muted">Ordenar:</span>
             {Object.entries(SORTS).map(([key, label]) => (
               <Link

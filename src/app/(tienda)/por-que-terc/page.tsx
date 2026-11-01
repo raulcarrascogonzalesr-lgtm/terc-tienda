@@ -8,7 +8,7 @@ import { SITE, whatsappLink } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Por qué TERC | Tecnología reacondicionada",
-  description: "Cómo revisamos cada equipo, cómo describimos su estado y cómo funciona la garantía de TERC.",
+  description: "Cómo revisamos cada equipo, cómo describimos su estado, la garantía de 1 año y el soporte por WhatsApp de TERC.",
 };
 
 const TRUST: { icon: IconName; title: string; text: string }[] = [
@@ -28,8 +28,12 @@ const STEPS = [
     text: "Probamos cada función, revisamos la batería, los limpiamos y te contamos su estado real.",
   },
   {
-    title: "Te llegan con garantía",
-    text: "Pagas seguro, lo despachamos a tu casa y quedas cubierto por la garantía de TERC.",
+    title: "Te llegan con 1 año de garantía",
+    text: "Pagas seguro, lo despachamos a tu casa y quedas cubierto 12 meses por la garantía de TERC.",
+  },
+  {
+    title: "Y seguimos contigo",
+    text: "Soporte por WhatsApp con personas reales y asesoría por videollamada, durante la garantía y después.",
   },
 ];
 
@@ -47,7 +51,7 @@ const SAFE_BUY: { icon: IconName; title: string; text: string }[] = [
   {
     icon: "shield",
     title: "Te respondemos nosotros",
-    text: "Si algo falla, lo ves directo con TERC por WhatsApp o correo, sin intermediarios.",
+    text: "Si algo falla, lo ves directo con el soporte de TERC por WhatsApp, sin intermediarios ni bots.",
   },
 ];
 
@@ -99,7 +103,7 @@ export default function WhyTercPage() {
         <h2 className="mt-1 max-w-xl text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
           La calidad del primer día, al precio de la segunda vida.
         </h2>
-        <ol className="mt-10 grid gap-8 md:grid-cols-3">
+        <ol className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s, i) => (
             <li key={s.title} className="space-y-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-pine text-sm font-semibold text-gold">
