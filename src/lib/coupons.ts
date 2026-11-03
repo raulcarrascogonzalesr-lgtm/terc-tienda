@@ -13,19 +13,28 @@ export function normalizeCode(raw: unknown): string {
 }
 
 export function describeCoupon(coupon: Pick<Coupon, "kind" | "value">, format: (n: number) => string): string {
+  if (coupon.kind === "shipping") return "Envío gratis";
   return coupon.kind === "percent" ? `${coupon.value}%` : format(coupon.value);
+}
+
+// Si el cupón ya venció: los de 24 horas por la hora exacta, el resto por el día (hora de Chile).
+export function couponExpired(coupon: Pick<Coupon, "expires_on" | "expires_at">, now = Date.now()): boolean {
+  if (coupon.expires_at) return Date.parse(coupon.expires_at) <= now;
+  return !!coupon.expires_on && coupon.expires_on < todayInChile();
 }
 
 // Precio de una unidad con el cupón. El cupón no se suma a una oferta: se calcula sobre el
 // precio de antes de la oferta y el cliente paga el más bajo de los dos.
 export function couponUnitPrice(coupon: Pick<Coupon, "kind" | "value">, product: Pick<Product, "price" | "compare_price">) {
+  if (coupon.kind === "shipping") return product.price; // no toca el precio del equipo, solo el envío
   const base = product.compare_price && product.compare_price > product.price ? product.compare_price : product.price;
   const off = coupon.kind === "percent" ? Math.round((base * coupon.value) / 100) : coupon.value;
   return Math.min(product.price, Math.max(base - off, 1));
 }
 
 export type CouponCheck =
-  | { ok: true; coupon: Coupon; product: Product; unitPrice: number; discount: number }
+  | { ok: true; coupon: Coupon; product: Product; unitPrice: number; discount: number; freeShipping: false }
+  | { ok: true; coupon: Coupon; product: null; unitPrice: 0; discount: 0; freeShipping: true }
   | { ok: false; error: string };
 
 // Revisa que el cupón exista, esté vigente, sea para un equipo del carrito y le quede algún uso.
@@ -42,7 +51,16 @@ export async function checkCoupon(
 
   const { data: coupon } = await supabase.from("coupons").select("*").eq("code", code).maybeSingle();
   if (!coupon || !coupon.active) return { ok: false, error: "Ese cupón no existe o ya no está activo" };
-  if (coupon.expires_on && coupon.expires_on < todayInChile()) return { ok: false, error: "Ese cupón ya venció" };
+  if (couponExpired(coupon)) return { ok: false, error: "Ese cupón ya venció" };
+
+  // Envío gratis: sirve con cualquier equipo; el envío se deja en $0 al pagar.
+  if (coupon.kind === "shipping") {
+    if (!products.length) return { ok: false, error: "Agrega un equipo al carrito para usar el cupón" };
+    const usedShip = await countCouponUses(supabase, code, orderId, email).catch(() => null);
+    if (usedShip === null) return { ok: false, error: "No pudimos revisar el cupón. Intenta de nuevo." };
+    if (usedShip >= coupon.max_uses) return { ok: false, error: "Ese cupón ya fue usado o hay otra compra en curso con él" };
+    return { ok: true, coupon: coupon as Coupon, product: null, unitPrice: 0, discount: 0, freeShipping: true };
+  }
 
   // Un cupón sin equipo fijo (código de amigo o su premio) descuenta en el equipo más caro del carrito.
   const product = coupon.product_id
@@ -71,7 +89,7 @@ export async function checkCoupon(
   if (discount <= 0) {
     return { ok: false, error: "Este equipo ya tiene una oferta mejor que tu cupón: no lo necesitas" };
   }
-  return { ok: true, coupon: coupon as Coupon, product, unitPrice, discount };
+  return { ok: true, coupon: coupon as Coupon, product, unitPrice, discount, freeShipping: false };
 }
 
 // Pedidos pagados con el cupón, más los que se están pagando ahora (aún dentro del plazo).

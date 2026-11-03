@@ -95,10 +95,11 @@ export type Order = {
 export type Coupon = {
   code: string; // en mayúsculas, por ejemplo PRIMERO7
   product_id: string | null; // vacío = sirve para cualquier equipo (códigos de amigo y sus premios)
-  kind: "percent" | "amount"; // porcentaje del precio o monto fijo en pesos (con IVA)
+  kind: "percent" | "amount" | "shipping"; // porcentaje del precio, monto fijo en pesos (con IVA) o envío gratis
   value: number;
   max_uses: number;
   expires_on: string | null; // último día en que sirve (AAAA-MM-DD)
+  expires_at?: string | null; // vence a esta hora exacta (cupones de 24 horas)
   note: string;
   active: boolean;
   created_at: string;

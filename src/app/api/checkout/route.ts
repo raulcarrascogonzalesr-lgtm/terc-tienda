@@ -205,12 +205,14 @@ export async function POST(request: Request) {
   const supabase = getAdminClient();
 
   // Cupón: descuenta en una sola unidad del equipo para el que se creó.
-  let coupon: { code: string; productId: string; unitPrice: number; discount: number } | null = null;
+  let coupon: { code: string; productId: string | null; unitPrice: number; discount: number } | null = null;
   if (typeof body.coupon === "string" && body.coupon.trim()) {
     if (!supabase) return NextResponse.json({ error: "Los cupones no están disponibles" }, { status: 503 });
     const check = await checkCoupon(supabase, body.coupon, lines.map((l) => l.product), undefined, customer.email);
     if (!check.ok) return NextResponse.json({ error: check.error }, { status: 409 });
-    coupon = { code: check.coupon.code, productId: check.product.id, unitPrice: check.unitPrice, discount: check.discount };
+    coupon = { code: check.coupon.code, productId: check.product?.id ?? null, unitPrice: check.unitPrice, discount: check.discount };
+    // Cupón de envío gratis: el cliente no paga el envío (la tienda lo paga igual al courier).
+    if (check.freeShipping) shipping = { ...shipping, price: 0 };
   }
   const discount = coupon?.discount ?? 0;
   const total = subtotal - discount + shipping.price;
@@ -298,7 +300,7 @@ export async function POST(request: Request) {
       items: [
         // Con cupón, la unidad con descuento va en su propia línea, para que la suma sea el total.
         ...lines.flatMap((l) => {
-          const discounted = coupon?.productId === l.product.id;
+          const discounted = !!coupon?.productId && coupon.productId === l.product.id;
           const full = { id: l.product.id, title: l.product.name, unit_price: l.product.price, currency_id: "CLP" };
           return [
             ...(discounted

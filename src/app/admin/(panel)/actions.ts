@@ -1,6 +1,6 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
@@ -591,6 +591,44 @@ export async function saveCoupon(_prev: SaveResult, form: FormData): Promise<Sav
   }
   revalidatePath("/admin/cupones");
   return null;
+}
+
+// Cupón de envío gratis por 24 horas, uno por persona (por ejemplo, para quien manda la palabra
+// secreta de un reel por DM). Un solo uso, cualquier equipo; el código es al azar y difícil de adivinar.
+export async function createShippingCoupon(
+  _prev: { code?: string; expiresAt?: string; error?: string } | null,
+  form: FormData,
+): Promise<{ code?: string; expiresAt?: string; error?: string }> {
+  await requireAdmin();
+  const supabase = db();
+  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const note = String(form.get("note") ?? "").trim().slice(0, 200);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const code = `ENV-${Array.from({ length: 6 }, () => letters[randomInt(letters.length)]).join("")}`;
+    const { error } = await supabase.from("coupons").insert({
+      code,
+      product_id: null,
+      kind: "shipping",
+      value: 1,
+      max_uses: 1,
+      expires_on: expiresAt.toLocaleDateString("en-CA", { timeZone: "America/Santiago" }),
+      expires_at: expiresAt.toISOString(),
+      note: note || "Envío gratis 24 h",
+    });
+    if (!error) {
+      revalidatePath("/admin/cupones");
+      return { code, expiresAt: expiresAt.toISOString() };
+    }
+    if (error.code !== "23505") {
+      return {
+        error: /expires_at|coupons_kind_check/.test(error.message)
+          ? "Falta correr supabase/cupon-envio.sql en Supabase para crear cupones de envío gratis."
+          : error.message,
+      };
+    }
+  }
+  return { error: "No se pudo crear el cupón. Intenta de nuevo." };
 }
 
 export async function toggleCoupon(code: string, active: boolean) {
