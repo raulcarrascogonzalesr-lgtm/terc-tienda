@@ -12,6 +12,7 @@ import { findCommune, quoteWithFund } from "@/lib/shipit";
 import { getShippingFund } from "@/lib/shipping-fund";
 import { courierLabel, isShippingZone, MIN_REGION_SHIPPING, SHIPPING_ZONES } from "@/lib/shipping";
 import { storeIsOpen } from "@/lib/store-status";
+import { isTestProduct, TEST_SHIPPING } from "@/lib/test-product";
 import { getAdminClient } from "@/lib/supabase";
 import { sanitizeUtm } from "@/lib/utm";
 
@@ -138,9 +139,18 @@ export async function POST(request: Request) {
     lines.push({ product, quantity: item.quantity });
   }
 
+  // El producto de prueba de pagos va solo y sin envío: no se cotiza con Shipit ni hay despacho.
+  const testOrder = lines.some((l) => isTestProduct(l.product.id));
+  if (testOrder && lines.some((l) => !isTestProduct(l.product.id))) {
+    return NextResponse.json({ error: "El producto de prueba se paga solo: saca los demás del carrito." }, { status: 400 });
+  }
+
   // quote: lo que cobra el courier; fund: lo que trajeron los equipos para el envío (envío gratis en la RM).
   let shipping: { zone: string; label: string; price: number; quote: number; fund: number };
-  if (commune) {
+  if (testOrder) {
+    customer.courier = TEST_SHIPPING.label;
+    shipping = { zone: TEST_SHIPPING.courier, label: TEST_SHIPPING.label, price: 0, quote: 0, fund: 0 };
+  } else if (commune) {
     // El precio del envío también se vuelve a cotizar aquí, nunca se toma del navegador.
     const { options, fundTotal } = await quoteWithFund(commune.id, lines);
     const option = options.find((o) => o.courier === body.shipping?.courier);

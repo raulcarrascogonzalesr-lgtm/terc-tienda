@@ -14,6 +14,7 @@ import { getProductBySlug } from "@/lib/products";
 import { boxFor } from "@/lib/shipping";
 import { jsonLdScript, productDescription, productJsonLd } from "@/lib/seo";
 import { getShippingFund } from "@/lib/shipping-fund";
+import { isTestProduct } from "@/lib/test-product";
 import { SITE, whatsappLink } from "@/lib/site";
 import { KIND_LABEL, productSpecs } from "@/lib/specs";
 import { warrantyLabel } from "@/lib/warranty";
@@ -24,6 +25,8 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug((await params).slug);
   if (!product) return { title: "Producto no encontrado" };
+  // El producto de prueba de pagos no debe aparecer en Google.
+  if (isTestProduct(product.id)) return { title: product.name, robots: { index: false, follow: false } };
   const title = `${product.name} reacondicionado | TERC`;
   const description = productDescription(product);
   return {
@@ -75,8 +78,16 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div className="shell py-6 sm:py-10">
-      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(productJsonLd(product))} />
-      <TrackView item={{ id: product.id, name: product.name, price: product.price, quantity: 1, category: product.category }} />
+      {isTestProduct(product.id) ? (
+        <p className="mb-6 rounded-2xl bg-sale-50 px-4 py-3 text-sm font-semibold text-sale">
+          Producto interno de TERC para probar los pagos. No es un equipo y no se envía.
+        </p>
+      ) : (
+        <>
+          <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(productJsonLd(product))} />
+          <TrackView item={{ id: product.id, name: product.name, price: product.price, quantity: 1, category: product.category }} />
+        </>
+      )}
       <nav aria-label="Ruta" className="mb-6 text-sm text-muted">
         <Link href="/" className="hover:text-ink">
           Inicio

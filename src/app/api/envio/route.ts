@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getProductsByIds } from "@/lib/products";
 import { getCommunes, quoteWithFund } from "@/lib/shipit";
 import { getShippingFund } from "@/lib/shipping-fund";
+import { isTestProduct, TEST_SHIPPING } from "@/lib/test-product";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,13 @@ export async function POST(request: Request) {
     const quantity = Math.max(1, Math.floor(Number(i.quantity)) || 1);
     return product ? [{ product, quantity }] : [];
   });
+  // El producto de prueba de pagos no se envía: no se cotiza con Shipit.
+  if (lines.some((l) => isTestProduct(l.product.id))) {
+    if (lines.some((l) => !isTestProduct(l.product.id))) {
+      return NextResponse.json({ error: "El producto de prueba se paga solo: saca los demás del carrito." }, { status: 400 });
+    }
+    return NextResponse.json({ options: [TEST_SHIPPING] });
+  }
   const { options } = await quoteWithFund(communeId, lines);
   return NextResponse.json({ options });
 }
