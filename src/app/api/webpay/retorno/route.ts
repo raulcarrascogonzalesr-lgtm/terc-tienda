@@ -33,8 +33,13 @@ async function handle(request: Request) {
 
   if (!token) {
     const orderId = params.get("TBK_ID_SESION");
+    const cancelled = params.get("TBK_TOKEN"); // el cliente apretó "Anular compra y volver al comercio"
     if (orderId && supabase) {
-      await supabase.from("orders").update({ status: "failed" }).eq("id", orderId).eq("status", "pending");
+      await supabase
+        .from("orders")
+        .update({ status: "failed", ...(cancelled ? { payment_id: `webpay${config?.isTest ? "-prueba" : ""}:anulada:${cancelled}` } : {}) })
+        .eq("id", orderId)
+        .eq("status", "pending");
     }
     return go("error");
   }
@@ -60,7 +65,8 @@ async function handle(request: Request) {
     return go("error");
   }
 
-  const paymentId = `webpay${config.isTest ? "-prueba" : ""}:${result.buy_order}:${result.authorization_code ?? ""}`;
+  // Orden de compra, código de autorización y token (Transbank pide el token para validar la integración).
+  const paymentId = `webpay${config.isTest ? "-prueba" : ""}:${result.buy_order}:${result.authorization_code ?? ""}:token:${token}`;
   // El monto cobrado debe coincidir con el total del pedido guardado.
   if (isWebpayApproved(result) && result.amount === order.total) {
     // La función mark_order_paid descuenta stock una sola vez por pedido.

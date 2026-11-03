@@ -32,16 +32,19 @@ type CheckoutBody = {
 type PaymentMethod = "mercadopago" | "webpay";
 
 // Medios de pago que el carrito puede ofrecer. Webpay en modo prueba (o con WEBPAY_SOLO_ADMIN) solo lo ve el administrador.
-async function availableMethods(): Promise<PaymentMethod[]> {
+// Con el producto de prueba solo (testCart), Webpay se muestra a cualquiera: así Transbank puede
+// revisar el pago en la tienda durante la validación, sin abrir Webpay de prueba a los demás equipos.
+async function availableMethods(testCart = false): Promise<PaymentMethod[]> {
   const methods: PaymentMethod[] = [];
   const webpay = getWebpayConfig();
-  if (webpay && (!webpay.adminOnly || (await getAdminUser()))) methods.push("webpay");
+  if (webpay && (!webpay.adminOnly || testCart || (await getAdminUser()))) methods.push("webpay");
   if (getMercadoPagoClient()) methods.push("mercadopago");
   return methods;
 }
 
-export async function GET() {
-  return NextResponse.json({ methods: await availableMethods() });
+export async function GET(request: Request) {
+  const testCart = new URL(request.url).searchParams.get("prueba") === "1";
+  return NextResponse.json({ methods: await availableMethods(testCart) });
 }
 
 // Datos del cliente: los obligatorios y los que puede dejar en blanco.
@@ -53,6 +56,10 @@ function text(value: unknown, max = 200) {
 }
 
 export async function POST(request: Request) {
+  const body = (await request.json().catch(() => null)) as CheckoutBody | null;
+  // El producto de prueba de pagos (ver test-product.ts) va solo en el carrito.
+  const testCart =
+    Array.isArray(body?.items) && body.items.length > 0 && body.items.every((i) => isTestProduct(String(i?.productId)));
   // Con las compras cerradas desde el panel, solo el administrador puede pagar (para probar).
   if (!(await storeIsOpen()) && !(await getAdminUser())) {
     return NextResponse.json(
@@ -60,7 +67,6 @@ export async function POST(request: Request) {
       { status: 503 },
     );
   }
-  const body = (await request.json().catch(() => null)) as CheckoutBody | null;
   if (!body || !Array.isArray(body.items) || body.items.length === 0) {
     return NextResponse.json({ error: "El carrito está vacío" }, { status: 400 });
   }
@@ -71,7 +77,7 @@ export async function POST(request: Request) {
     );
   }
   const method: PaymentMethod = body.method === "webpay" ? "webpay" : "mercadopago";
-  if (!(await availableMethods()).includes(method)) {
+  if (!(await availableMethods(testCart)).includes(method)) {
     return NextResponse.json({ error: "Ese medio de pago no está disponible" }, { status: 503 });
   }
   // Con Shipit, la región y la comuna salen de la comuna elegida en la lista.
@@ -266,6 +272,10 @@ export async function POST(request: Request) {
         amount: total,
         returnUrl: `${siteUrl}/api/webpay/retorno`,
       });
+      // El token queda en el pedido (se ve en el panel): Transbank lo pide para validar la integración.
+      if (supabase) {
+        await supabase.from("orders").update({ payment_id: `webpay${webpay.isTest ? "-prueba" : ""}:token:${tx.token}` }).eq("id", orderId);
+      }
       // Webpay pide enviar al cliente con un formulario (POST) que lleva el token.
       return NextResponse.json({ checkoutUrl: tx.url, token: tx.token, orderId });
     } catch (err) {
