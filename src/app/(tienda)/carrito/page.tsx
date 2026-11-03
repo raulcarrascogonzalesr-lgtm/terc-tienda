@@ -11,6 +11,7 @@ import { MARKETING_CONSENT_TEXT } from "@/lib/consent";
 import { deliveryShort } from "@/lib/delivery";
 import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
+import { isTestProduct } from "@/lib/test-product";
 import { whatsappLink } from "@/lib/site";
 import { UTM_MAX_AGE_MS, UTM_STORAGE_KEY } from "@/lib/utm";
 import { warrantyLabel } from "@/lib/warranty";
@@ -59,8 +60,9 @@ export default function CartPage() {
   const [marketingConsent, setMarketingConsent] = useState(false); // siempre parte sin marcar
 
   // Medios de pago activos (Webpay aparece cuando está configurado).
+  const testCart = items.length > 0 && items.every((i) => isTestProduct(i.productId));
   useEffect(() => {
-    fetch("/api/checkout")
+    fetch(testCart ? "/api/checkout?prueba=1" : "/api/checkout")
       .then((res) => res.json())
       .then((data: { methods?: PaymentMethod[] }) => {
         if (!data.methods?.length) return;
@@ -68,7 +70,7 @@ export default function CartPage() {
         setMethod(data.methods[0]);
       })
       .catch(() => {});
-  }, []);
+  }, [testCart]);
 
   // Fecha estimada de llegada (si algún equipo es del proveedor, manda el plazo más largo).
   // Los carritos guardados antes no saben si el equipo es del proveedor: se usa el plazo largo.
