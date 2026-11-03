@@ -42,7 +42,7 @@ const AFTER_PAYMENT: { icon: IconName; title: string; text: string }[] = [
   { icon: "check", title: "Llega a tu puerta", text: "En pocos días hábiles." },
 ];
 
-type AppliedCoupon = { code: string; productId: string; productName: string; discount: number };
+type AppliedCoupon = { code: string; productId: string | null; productName: string | null; discount: number; freeShipping?: boolean };
 
 type Step = "carrito" | "datos";
 const STEP_PARAM = "paso=datos";
@@ -109,9 +109,11 @@ export default function CartPage() {
     );
   }
 
-  const shipping = shippingChoice?.price ?? null;
   // Si el cliente saca del carrito el equipo del cupón, el descuento deja de aplicar.
-  const activeCoupon = coupon && items.some((i) => i.productId === coupon.productId) ? coupon : null;
+  // El de envío gratis sirve con cualquier equipo.
+  const activeCoupon =
+    coupon && (coupon.freeShipping || items.some((i) => i.productId === coupon.productId)) ? coupon : null;
+  const shipping = shippingChoice ? (activeCoupon?.freeShipping ? 0 : shippingChoice.price) : null;
   const discount = activeCoupon?.discount ?? 0;
   // Solo se nombran los detalles estéticos si el cliente lleva un equipo que los tiene.
   const cosmeticItems = items.filter((i) => i.cosmetic).map((i) => i.name);
@@ -181,7 +183,9 @@ export default function CartPage() {
   const totals = (
     <dl className="space-y-2 border-t border-line/10 pt-4 text-[15px]">
       <Row label={items.length === 1 && items[0].quantity === 1 ? "Equipo" : "Productos"} value={formatCLP(total)} />
-      {activeCoupon && <Row label={`Cupón ${activeCoupon.code}`} value={`−${formatCLP(discount)}`} />}
+      {activeCoupon && !activeCoupon.freeShipping && (
+        <Row label={`Cupón ${activeCoupon.code}`} value={`−${formatCLP(discount)}`} />
+      )}
       <Row
         label="Envío"
         value={shipping === null ? "Elige tu comuna" : shipping === 0 ? "Gratis" : formatCLP(shipping)}
@@ -498,7 +502,8 @@ function CouponBox({
   if (applied) {
     return (
       <p className="text-sm text-pine">
-        Cupón <strong>{applied.code}</strong> aplicado a {applied.productName}.{" "}
+        Cupón <strong>{applied.code}</strong>{" "}
+        {applied.freeShipping ? "aplicado: tu envío sale gratis." : `aplicado a ${applied.productName}.`}{" "}
         <button type="button" onClick={() => onApply(null)} className="text-muted underline">
           Quitar
         </button>

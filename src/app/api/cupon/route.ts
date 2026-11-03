@@ -19,8 +19,9 @@ export async function POST(request: Request) {
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 });
   return NextResponse.json({
     code: result.coupon.code,
-    productId: result.product.id,
-    productName: result.product.name,
+    productId: result.product?.id ?? null,
+    productName: result.product?.name ?? null,
     discount: result.discount,
+    freeShipping: result.freeShipping,
   });
 }

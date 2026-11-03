@@ -1,17 +1,17 @@
-import { couponUnitPrice, describeCoupon, usesByCode } from "@/lib/coupons";
-import { formatCLP, shortDate, todayInChile } from "@/lib/format";
+import { couponExpired, couponUnitPrice, describeCoupon, usesByCode } from "@/lib/coupons";
+import { formatCLP, shortDate } from "@/lib/format";
 import { ConfirmButton } from "../ConfirmButton";
 import { deleteCoupon, toggleCoupon } from "../actions";
 import { listAllProducts, listCoupons, listOrders } from "../data";
 import { Badge, Card, PageHeader, Tip } from "../ui";
 import { CouponForm } from "./CouponForm";
+import { ShippingCouponForm } from "./ShippingCouponForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function CouponsPage() {
   const [coupons, products, orders] = await Promise.all([listCoupons(), listAllProducts(), listOrders(1000)]);
   const uses = usesByCode(orders);
-  const today = todayInChile();
   const byId = new Map(products.map((p) => [p.id, p]));
 
   return (
@@ -28,6 +28,14 @@ export default async function CouponsPage() {
         cupón no se suma: el cliente paga el precio más bajo de los dos. Deja el código vacío y se
         crea uno al azar, difícil de adivinar.
       </Tip>
+
+      <Card title="Envío gratis por 24 horas">
+        <p className="text-sm text-[#6b716f] mb-3">
+          Para quien te manda la palabra secreta del reel por DM: revisa que te siga y crea un cupón
+          para esa persona. Sirve con cualquier equipo, una sola vez, y vence 24 horas después.
+        </p>
+        <ShippingCouponForm />
+      </Card>
 
       <Card title="Nuevo cupón">
         <CouponForm
@@ -60,7 +68,7 @@ export default async function CouponsPage() {
                 {coupons.map((c) => {
                   const product = c.product_id ? byId.get(c.product_id) : undefined;
                   const used = uses.get(c.code) ?? 0;
-                  const expired = !!c.expires_on && c.expires_on < today;
+                  const expired = couponExpired(c);
                   const status =
                     used >= c.max_uses
                       ? { tone: "muted" as const, label: "Usado" }
@@ -78,16 +86,27 @@ export default async function CouponsPage() {
                       <td className="p-2">{c.product_id ? (product?.name ?? "—") : "Cualquier equipo"}</td>
                       <td className="p-2 text-right whitespace-nowrap">{describeCoupon(c, formatCLP)}</td>
                       <td className="p-2 text-right whitespace-nowrap">
-                        {product ? formatCLP(couponUnitPrice(c, product)) : "—"}
-                        {product && <p className="text-xs text-[#6b716f]">antes {formatCLP(product.price)}</p>}
+                        {product && c.kind !== "shipping" ? formatCLP(couponUnitPrice(c, product)) : "—"}
+                        {product && c.kind !== "shipping" && <p className="text-xs text-[#6b716f]">antes {formatCLP(product.price)}</p>}
                       </td>
                       <td className="p-2 text-center whitespace-nowrap">
                         {used} de {c.max_uses}
                       </td>
                       <td className="p-2">
                         <Badge tone={status.tone}>{status.label}</Badge>
-                        {c.expires_on && (
-                          <p className="text-xs text-[#6b716f] mt-1">Vence {shortDate(c.expires_on)}</p>
+                        {c.expires_at ? (
+                          <p className="text-xs text-[#6b716f] mt-1">
+                            Vence{" "}
+                            {new Date(c.expires_at).toLocaleString("es-CL", {
+                              timeZone: "America/Santiago",
+                              day: "numeric",
+                              month: "short",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        ) : (
+                          c.expires_on && <p className="text-xs text-[#6b716f] mt-1">Vence {shortDate(c.expires_on)}</p>
                         )}
                       </td>
                       <td className="px-5 sm:px-6 py-2">
