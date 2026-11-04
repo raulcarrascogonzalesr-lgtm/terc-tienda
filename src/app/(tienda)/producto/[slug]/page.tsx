@@ -84,7 +84,7 @@ export default async function ProductPage({ params }: Props) {
         </p>
       ) : (
         <>
-          <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(productJsonLd(product))} />
+          <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(productJsonLd(product, fund))} />
           <TrackView item={{ id: product.id, name: product.name, price: product.price, quantity: 1, category: product.category }} />
         </>
       )}
