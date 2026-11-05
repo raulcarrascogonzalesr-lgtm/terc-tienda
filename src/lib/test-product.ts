@@ -16,7 +16,7 @@ export const TEST_PRODUCT: Product = {
   brand: "TERC",
   category: "Prueba",
   grade: "A",
-  price: 1000,
+  price: 50, // Transbank pide un producto de prueba de $50 para la primera compra real
   list_price: null,
   compare_price: null,
   offer_ends_at: null,
