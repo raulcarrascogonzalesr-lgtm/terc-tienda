@@ -12,7 +12,6 @@ import { findCommune, quoteWithFund } from "@/lib/shipit";
 import { getShippingFund } from "@/lib/shipping-fund";
 import { courierLabel, isShippingZone, MIN_REGION_SHIPPING, SHIPPING_ZONES } from "@/lib/shipping";
 import { storeIsOpen } from "@/lib/store-status";
-import { isTestProduct, TEST_SHIPPING } from "@/lib/test-product";
 import { getAdminClient } from "@/lib/supabase";
 import { sanitizeUtm } from "@/lib/utm";
 
@@ -32,19 +31,16 @@ type CheckoutBody = {
 type PaymentMethod = "mercadopago" | "webpay";
 
 // Medios de pago que el carrito puede ofrecer. Webpay en modo prueba (o con WEBPAY_SOLO_ADMIN) solo lo ve el administrador.
-// Con el producto de prueba solo (testCart), Webpay se muestra a cualquiera: así Transbank puede
-// revisar el pago en la tienda durante la validación, sin abrir Webpay de prueba a los demás equipos.
-async function availableMethods(testCart = false): Promise<PaymentMethod[]> {
+async function availableMethods(): Promise<PaymentMethod[]> {
   const methods: PaymentMethod[] = [];
   const webpay = getWebpayConfig();
-  if (webpay && (!webpay.adminOnly || testCart || (await getAdminUser()))) methods.push("webpay");
+  if (webpay && (!webpay.adminOnly || (await getAdminUser()))) methods.push("webpay");
   if (getMercadoPagoClient()) methods.push("mercadopago");
   return methods;
 }
 
-export async function GET(request: Request) {
-  const testCart = new URL(request.url).searchParams.get("prueba") === "1";
-  return NextResponse.json({ methods: await availableMethods(testCart) });
+export async function GET() {
+  return NextResponse.json({ methods: await availableMethods() });
 }
 
 // Datos del cliente: los obligatorios y los que puede dejar en blanco.
@@ -57,9 +53,6 @@ function text(value: unknown, max = 200) {
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as CheckoutBody | null;
-  // El producto de prueba de pagos (ver test-product.ts) va solo en el carrito.
-  const testCart =
-    Array.isArray(body?.items) && body.items.length > 0 && body.items.every((i) => isTestProduct(String(i?.productId)));
   // Con las compras cerradas desde el panel, solo el administrador puede pagar (para probar).
   if (!(await storeIsOpen()) && !(await getAdminUser())) {
     return NextResponse.json(
@@ -77,7 +70,7 @@ export async function POST(request: Request) {
     );
   }
   const method: PaymentMethod = body.method === "webpay" ? "webpay" : "mercadopago";
-  if (!(await availableMethods(testCart)).includes(method)) {
+  if (!(await availableMethods()).includes(method)) {
     return NextResponse.json({ error: "Ese medio de pago no está disponible" }, { status: 503 });
   }
   // Con Shipit, la región y la comuna salen de la comuna elegida en la lista.
@@ -145,18 +138,9 @@ export async function POST(request: Request) {
     lines.push({ product, quantity: item.quantity });
   }
 
-  // El producto de prueba de pagos va solo y sin envío: no se cotiza con Shipit ni hay despacho.
-  const testOrder = lines.some((l) => isTestProduct(l.product.id));
-  if (testOrder && lines.some((l) => !isTestProduct(l.product.id))) {
-    return NextResponse.json({ error: "El producto de prueba se paga solo: saca los demás del carrito." }, { status: 400 });
-  }
-
   // quote: lo que cobra el courier; fund: lo que trajeron los equipos para el envío (envío gratis en la RM).
   let shipping: { zone: string; label: string; price: number; quote: number; fund: number };
-  if (testOrder) {
-    customer.courier = TEST_SHIPPING.label;
-    shipping = { zone: TEST_SHIPPING.courier, label: TEST_SHIPPING.label, price: 0, quote: 0, fund: 0 };
-  } else if (commune) {
+  if (commune) {
     // El precio del envío también se vuelve a cotizar aquí, nunca se toma del navegador.
     const { options, fundTotal } = await quoteWithFund(commune.id, lines);
     const option = options.find((o) => o.courier === body.shipping?.courier);
