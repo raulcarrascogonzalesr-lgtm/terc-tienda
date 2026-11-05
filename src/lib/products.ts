@@ -2,7 +2,6 @@ import { todayInChile } from "./format";
 import { getShippingFund } from "./shipping-fund";
 import { getPublicClient } from "./supabase";
 import { SAMPLE_PRODUCTS } from "./sample-products";
-import { TEST_PRODUCT } from "./test-product";
 import type { Product } from "./types";
 
 // Columnas públicas. El costo del proveedor nunca se envía al navegador.
@@ -40,8 +39,6 @@ export async function listProducts(): Promise<Product[]> {
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  // El producto de prueba de pagos solo existe por su enlace directo (ver test-product.ts).
-  if (slug === TEST_PRODUCT.slug) return TEST_PRODUCT;
   const supabase = getPublicClient();
   if (!supabase) {
     const sample = SAMPLE_PRODUCTS.find((p) => p.slug === slug);
@@ -57,11 +54,8 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 }
 
 export async function getProductsByIds(ids: string[]): Promise<Product[]> {
-  const test = ids.includes(TEST_PRODUCT.id) ? [TEST_PRODUCT] : [];
-  ids = ids.filter((id) => id !== TEST_PRODUCT.id);
-  if (ids.length === 0) return test;
   const supabase = getPublicClient();
-  if (!supabase) return [...test, ...SAMPLE_PRODUCTS.filter((p) => ids.includes(p.id)).map(withOfferExpiry)];
+  if (!supabase) return SAMPLE_PRODUCTS.filter((p) => ids.includes(p.id)).map(withOfferExpiry);
 
   // Solo productos visibles: si uno se ocultó mientras estaba en un carrito, ya no se puede pagar.
   const [{ data, error }, fund] = await Promise.all([
@@ -69,5 +63,5 @@ export async function getProductsByIds(ids: string[]): Promise<Product[]> {
     getShippingFund(),
   ]);
   if (error) throw error;
-  return [...test, ...(data as Product[]).map(withFund(fund))];
+  return (data as Product[]).map(withFund(fund));
 }

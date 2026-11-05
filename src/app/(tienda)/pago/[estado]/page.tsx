@@ -7,7 +7,6 @@ import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { orderNumber } from "@/lib/order-emails";
 import { getProductsByIds } from "@/lib/products";
-import { isTestProduct } from "@/lib/test-product";
 import { whatsappLink } from "@/lib/site";
 import { getAdminClient } from "@/lib/supabase";
 import type { Order } from "@/lib/types";
@@ -105,8 +104,7 @@ export default async function PaymentResultPage({
   return (
     <div className="shell max-w-5xl space-y-6 py-8">
       <ClearCartOnSuccess />
-      {/* Las pruebas de pago no se cuentan como compras en Google ni en Meta. */}
-      {order && !order.items.some((i) => isTestProduct(i.product_id)) && (
+      {order && (
         <TrackPurchase
           orderId={order.id}
           value={order.total}
