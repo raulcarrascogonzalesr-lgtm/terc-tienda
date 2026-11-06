@@ -12,8 +12,17 @@
 --   EliteBook 830 G7          382.990 → 354.990   $389.990 → $361.990
 --   ProOne 440 G9             485.990 → 462.990   $492.990 → $469.990
 --
+-- Garantía de la oferta: estos equipos traen 6 meses mientras dure la oferta. En el carrito el cliente
+-- puede extenderla a 1 año (la garantía normal) por $19.990, pago único. Al terminar la oferta vuelven
+-- solos a 1 año. Lo que pagó cada cliente y su garantía quedan escritos en el pedido y en su correo.
+--
 -- Ejecutar UNA vez en Supabase > SQL Editor. Si se repite no pasa nada: solo cambia un equipo
 -- si todavía tiene el precio de antes.
+-- Columnas nuevas (la tienda funciona igual si todavía no existen).
+alter table products add column if not exists offer_warranty_months integer check (offer_warranty_months > 0);
+alter table products add column if not exists warranty_extra_price integer check (warranty_extra_price >= 0);
+grant select (offer_warranty_months, warranty_extra_price) on products to anon, authenticated;
+
 -- EliteBook 840 G7 de 16 GB: el proveedor ya no tiene (lista del 6-11-2026) y seguía a la venta.
 -- Se oculta de la tienda para que nadie pague uno que no se puede comprar.
 -- Para volver a mostrarlo: misma línea con active = true.
@@ -34,10 +43,12 @@ update products p
 set compare_price = o.antes,
     price = o.ahora,
     offer_ends_at = date '2026-11-09',
-    offer_name = '4 Días Terqui'
+    offer_name = '4 Días Terqui',
+    offer_warranty_months = 6,
+    warranty_extra_price = 19990
 from oferta o
 where p.slug = o.slug and p.price = o.antes
-returning p.sku, p.name, p.compare_price as precio_antes, p.price as precio_oferta, p.offer_ends_at;
+returning p.sku, p.name, p.compare_price as precio_antes, p.price as precio_oferta, p.offer_ends_at, p.offer_warranty_months as garantia_oferta, p.warranty_extra_price as extender_garantia;
 
 -- Abajo deben aparecer 5 filas (Supabase muestra solo el resultado de esta última parte). Si muestra menos, algún equipo ya no tenía el precio de antes:
 -- avísale a Claude antes de cambiar nada a mano.

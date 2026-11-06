@@ -166,6 +166,12 @@ export default async function ProductPage({ params }: Props) {
                 Antes <span className="line-through">{formatCLP(sale.before)}</span>: rebaja de {sale.percent}%.
               </p>
             )}
+            {product.warranty_upgrade && (
+              <p className="text-[13px] text-muted">
+                Precio de oferta con {warranty} de garantía. En el carrito puedes extenderla a{" "}
+                {warrantyLabel(product.warranty_upgrade.months)} por {formatCLP(product.warranty_upgrade.price)} (pago único).
+              </p>
+            )}
             {off && (
               <p className="text-sm text-muted">
                 Uno nuevo parecido cuesta <span className="line-through">{formatCLP(off.before)}</span>. Con TERC pagas{" "}

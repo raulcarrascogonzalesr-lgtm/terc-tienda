@@ -25,6 +25,7 @@ function useAddToCart(product: Product) {
       onDemand: product.on_demand,
       savings: savings(product)?.amount ?? null,
       warrantyMonths: product.warranty_months,
+      warrantyUpgrade: product.warranty_upgrade ?? null,
     });
     trackAddToCart({ id: product.id, name: product.name, price: product.price, quantity: 1, category: product.category });
   };

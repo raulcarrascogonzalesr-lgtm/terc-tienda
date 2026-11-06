@@ -14,6 +14,7 @@ import { photoProps } from "@/lib/photo";
 import { whatsappLink } from "@/lib/site";
 import { UTM_MAX_AGE_MS, UTM_STORAGE_KEY } from "@/lib/utm";
 import { warrantyLabel } from "@/lib/warranty";
+import { cartUnitPrice, type CartItem } from "@/lib/types";
 import { DeliveryForm } from "./DeliveryForm";
 import { ShippingPicker, type ShippingChoice } from "./ShippingPicker";
 
@@ -46,8 +47,13 @@ type AppliedCoupon = { code: string; productId: string | null; productName: stri
 type Step = "carrito" | "datos";
 const STEP_PARAM = "paso=datos";
 
+// Garantía de la línea: la extendida si el cliente la eligió, si no la que trae el equipo.
+function itemWarranty(item: CartItem) {
+  return item.warrantyExtended && item.warrantyUpgrade ? item.warrantyUpgrade.months : (item.warrantyMonths ?? 12);
+}
+
 export default function CartPage() {
-  const { items, total, setQuantity, remove, canBuy } = useCart();
+  const { items, total, setQuantity, remove, setWarrantyExtended, canBuy } = useCart();
   const [eta, setEta] = useState<string | null>(null);
   const [shippingChoice, setShippingChoice] = useState<ShippingChoice | null>(null);
   const [step, setStep] = useState<Step>("carrito");
@@ -141,7 +147,11 @@ export default function CartPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+          items: items.map((i) => ({
+            productId: i.productId,
+            quantity: i.quantity,
+            extendWarranty: !!(i.warrantyExtended && i.warrantyUpgrade),
+          })),
           ...shippingChoice.payload,
           customer: { ...customer, region: shippingChoice.region, comuna: shippingChoice.comuna },
           utm: readUtm(),
@@ -210,7 +220,7 @@ export default function CartPage() {
   );
   const whatsapp = whatsappLink("Hola, tengo una duda sobre mi compra en TERC");
   const methodNames = methods.map((m) => METHOD_LABELS[m]).join(" o ");
-  const warranty = Math.min(...items.map((i) => i.warrantyMonths ?? 12));
+  const warranty = Math.min(...items.map(itemWarranty));
 
   return (
     <div className="shell py-8">
@@ -250,13 +260,29 @@ export default function CartPage() {
                 {item.specs && <p className="mt-1 text-[13px] text-muted">{item.specs}</p>}
                 <p className="mt-2 flex flex-wrap gap-1.5">
                   <span className="rounded-full bg-mint-50 px-2 py-1 text-[11.5px] font-bold text-pine-700">
-                    {warrantyLabel(item.warrantyMonths ?? 12)} de garantía
+                    {warrantyLabel(itemWarranty(item))} de garantía
                   </span>
                   <span className="rounded-full bg-mint-50 px-2 py-1 text-[11.5px] font-bold text-pine-700">Revisado por TERC</span>
                 </p>
+                {item.warrantyUpgrade && (
+                  <label className="mt-2.5 flex cursor-pointer items-start gap-2 rounded-xl border border-line/10 bg-paper px-3 py-2 text-[12.5px] leading-snug text-muted">
+                    <input
+                      type="checkbox"
+                      checked={!!item.warrantyExtended}
+                      onChange={(e) => setWarrantyExtended(item.productId, e.target.checked)}
+                      className="mt-0.5 accent-pine-700"
+                    />
+                    <span>
+                      Por la oferta, este equipo trae {warrantyLabel(item.warrantyMonths ?? 6)} de garantía. Extiéndela a{" "}
+                      <strong className="text-ink">{warrantyLabel(item.warrantyUpgrade.months)}</strong> por{" "}
+                      <strong className="text-ink">{formatCLP(item.warrantyUpgrade.price)}</strong>
+                      {item.quantity > 1 ? " por equipo" : ""} (pago único).
+                    </span>
+                  </label>
+                )}
               </div>
               <div className="col-span-2 flex items-center justify-between gap-3 sm:col-span-1 sm:grid sm:justify-items-end">
-                <b className="font-[family-name:var(--font-display)] text-xl text-ink">{formatCLP(item.price * item.quantity)}</b>
+                <b className="font-[family-name:var(--font-display)] text-xl text-ink">{formatCLP(cartUnitPrice(item) * item.quantity)}</b>
                 <span className="flex items-center gap-3">
                   {item.maxQuantity > 1 && (
                     <input
@@ -367,8 +393,9 @@ export default function CartPage() {
                   <div key={i.productId} className="flex justify-between gap-4">
                     <span>
                       {i.quantity} × {i.name}
+                      {i.warrantyExtended && i.warrantyUpgrade && ` + garantía ${warrantyLabel(i.warrantyUpgrade.months)}`}
                     </span>
-                    <span className="shrink-0">{formatCLP(i.price * i.quantity)}</span>
+                    <span className="shrink-0">{formatCLP(cartUnitPrice(i) * i.quantity)}</span>
                   </div>
                 ))}
               </div>

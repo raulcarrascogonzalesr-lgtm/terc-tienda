@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ADMIN_BROWSER_KEY } from "@/lib/admin-browser";
-import type { CartItem } from "@/lib/types";
+import { cartUnitPrice, type CartItem } from "@/lib/types";
 
 type CartContextValue = {
   items: CartItem[];
@@ -11,6 +11,7 @@ type CartContextValue = {
   add: (item: Omit<CartItem, "quantity">) => void;
   setQuantity: (productId: string, quantity: number) => void;
   remove: (productId: string) => void;
+  setWarrantyExtended: (productId: string, extended: boolean) => void;
   clear: () => void;
   // Falso mientras las compras están cerradas (salvo en el navegador del administrador).
   canBuy: boolean;
@@ -71,12 +72,18 @@ export function CartProvider({
         if (existing) {
           return prev.map((i) =>
             i.productId === item.productId
-              ? { ...i, quantity: Math.min(i.quantity + 1, i.maxQuantity) }
+              ? { ...i, quantity: Math.min(i.quantity + 1, i.maxQuantity), warrantyMonths: item.warrantyMonths, warrantyUpgrade: item.warrantyUpgrade }
               : i,
           );
         }
         return [...prev, { ...item, quantity: 1 }];
       }),
+    [],
+  );
+
+  const setWarrantyExtended = useCallback(
+    (productId: string, extended: boolean) =>
+      setItems((prev) => prev.map((i) => (i.productId === productId ? { ...i, warrantyExtended: extended } : i))),
     [],
   );
 
@@ -92,14 +99,15 @@ export function CartProvider({
     () => ({
       items,
       count: items.reduce((sum, i) => sum + i.quantity, 0),
-      total: items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+      total: items.reduce((sum, i) => sum + cartUnitPrice(i) * i.quantity, 0),
       add,
       setQuantity,
       remove,
+      setWarrantyExtended,
       clear,
       canBuy: storeOpen || adminBrowser,
     }),
-    [items, add, setQuantity, remove, clear, storeOpen, adminBrowser],
+    [items, add, setQuantity, remove, setWarrantyExtended, clear, storeOpen, adminBrowser],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
