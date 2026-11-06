@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { heroPhoto } from "@/lib/hero-cutouts";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { TerquiHero } from "@/components/home/TerquiHero";
@@ -97,8 +98,9 @@ function heroItem(p: Product): HeroItem {
     before: sale?.before ?? off?.before ?? null,
     deal: sale ? "oferta" : off ? "nuevo" : null,
     warranty: p.warranty_months,
-    // La foto original: el recorte del banner sale mejor sin la compresión de las versiones achicadas.
-    img: p.image_url!,
+    // El recorte hecho a mano si existe; si no, la foto original (el recorte del banner sale
+    // mejor sin la compresión de las versiones achicadas).
+    img: heroPhoto(p.slug, p.image_url!),
   };
 }
 

@@ -1,4 +1,5 @@
 import { CUTOUT_CACHE, cutoutBlob } from "@/lib/cutout";
+import { CUTOUT_DIR } from "@/lib/hero-cutouts";
 
 // Fotos sin fondo para el banner. El cálculo corre en un worker (otro hilo), así la animación
 // y la página siguen fluidas; si el navegador no puede, se hace en la página como antes.
@@ -25,6 +26,13 @@ export function cutoutPhotos() {
   return {
     async cut(src: string) {
       const abs = new URL(src, location.href).href;
+      // Foto ya recortada a mano: se usa tal cual (pasarla por el recorte automático le comería bordes).
+      if (new URL(abs).pathname.startsWith(CUTOUT_DIR)) {
+        const img = new Image();
+        img.src = abs;
+        await img.decode();
+        return { url: abs, ar: img.naturalWidth / img.naturalHeight };
+      }
       const { blob, ar } = worker
         ? await new Promise<{ blob: Blob; ar: number }>((resolve, reject) => {
             const id = next++;
