@@ -25,6 +25,9 @@ function withOfferWarranty(product: Product): Product {
   const price = product.warranty_extra_price;
   return {
     ...product,
+    // La descripción guardada dice "12 meses de garantía": mientras dura la oferta dice la de la oferta
+    // (se ve en la ficha, en Google y en Merchant Center).
+    description: product.description?.replace(/\d+ meses de garantía/g, `${reduced} meses de garantía`) ?? product.description,
     warranty_months: reduced,
     warranty_upgrade: price && price > 0 ? { months: product.warranty_months, price } : null,
   };
