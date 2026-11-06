@@ -14,6 +14,14 @@
 --
 -- Ejecutar UNA vez en Supabase > SQL Editor. Si se repite no pasa nada: solo cambia un equipo
 -- si todavía tiene el precio de antes.
+-- EliteBook 840 G7 de 16 GB: el proveedor ya no tiene (lista del 6-11-2026) y seguía a la venta.
+-- Se oculta de la tienda para que nadie pague uno que no se puede comprar.
+-- Para volver a mostrarlo: misma línea con active = true.
+update products
+set active = false
+where slug = 'notebook-hp-elitebook-840-g7-i5-10210u-16-gb-ssd-256-gb'
+returning sku, name, active;
+
 with oferta (slug, antes, ahora) as (
   values
     ('pc-hp-prodesk-600-g4-sff-i5-8500-8-gb-1-tb', 182990, 145990),
@@ -31,13 +39,5 @@ from oferta o
 where p.slug = o.slug and p.price = o.antes
 returning p.sku, p.name, p.compare_price as precio_antes, p.price as precio_oferta, p.offer_ends_at;
 
--- Debe mostrar 5 filas. Si muestra menos, algún equipo ya no tenía el precio de antes:
+-- Abajo deben aparecer 5 filas (Supabase muestra solo el resultado de esta última parte). Si muestra menos, algún equipo ya no tenía el precio de antes:
 -- avísale a Claude antes de cambiar nada a mano.
-
--- EliteBook 840 G7 de 16 GB: el proveedor ya no tiene (lista del 6-11-2026) y seguía a la venta.
--- Se oculta de la tienda para que nadie pague uno que no se puede comprar.
--- Para volver a mostrarlo: misma línea con active = true.
-update products
-set active = false
-where slug = 'notebook-hp-elitebook-840-g7-i5-10210u-16-gb-ssd-256-gb'
-returning sku, name, active;
