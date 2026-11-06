@@ -1,4 +1,5 @@
 import { CONDITION } from "./format";
+import { SHIPPING_ZONES } from "./shipping";
 import { SITE } from "./site";
 import type { Product } from "./types";
 import { warrantyLabel } from "./warranty";
@@ -24,7 +25,32 @@ export function productDescription(product: Product): string {
 
 // Ficha del producto para Google (datos estructurados). Permite que el resultado
 // muestre precio, disponibilidad y "reacondicionado".
-export function productJsonLd(product: Product) {
+// Envío y devoluciones, para que Google los muestre junto al precio.
+// A regiones el costo real lo cotiza el courier al pagar; aquí va la tarifa de referencia.
+function shippingDetails(product: Product, fund: number) {
+  const [min, max] = SITE.deliveryDays[product.on_demand ? "onDemand" : "stock"];
+  const deliveryTime = {
+    "@type": "ShippingDeliveryTime",
+    handlingTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 1, unitCode: "DAY" },
+    transitTime: { "@type": "QuantitativeValue", minValue: min, maxValue: max, unitCode: "DAY" },
+  };
+  const zone = (price: number, region?: string) => ({
+    "@type": "OfferShippingDetails",
+    shippingRate: { "@type": "MonetaryAmount", value: price, currency: "CLP" },
+    shippingDestination: { "@type": "DefinedRegion", addressCountry: "CL", ...(region ? { addressRegion: region } : {}) },
+    deliveryTime,
+  });
+  return [zone(fund > 0 ? 0 : SHIPPING_ZONES.rm.price, "RM"), zone(SHIPPING_ZONES.regiones.price)];
+}
+
+// TERC no acepta devoluciones por arrepentimiento (ver /garantia-y-devoluciones); las fallas las cubre la garantía.
+const RETURN_POLICY = {
+  "@type": "MerchantReturnPolicy",
+  applicableCountry: "CL",
+  returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
+};
+
+export function productJsonLd(product: Product, fund = 0) {
   const url = `${SITE_URL}/producto/${product.slug}`;
   const images = [product.image_url, ...product.images].filter(Boolean);
   return {
@@ -45,6 +71,8 @@ export function productJsonLd(product: Product) {
       availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       ...(product.offer_ends_at ? { priceValidUntil: product.offer_ends_at } : {}),
       seller: { "@type": "Organization", name: "TERC" },
+      shippingDetails: shippingDetails(product, fund),
+      hasMerchantReturnPolicy: RETURN_POLICY,
     },
   };
 }

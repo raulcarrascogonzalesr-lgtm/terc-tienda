@@ -75,7 +75,7 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div className="shell py-6 sm:py-10">
-      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(productJsonLd(product))} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(productJsonLd(product, fund))} />
       <TrackView item={{ id: product.id, name: product.name, price: product.price, quantity: 1, category: product.category }} />
       <nav aria-label="Ruta" className="mb-6 text-sm text-muted">
         <Link href="/" className="hover:text-ink">
