@@ -14,9 +14,10 @@ import { courierLabel, isShippingZone, MIN_REGION_SHIPPING, SHIPPING_ZONES } fro
 import { storeIsOpen } from "@/lib/store-status";
 import { getAdminClient } from "@/lib/supabase";
 import { sanitizeUtm } from "@/lib/utm";
+import { warrantyLabel } from "@/lib/warranty";
 
 type CheckoutBody = {
-  items?: { productId?: unknown; quantity?: unknown }[];
+  items?: { productId?: unknown; quantity?: unknown; extendWarranty?: unknown }[];
   shippingZone?: unknown; // tarifas fijas, cuando Shipit no está disponible
   shipping?: { communeId?: unknown; courier?: unknown }; // envío cotizado con Shipit
   preferredCourier?: unknown; // courier que eligió el cliente cuando el envío va con tarifa fija
@@ -119,6 +120,7 @@ export async function POST(request: Request) {
   const requested = body.items.map((i) => ({
     productId: String(i.productId),
     quantity: Math.floor(Number(i.quantity)),
+    extendWarranty: i.extendWarranty === true,
   }));
   if (requested.some((i) => !Number.isFinite(i.quantity) || i.quantity < 1)) {
     return NextResponse.json({ error: "Cantidad no válida" }, { status: 400 });
@@ -135,7 +137,14 @@ export async function POST(request: Request) {
     if (product.stock < item.quantity) {
       return NextResponse.json({ error: `Sin stock suficiente de ${product.name}` }, { status: 409 });
     }
-    lines.push({ product, quantity: item.quantity });
+    // Extensión de garantía: solo si el equipo la ofrece hoy (equipo en oferta); el precio sale del catálogo.
+    const upgrade = item.extendWarranty ? (product.warranty_upgrade ?? null) : null;
+    lines.push({
+      product,
+      quantity: item.quantity,
+      warrantyMonths: upgrade?.months ?? product.warranty_months,
+      warrantyExtra: upgrade?.price ?? 0,
+    });
   }
 
   // quote: lo que cobra el courier; fund: lo que trajeron los equipos para el envío (envío gratis en la RM).
@@ -183,7 +192,7 @@ export async function POST(request: Request) {
       fund,
     };
   }
-  const subtotal = lines.reduce((sum, l) => sum + l.product.price * l.quantity, 0);
+  const subtotal = lines.reduce((sum, l) => sum + (l.product.price + l.warrantyExtra) * l.quantity, 0);
   const orderId = randomUUID();
 
   const supabase = getAdminClient();
@@ -223,10 +232,12 @@ export async function POST(request: Request) {
       total,
       items: lines.map((l) => ({
         product_id: l.product.id,
-        name: l.product.name,
-        unit_price: l.product.price,
+        name: l.warrantyExtra ? `${l.product.name} + garantía extendida a ${warrantyLabel(l.warrantyMonths)}` : l.product.name,
+        unit_price: l.product.price + l.warrantyExtra,
         unit_cost: costById.get(l.product.id) ?? null,
         quantity: l.quantity,
+        warranty_months: l.warrantyMonths,
+        ...(l.warrantyExtra ? { warranty_extra: l.warrantyExtra } : {}),
       })),
       utm: sanitizeUtm(body.utm),
     });
@@ -285,10 +296,11 @@ export async function POST(request: Request) {
         // Con cupón, la unidad con descuento va en su propia línea, para que la suma sea el total.
         ...lines.flatMap((l) => {
           const discounted = !!coupon?.productId && coupon.productId === l.product.id;
-          const full = { id: l.product.id, title: l.product.name, unit_price: l.product.price, currency_id: "CLP" };
+          const title = l.warrantyExtra ? `${l.product.name} + garantía ${warrantyLabel(l.warrantyMonths)}` : l.product.name;
+          const full = { id: l.product.id, title, unit_price: l.product.price + l.warrantyExtra, currency_id: "CLP" };
           return [
             ...(discounted
-              ? [{ ...full, title: `${l.product.name} (cupón ${coupon!.code})`, quantity: 1, unit_price: coupon!.unitPrice }]
+              ? [{ ...full, title: `${title} (cupón ${coupon!.code})`, quantity: 1, unit_price: coupon!.unitPrice + l.warrantyExtra }]
               : []),
             ...(l.quantity - (discounted ? 1 : 0) > 0 ? [{ ...full, quantity: l.quantity - (discounted ? 1 : 0) }] : []),
           ];

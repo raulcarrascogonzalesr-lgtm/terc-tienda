@@ -110,7 +110,8 @@ function itemsText(order: Order): string {
 }
 
 function warrantyMonths(order: Order, info: Map<string, ItemInfo>): number | null {
-  const months = order.items.map((i) => info.get(i.product_id)?.warranty_months ?? 0).filter((m) => m > 0);
+  // Primero la garantía con la que se vendió (la de una oferta o la extendida); en pedidos antiguos, la del equipo.
+  const months = order.items.map((i) => i.warranty_months ?? info.get(i.product_id)?.warranty_months ?? 0).filter((m) => m > 0);
   return months.length ? Math.min(...months) : null;
 }
 

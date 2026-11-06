@@ -18,6 +18,12 @@ export type Product = {
   on_demand: boolean; // del proveedor: el stock es lo que él informa, no es inversión propia (el cliente no lo ve)
   battery_health: number | null; // porcentaje, si aplica
   warranty_months: number;
+  // Oferta con garantía reducida: mientras dure la oferta el equipo trae `offer_warranty_months`
+  // y el cliente puede volver a la garantía normal pagando `warranty_extra_price` (pago único).
+  offer_warranty_months?: number | null;
+  warranty_extra_price?: number | null;
+  // Lo calcula la tienda (no está en la base): la extensión que se ofrece en el carrito, si hay.
+  warranty_upgrade?: { months: number; price: number } | null;
   description: string;
   image_url: string | null;
   images: string[]; // fotos extra, en el orden en que se muestran
@@ -44,7 +50,15 @@ export type CartItem = {
   onDemand?: boolean; // del proveedor: cambia la fecha estimada de llegada
   savings?: number | null; // cuánto ahorra frente a uno nuevo, por unidad
   warrantyMonths?: number;
+  // Equipos en oferta con garantía reducida: extensión opcional (pago único por unidad).
+  warrantyUpgrade?: { months: number; price: number } | null;
+  warrantyExtended?: boolean; // el cliente marcó la casilla para extenderla
 };
+
+// Lo que se cobra por unidad en el carrito: el equipo más la extensión de garantía, si la eligió.
+export function cartUnitPrice(item: Pick<CartItem, "price" | "warrantyUpgrade" | "warrantyExtended">) {
+  return item.price + (item.warrantyExtended && item.warrantyUpgrade ? item.warrantyUpgrade.price : 0);
+}
 
 // Datos completos que solo ve el panel de administración.
 export type AdminProduct = Product & {
@@ -67,6 +81,8 @@ export type Order = {
     unit_price: number;
     unit_cost?: number | null; // costo al momento de la venta (pedidos nuevos)
     quantity: number;
+    warranty_months?: number; // garantía con la que se vendió (pedidos nuevos)
+    warranty_extra?: number; // lo que pagó por unidad por extender la garantía (ya va en unit_price)
   }[];
   shipping_zone: string;
   shipping_cost: number;

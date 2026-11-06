@@ -119,6 +119,11 @@ export default function WarrantyPage() {
           desde el día en que recibes tu pedido. Cubre las fallas técnicas que el equipo tenga y que no te hayamos
           informado antes de la compra.
         </p>
+        <p className="text-sm">
+          <strong className="text-ink">Equipos en oferta:</strong> algunas ofertas traen 6 meses de garantía, y así se
+          indica en la ficha y en el carrito. Si quieres los 12 meses, puedes extenderla en el carrito con un pago único.
+          La garantía con la que compraste queda escrita en el correo de tu compra.
+        </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-2xl bg-mint-50 border border-pine-700/15 p-5">
             <p className="text-sm font-semibold text-ink">Primeros 6 meses</p>
