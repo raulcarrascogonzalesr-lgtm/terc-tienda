@@ -236,7 +236,7 @@ export default async function ProductPage({ params }: Props) {
                   {warranty}
                 </p>
                 <p className="mt-2 text-[13px] text-white/80">
-                  Si algo falla, lo reparamos, te lo cambiamos o te devolvemos tu plata. Los envíos los pagamos
+                  Si algo falla, lo reparamos gratis o te lo cambiamos por uno equivalente. Los envíos los pagamos
                   nosotros.
                 </p>
               </div>
@@ -296,7 +296,7 @@ export default async function ProductPage({ params }: Props) {
             <Row label="Garantía">
               {warranty} por fallas, desde que lo recibes
               <small>
-                Los primeros 6 meses eliges reparar, cambiar o devolver. Batería y cargador: 6 meses. No hay cambios por
+                Lo reparamos gratis y, si no tiene arreglo, te lo cambiamos por uno equivalente. Batería y cargador: 6 meses. No hay cambios por
                 arrepentimiento: por eso revisamos todo antes de enviarlo y te resolvemos cualquier
                 duda antes de comprar.{" "}
                 <Link href="/garantia-y-devoluciones" className="underline">

@@ -36,7 +36,7 @@ export function services({
       tone: "pine",
       eyebrow: "Garantía TERC",
       title: `${warrantyLabel(warranty)} de garantía`,
-      text: "Si algo falla, lo reparamos, te lo cambiamos o te devolvemos tu plata. El envío lo pagamos nosotros.",
+      text: "Si algo falla, lo reparamos gratis o te lo cambiamos por uno equivalente. El envío lo pagamos nosotros.",
       cta: { label: "Cómo funciona", href: "/garantia-y-devoluciones" },
     },
     {

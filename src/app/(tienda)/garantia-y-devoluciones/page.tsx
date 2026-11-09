@@ -6,7 +6,7 @@ import { SITE, whatsappLink } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Garantía y devoluciones | TERC",
   description:
-    "1 año de garantía en todos los equipos reacondicionados de TERC y soporte por WhatsApp. Qué cubre, cuándo devolvemos el dinero y cómo pedirla.",
+    "1 año de garantía en todos los equipos reacondicionados de TERC y soporte por WhatsApp. Qué cubre, cómo la solucionamos y cómo pedirla.",
 };
 
 // Resumen que se lee de un vistazo, antes del detalle.
@@ -19,7 +19,7 @@ const SUMMARY: { icon: IconName; title: string; text: string }[] = [
   {
     icon: "repair",
     title: "Si falla, lo solucionamos",
-    text: "Reparación gratis, cambio o devolución del dinero. Los envíos los pagamos nosotros.",
+    text: "Lo reparamos gratis y, si no tiene arreglo, te lo cambiamos por uno equivalente. Los envíos los pagamos nosotros.",
   },
   {
     icon: "chat",
@@ -65,7 +65,7 @@ const STEPS = [
   },
   {
     title: "Lo solucionamos",
-    text: "Si la falla está cubierta, lo reparamos gratis, te lo cambiamos o te devolvemos el dinero, según el tramo de la garantía.",
+    text: "Si la falla está cubierta, lo reparamos gratis y, si no tiene arreglo, te lo cambiamos por uno igual o equivalente.",
   },
 ];
 
@@ -83,8 +83,8 @@ export default function WarrantyPage() {
           en cada equipo, y soporte por WhatsApp.
         </p>
         <p className="mt-3 max-w-xl text-white/80">
-          Queremos que compres tranquilo. Aquí te explicamos, en simple, qué cubre la garantía de tu equipo y cuándo
-          devolvemos el dinero. Léela antes de comprar: al pagar, aceptas estas condiciones.
+          Queremos que compres tranquilo. Aquí te explicamos, en simple, qué cubre la garantía de tu equipo y cómo
+          la solucionamos. Léela antes de comprar: al pagar, aceptas estas condiciones.
         </p>
       </div>
 
@@ -126,20 +126,24 @@ export default function WarrantyPage() {
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-2xl bg-mint-50 border border-pine-700/15 p-5">
-            <p className="text-sm font-semibold text-ink">Primeros 6 meses</p>
+            <p className="text-sm font-semibold text-ink">Primero, lo reparamos</p>
             <p className="mt-1 text-sm">
-              Si la falla está cubierta, <strong className="text-ink">tú eliges</strong>: reparar el equipo sin costo,
-              cambiarlo por otro igual o equivalente, o que te devolvamos el dinero que pagaste por él.
+              Si la falla está cubierta, <strong className="text-ink">reparamos tu equipo sin costo</strong>: el
+              diagnóstico, los repuestos y la mano de obra van por nuestra cuenta.
             </p>
           </div>
           <div className="rounded-2xl bg-mint-50 border border-pine-700/15 p-5">
-            <p className="text-sm font-semibold text-ink">Del mes 7 al mes 12</p>
+            <p className="text-sm font-semibold text-ink">Si no tiene arreglo, te lo cambiamos</p>
             <p className="mt-1 text-sm">
-              Reparamos el equipo sin costo. Si no se puede reparar, te lo cambiamos por uno igual o mejor. Y si tampoco
-              tenemos uno para cambiarlo, te devolvemos el dinero.
+              Si la falla no se puede reparar, te lo cambiamos por{" "}
+              <strong className="text-ink">uno igual o equivalente</strong>: del mismo nivel o mejor, nunca peor.
             </p>
           </div>
         </div>
+        <p className="text-sm">
+          Después de revisar el equipo te contamos qué solución corresponde. La garantía TERC no incluye la devolución
+          del dinero, salvo el caso excepcional que explicamos en el punto 7.
+        </p>
         <p>
           <strong className="text-ink">Batería y cargador.</strong> Tienen 6 meses de garantía, porque se gastan con el
           uso, igual que los neumáticos de un auto. Si en esos 6 meses la batería deja de cargar o dura mucho menos de
@@ -164,7 +168,7 @@ export default function WarrantyPage() {
           </div>
         </div>
         <p>
-          En los dos tramos, los envíos de ida y vuelta de la garantía los paga TERC, desde cualquier parte de Chile.
+          Los envíos de ida y vuelta de la garantía los paga TERC, desde cualquier parte de Chile.
         </p>
       </section>
 
@@ -260,10 +264,11 @@ export default function WarrantyPage() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-lg font-semibold text-ink">7. Cómo devolvemos el dinero</h2>
+        <h2 className="text-lg font-semibold text-ink">7. Si no podemos repararlo ni cambiarlo</h2>
         <p>
-          Cuando corresponde devolver el dinero, lo hacemos por el mismo medio con que pagaste (Mercado Pago o
-          Webpay) y emitimos la nota de crédito de tu boleta o factura. El tiempo en que lo ves reflejado depende de
+          Es un caso excepcional: solo si la falla está cubierta, no tiene arreglo y no tenemos un equipo igual o
+          equivalente para cambiarlo, te devolvemos el dinero que pagaste por él. Lo hacemos por el mismo medio con
+          que pagaste (Mercado Pago o Webpay) y emitimos la nota de crédito de tu boleta o factura. El tiempo en que lo ves reflejado depende de
           tu banco o de Mercado Pago.
         </p>
       </section>

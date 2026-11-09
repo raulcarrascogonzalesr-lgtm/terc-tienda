@@ -254,7 +254,7 @@ export function TerquiHero({
             <div className="hx-chips">
               <span className="hx-chip" data-in="1.5">
                 <Icon d={I.shield} />
-                Reparación, cambio o devolución
+                Reparación o cambio
               </span>
               <span className="hx-chip" data-in="1.65">
                 <Icon d={I.truck} />
