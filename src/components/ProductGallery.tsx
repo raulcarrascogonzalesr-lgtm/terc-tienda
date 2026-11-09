@@ -39,7 +39,7 @@ function TrustSlide({ product }: { product: Product }) {
           )}
         </p>
         <p className="mt-2 max-w-xs text-xs text-white/75 sm:text-sm">
-          Si algo falla, lo reparamos, te lo cambiamos o te devolvemos tu plata. Y el envío lo pagamos nosotros.
+          Si algo falla, lo reparamos gratis o te lo cambiamos por uno equivalente. Y el envío lo pagamos nosotros.
         </p>
       </div>
       <ul className="relative space-y-1.5 sm:space-y-2.5">

@@ -14,7 +14,7 @@ const PILLARS: { icon: IconName; title: string; text: string }[] = [
   {
     icon: "shield",
     title: "1 año de garantía",
-    text: "Reparación, cambio o devolución. El envío corre por nuestra cuenta.",
+    text: "Lo reparamos gratis o te lo cambiamos por uno equivalente. El envío corre por nuestra cuenta.",
   },
   {
     icon: "chat",
@@ -90,7 +90,7 @@ export function PeaceOfMind({ warranty, whatsapp }: { warranty: number; whatsapp
             de garantía en cada equipo.
           </p>
           <p className="mt-3 max-w-md text-base text-white/80 sm:text-lg">
-            Si algo falla, lo reparamos, te lo cambiamos o te devolvemos tu plata. Y el envío lo pagamos nosotros.
+            Si algo falla, lo reparamos gratis o te lo cambiamos por uno equivalente. Y el envío lo pagamos nosotros.
           </p>
           <Link
             href="/garantia-y-devoluciones"
@@ -101,8 +101,8 @@ export function PeaceOfMind({ warranty, whatsapp }: { warranty: number; whatsapp
         </div>
         <ul className="relative grid gap-2.5">
           {[
-            ["Primeros 6 meses", "tú eliges: reparar, cambiar o devolver tu plata."],
-            ["Del mes 7 al 12", "lo reparamos gratis, y si no se puede, te lo cambiamos."],
+            ["Primero, reparamos", "tu equipo gratis, con repuestos de calidad."],
+            ["Si no tiene arreglo", "te lo cambiamos por uno igual o equivalente."],
             ["Envíos gratis", "de ida y vuelta, desde cualquier parte de Chile."],
             ["Desde que lo recibes", "cuenta tu año completo."],
           ].map(([title, text]) => (

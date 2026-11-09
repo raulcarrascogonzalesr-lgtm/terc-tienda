@@ -53,7 +53,7 @@ type Sort = keyof typeof SORTS;
 
 // El título de la garantía se completa con los meses del catálogo (ver warrantyLabel).
 const BENEFITS: { icon: IconName; title: string; text: string }[] = [
-  { icon: "shield", title: "de garantía", text: "Reparación, cambio o devolución" },
+  { icon: "shield", title: "de garantía", text: "Reparación o cambio" },
   { icon: "chat", title: "Soporte por WhatsApp", text: "Personas reales, antes y después" },
   { icon: "truck", title: "Envíos a todo Chile", text: "Despacho seguro a tu casa" },
   { icon: "card", title: "Paga en cuotas", text: "Tarjeta o débito con Mercado Pago" },
