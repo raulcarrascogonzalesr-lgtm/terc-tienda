@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { formatCLP, shortDate, todayInChile } from "@/lib/format";
 import { listAllProducts, listExtraCosts } from "../data";
-import type { ExtraCost } from "@/lib/types";
+import type { ExtraCost, Product } from "@/lib/types";
+import { photoProps } from "@/lib/photo";
+import { productKind, type ProductKind } from "@/lib/specs";
 import { extraCostFor } from "../extra-costs";
 import { netOf } from "../finance";
 import { ICONS } from "../icons";
@@ -17,6 +19,43 @@ function marginOf(price: number, cost: number | null, category: string, extraCos
   const net = netOf(price);
   const value = net - cost - extraCostFor(price, category, extraCosts);
   return { value, percent: net ? Math.round((value / net) * 100) : 0 };
+}
+
+// Foto de ejemplo para los productos que todavía no tienen foto propia, según el tipo de equipo.
+const REFERENCE_PHOTO: Record<ProductKind, string> = {
+  notebook: "/ejemplo/lat.webp",
+  aio: "/ejemplo/aio.webp",
+  desktop: "/ejemplo/ed800.webp",
+  mini: "/ejemplo/opti.webp",
+};
+
+// Miniatura para reconocer cada producto en la lista: su foto de la tienda o, si no tiene, una de ejemplo.
+function Thumbnail({ product }: { product: Product }) {
+  const own = product.image_url ?? product.images[0] ?? null;
+  const src = own ?? REFERENCE_PHOTO[productKind(product)];
+  return (
+    <Link
+      href={`/admin/productos/${product.id}`}
+      className="relative block h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-[#e4e2dc] bg-[#f6f5f1]"
+      title={own ? product.name : "Sin foto propia: imagen de ejemplo"}
+      tabIndex={-1}
+      aria-hidden
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        {...photoProps(src, "56px", 256)}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        className={`h-full w-full object-contain p-0.5 mix-blend-multiply ${own ? "" : "opacity-50 grayscale"}`}
+      />
+      {!own && (
+        <span className="absolute inset-x-0 bottom-0 bg-white/85 text-center text-[9px] leading-3 text-[#6b716f]">
+          ejemplo
+        </span>
+      )}
+    </Link>
+  );
 }
 
 // Para buscar sin importar mayúsculas, tildes ni guiones.
@@ -109,10 +148,15 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
                   className="border-b border-[#efede8] last:border-0 hover:bg-[#fafaf8]"
                 >
                   <td className="p-3">
-                    <Link href={`/admin/productos/${p.id}`} className="text-[#288868] underline">
-                      {p.name}
-                    </Link>
-                    <span className="block font-mono text-xs text-[#6b716f]">{p.sku}</span>
+                    <div className="flex items-center gap-3 min-w-[16rem]">
+                      <Thumbnail product={p} />
+                      <div>
+                        <Link href={`/admin/productos/${p.id}`} className="text-[#288868] underline">
+                          {p.name}
+                        </Link>
+                        <span className="block font-mono text-xs text-[#6b716f]">{p.sku}</span>
+                      </div>
+                    </div>
                   </td>
                   <td className="p-3">{p.grade}</td>
                   <td className="p-3 text-right whitespace-nowrap">
