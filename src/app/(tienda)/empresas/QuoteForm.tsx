@@ -19,7 +19,7 @@ export function QuoteForm({ kind }: { kind: QuoteKind }) {
         <Terqui pose="corazon" className="w-36 h-36" />
         <h3 className="text-xl font-bold text-ink">¡Recibimos tu solicitud!</h3>
         <p className="max-w-sm text-sm text-muted">
-          Te contactamos dentro de un día hábil para ver los detalles y enviarte una cotización.
+          Te respondemos el mismo día hábil para ver los detalles y enviarte tu cotización.
         </p>
       </div>
     );

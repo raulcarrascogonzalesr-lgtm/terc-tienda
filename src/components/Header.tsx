@@ -165,9 +165,9 @@ export function Header({
                 </Link>
                 <Link
                   href="/empresas"
-                  className="shrink-0 rounded-full px-3 py-1.5 font-medium text-pine-700 hover:bg-surface"
+                  className="shrink-0 rounded-full bg-pine px-3.5 py-1.5 font-semibold text-white hover:bg-cta"
                 >
-                  Empresas y cotizaciones
+                  Empresas: precio por volumen
                 </Link>
               </div>
             </nav>
