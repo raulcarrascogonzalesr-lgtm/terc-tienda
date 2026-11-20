@@ -285,6 +285,26 @@ export default async function HomePage({ searchParams }: Props) {
               ))}
             </div>
           </section>
+          {/* Franja para empresas: compras por volumen con cotización. */}
+          <section className="shell pt-4">
+            <Link
+              href="/empresas"
+              className="rise group relative flex flex-col gap-3 overflow-hidden rounded-3xl bg-pine p-5 text-white transition hover:brightness-110 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+              style={delay(180)}
+            >
+              <Mark className="absolute -right-6 -top-6 w-32 opacity-[0.07]" ink="#ffffff" />
+              <div className="relative">
+                <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.16em] text-mint">TERC para empresas</p>
+                <p className="mt-1 text-lg sm:text-2xl font-bold tracking-tight">¿Necesitas varios equipos para tu oficina?</p>
+                <p className="mt-1 text-sm text-white/80">
+                  Precio especial por volumen, factura y entrega gratis en la Región Metropolitana desde 3 equipos.
+                </p>
+              </div>
+              <span className="relative inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-gold px-5 py-2.5 text-sm font-bold text-pine sm:self-auto">
+                Pedir cotización <StoreIcon name="arrow" className="w-4 h-4 transition group-hover:translate-x-1" />
+              </span>
+            </Link>
+          </section>
         </>
       )}
 

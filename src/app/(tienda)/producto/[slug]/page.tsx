@@ -224,6 +224,15 @@ export default async function ProductPage({ params }: Props) {
                 </span>
               </p>
             )}
+            <p className="flex items-center justify-center gap-2 text-sm text-ink">
+              <StoreIcon name="tag" className="h-4 w-4 text-pine-700" />
+              <span>
+                ¿Necesitas 3 o más?{" "}
+                <Link href="/empresas#cotizar" className="font-bold text-pine-700 hover:underline">
+                  Cotiza precio por volumen
+                </Link>
+              </span>
+            </p>
           </div>
 
           {/* Lo que va con el equipo: la garantía y el soporte, en grande. */}
