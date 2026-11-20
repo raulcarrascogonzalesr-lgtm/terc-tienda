@@ -12,7 +12,7 @@ export const SITE = {
   // Días hábiles aproximados desde la compra hasta que llega a la Región Metropolitana, para la
   // fecha estimada de la ficha, el carrito y la página de gracias: [mínimo, máximo].
   // "onDemand" son los del proveedor (se piden después de la compra); "stock", los que ya tenemos.
-  deliveryDays: { stock: [2, 4], onDemand: [4, 7] } as Record<"stock" | "onDemand", [number, number]>,
+  deliveryDays: { stock: [1, 2], onDemand: [1, 2] } as Record<"stock" | "onDemand", [number, number]>,
   // Garantía de todos los equipos (31-10-2026: 1 año). Cada equipo guarda la suya en warranty_months;
   // esta es la que se anuncia en la tienda (barra de arriba, pie de página).
   warrantyMonths: 12,

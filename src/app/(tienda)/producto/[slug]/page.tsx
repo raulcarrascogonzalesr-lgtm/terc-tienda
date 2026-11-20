@@ -201,10 +201,11 @@ export default async function ProductPage({ params }: Props) {
             <div className="flex items-start gap-3">
               <StoreIcon name="clock" className="mt-0.5 h-6 w-6 text-pine-700" />
               <div>
-                <p className="text-sm font-bold text-pine-700">Llega aprox. {deliveryText(product.on_demand)}</p>
+                <p className="text-sm font-bold text-pine-700">
+                  Región Metropolitana: llega en 1 a 2 días hábiles
+                </p>
                 <p className="text-[13px] text-muted">
-                  Fecha estimada para la Región Metropolitana; a regiones puede tardar 1 o 2 días más. Te enviamos el
-                  seguimiento por correo.
+                  Aprox. {deliveryText(product.on_demand)}. Te enviamos el seguimiento por correo.
                 </p>
               </div>
             </div>

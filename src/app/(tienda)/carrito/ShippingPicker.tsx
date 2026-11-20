@@ -34,6 +34,15 @@ function daysLabel(days: number | null) {
   return days === 1 ? "Llega en 1 día hábil" : `Llega en ${days} días hábiles`;
 }
 
+// Aviso de plazo a regiones: solo aparece al pagar, cuando la persona elige una región fuera de la RM.
+function RegionNote() {
+  return (
+    <p className="rounded-lg bg-mint-50 px-3 py-2 text-xs text-ink/80">
+      A regiones el courier suele tardar un poco más que en Santiago.
+    </p>
+  );
+}
+
 export function ShippingPicker({
   items,
   onChange,
@@ -172,6 +181,7 @@ export function ShippingPicker({
             ))}
           </select>
         </label>
+        {zone !== "rm" && <RegionNote />}
         <label className="block text-sm">
           Región
           <input value={fixedRegion} onChange={(e) => setFixedRegion(e.target.value)} required className={field} />
@@ -231,6 +241,7 @@ export function ShippingPicker({
           </select>
         </label>
       </div>
+      {region && !region.startsWith("Metropolitana") && <RegionNote />}
 
       {communeId && (
         <fieldset className="space-y-2">
