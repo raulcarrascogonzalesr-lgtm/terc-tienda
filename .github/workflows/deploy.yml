@@ -96,12 +96,24 @@ jobs:
         continue-on-error: true
         run: bash .github/scripts/revisar-tienda.sh "${{ vars.NEXT_PUBLIC_SITE_URL || 'https://terc.cl' }}"
 
+      # A veces la tienda responde bien justo después de reiniciar y al minuto empieza a dar
+      # error 500 en todas las páginas que se arman al momento (pasó el 20-11-2026 con #85:
+      # la portada, /empresas y las fichas, hasta el siguiente reinicio). Por eso se vuelve a
+      # revisar un rato después y, si falla, se reinicia otra vez.
+      - name: Revisar de nuevo un rato después
+        id: revisar2
+        if: ${{ steps.revisar.outcome == 'success' }}
+        continue-on-error: true
+        run: |
+          sleep 75
+          bash .github/scripts/revisar-tienda.sh "${{ vars.NEXT_PUBLIC_SITE_URL || 'https://terc.cl' }}"
+
       - name: Preparar otro reinicio
-        if: ${{ steps.revisar.outcome == 'failure' }}
+        if: ${{ steps.revisar.outcome == 'failure' || steps.revisar2.outcome == 'failure' }}
         run: date > .next/reinicio/tmp/restart.txt
 
       - name: Reiniciar la tienda otra vez
-        if: ${{ steps.revisar.outcome == 'failure' }}
+        if: ${{ steps.revisar.outcome == 'failure' || steps.revisar2.outcome == 'failure' }}
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ env.FTPS_HOST }}
@@ -113,5 +125,5 @@ jobs:
           state-name: .ftp-deploy-reinicio.json
 
       - name: Revisar otra vez
-        if: ${{ steps.revisar.outcome == 'failure' }}
+        if: ${{ steps.revisar.outcome == 'failure' || steps.revisar2.outcome == 'failure' }}
         run: bash .github/scripts/revisar-tienda.sh "${{ vars.NEXT_PUBLIC_SITE_URL || 'https://terc.cl' }}"
