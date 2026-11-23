@@ -7,15 +7,19 @@ import type { Product } from "./types";
 
 // Columnas públicas. El costo del proveedor nunca se envía al navegador.
 const PRODUCT_COLUMNS =
-  "id, sku, slug, name, brand, category, grade, price, list_price, compare_price, offer_ends_at, offer_name, offer_warranty_months, warranty_extra_price, stock, on_demand, battery_health, warranty_months, description, image_url, images, ship_weight_kg, ship_length_cm, ship_width_cm, ship_height_cm";
+  "id, sku, slug, name, brand, category, grade, price, list_price, compare_price, offer_ends_at, offer_name, offer_warranty_months, warranty_extra_price, stock, on_demand, battery_health, warranty_months, description, tech_sheet, image_url, images, ship_weight_kg, ship_length_cm, ship_width_cm, ship_height_cm";
 
-// Antes de correr oferta-4-dias-terqui-2026-11.sql estas dos columnas no existen: la tienda sigue sin ellas.
-const BASE_COLUMNS = PRODUCT_COLUMNS.replace(" offer_warranty_months, warranty_extra_price,", "");
+// Antes de correr ficha-tecnica.sql la columna tech_sheet no existe; antes de oferta-4-dias-terqui-2026-11.sql
+// tampoco existen las dos de la oferta con garantía reducida. La tienda sigue sin ellas.
+const NO_SHEET_COLUMNS = PRODUCT_COLUMNS.replace(" tech_sheet,", "");
+const BASE_COLUMNS = NO_SHEET_COLUMNS.replace(" offer_warranty_months, warranty_extra_price,", "");
 
 type Query = (columns: string) => PromiseLike<{ data: unknown; error: { code?: string } | null }>;
 async function selectProducts(query: Query) {
   const first = await query(PRODUCT_COLUMNS);
-  return first.error?.code === "42703" ? query(BASE_COLUMNS) : first; // 42703 = columna no existe
+  if (first.error?.code !== "42703") return first; // 42703 = columna no existe
+  const second = await query(NO_SHEET_COLUMNS);
+  return second.error?.code === "42703" ? query(BASE_COLUMNS) : second;
 }
 
 // Oferta con garantía reducida: mientras dura, el equipo trae menos meses y en el carrito se
