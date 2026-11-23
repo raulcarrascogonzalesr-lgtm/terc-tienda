@@ -2,7 +2,7 @@ import Link from "next/link";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
 import { Terqui } from "@/components/Terqui";
-import { ENERGY_STEPS, energyCategory, WIRESUN_URL } from "@/lib/energy";
+import { ENERGY_CATEGORIES, ENERGY_STEPS, energyCategory, energyHref, WIRESUN_URL } from "@/lib/energy";
 import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { whatsappLink } from "@/lib/site";
@@ -160,6 +160,34 @@ export function bannerProducts(energy: Product[], max = 4): Product[] {
   return picked.slice(0, max);
 }
 
+// Mientras no hay productos de Energía: las categorías que vienen, como "Muy pronto".
+export function SoonCategories({ dark = false, className = "" }: { dark?: boolean; className?: string }) {
+  return (
+    <ul className={`grid grid-cols-2 gap-3 sm:grid-cols-3 ${className}`}>
+      {ENERGY_CATEGORIES.map((c) => (
+        <li key={c.name}>
+          <Link
+            href={energyHref(c)}
+            className={`flex h-full flex-col gap-2 rounded-2xl p-3 transition hover:-translate-y-0.5 sm:p-4 ${
+              dark ? "bg-white/[0.06] ring-1 ring-white/10 hover:bg-white/10" : "bg-surface ring-1 ring-line/[0.06] hover:shadow-lg hover:shadow-pine/10"
+            }`}
+          >
+            <span className={`flex h-9 w-9 items-center justify-center rounded-full sm:h-10 sm:w-10 ${dark ? "bg-white/10 text-gold" : "bg-mint-50 text-pine-700"}`}>
+              <StoreIcon name={c.icon} className="h-5 w-5" />
+            </span>
+            <b className={`text-[14px] leading-tight ${dark ? "text-white" : "text-ink"}`}>{c.name}</b>
+            {/* En el celular la descripción se omite para que el banner no quede tan largo. */}
+            <span className={`hidden text-[12px] leading-snug sm:block ${dark ? "text-white/70" : "text-muted"}`}>{c.blurb}</span>
+            <span className="mt-auto inline-flex w-fit rounded-full bg-gold px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-pine">
+              Muy pronto
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 // Banner de Energía entre las filas de equipos de la portada.
 export function EnergyBanner({ products, className = "", style }: { products: Product[]; className?: string; style?: React.CSSProperties }) {
   return (
@@ -171,7 +199,7 @@ export function EnergyBanner({ products, className = "", style }: { products: Pr
       <StoreIcon name="bolt" className="pointer-events-none absolute -bottom-10 -left-8 h-52 w-52 text-white/[0.04]" />
       <div className="relative">
         <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-gold">
-          <StoreIcon name="bolt" className="h-4 w-4" /> Nuevo en TERC · Energía
+          <StoreIcon name="bolt" className="h-4 w-4" /> {products.length ? "Nuevo en TERC · Energía" : "Muy pronto en TERC · Energía"}
         </p>
         <h2 id="energia-banner" className="mt-2 font-[family-name:var(--font-display)] text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-4xl">
           Que un corte de luz no te pare la pega
@@ -200,11 +228,15 @@ export function EnergyBanner({ products, className = "", style }: { products: Pr
           </a>
         </p>
       </div>
-      <div className="relative grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-        {products.map((p) => (
-          <MiniProduct key={p.id} product={p} />
-        ))}
-      </div>
+      {products.length > 0 ? (
+        <div className="relative grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+          {products.map((p) => (
+            <MiniProduct key={p.id} product={p} />
+          ))}
+        </div>
+      ) : (
+        <SoonCategories dark className="relative" />
+      )}
     </section>
   );
 }

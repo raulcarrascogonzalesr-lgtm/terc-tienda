@@ -6,7 +6,7 @@ import { PreparingBanner } from "@/components/PreparingBanner";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { UtmCapture } from "@/components/UtmCapture";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
-import { energyCategoriesIn, splitWorlds } from "@/lib/energy";
+import { energyMenu, splitWorlds } from "@/lib/energy";
 import { offer } from "@/lib/format";
 import { listProducts } from "@/lib/products";
 import { getShippingFund } from "@/lib/shipping-fund";
@@ -20,11 +20,11 @@ export const revalidate = 60;
 
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
   const [products, open, fund] = await Promise.all([listProducts(), storeIsOpen(), getShippingFund()]);
-  // Dos mundos (TERC 2.1): equipos reacondicionados y Energía. El menú de Energía aparece solo
-  // cuando hay al menos un producto de Energía a la venta.
+  // Dos mundos (TERC 2.1): equipos reacondicionados y Energía. El menú de Energía se ve siempre;
+  // mientras no haya productos muestra todas sus categorías ("Muy pronto").
   const { pcs, energy } = splitWorlds(products);
   const categories = [...new Set(pcs.map((p) => p.category))].sort();
-  const energyCategories = energyCategoriesIn(energy).map(({ name, short }) => ({ name, short }));
+  const energyCategories = energyMenu(energy).map(({ name, short }) => ({ name, short }));
   const offers = pcs.filter((p) => offer(p));
   // "Solo por tiempo limitado" se dice únicamente de las ofertas que tienen fecha de término.
   const limited = offers.filter((p) => p.offer_ends_at);

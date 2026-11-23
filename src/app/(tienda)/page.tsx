@@ -178,8 +178,10 @@ export default async function HomePage({ searchParams }: Props) {
     rank,
   );
   const filtering = Boolean(query || categoria || onlyOffers);
-  // Banner de Energía entre las filas de equipos (solo en la portada y si hay productos con foto).
-  const energyPicks = filtering ? [] : bannerProducts(energy);
+  // Banner de Energía entre las filas de equipos (solo en la portada). Sin productos con foto,
+  // muestra las categorías como "Muy pronto".
+  const energyPicks = bannerProducts(energy);
+  const showEnergy = !filtering;
   const categories = [...new Set(all.map((p) => p.category))].sort();
 
   const offers = all.filter((p) => offer(p)).sort((a, b) => bestDiscount(b) - bestDiscount(a));
@@ -458,7 +460,7 @@ export default async function HomePage({ searchParams }: Props) {
             const cells = withServices(filtered, q ? [] : serviceCards);
             // Con suficientes equipos, el banner va en la tercera fila de la grilla: dos filas de equipos
             // arriba y el resto abajo, con cualquier número de columnas. Si son pocos, va después.
-            const inGrid = energyPicks.length > 0 && cells.length >= 10;
+            const inGrid = showEnergy && cells.length >= 10;
             return (
               <>
                 <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
@@ -477,7 +479,7 @@ export default async function HomePage({ searchParams }: Props) {
                     ),
                   ])}
                 </div>
-                {energyPicks.length > 0 && !inGrid && <EnergyBanner products={energyPicks} className="mt-8" />}
+                {showEnergy && !inGrid && <EnergyBanner products={energyPicks} className="mt-8" />}
               </>
             );
           })()
