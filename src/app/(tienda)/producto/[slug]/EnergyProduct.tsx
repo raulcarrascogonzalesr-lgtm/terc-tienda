@@ -119,6 +119,8 @@ export function EnergyProduct({ product }: { product: Product }) {
                 </span>
               </p>
             )}
+            {/* Raúl (23-11): no mostrar cuántas unidades quedan; solo este aviso, chico y tenue. */}
+            <p className="text-right text-[11px] text-muted/60">Stock no actualizado en tiempo real</p>
           </div>
 
           <div className="space-y-3">
@@ -149,7 +151,6 @@ export function EnergyProduct({ product }: { product: Product }) {
               TERC, de {SITE.company}
               <small>Empresa chilena. Boleta o factura en cada compra.</small>
             </Row>
-            <Row label="Disponibles">{product.stock}</Row>
           </dl>
 
           {product.description && (
