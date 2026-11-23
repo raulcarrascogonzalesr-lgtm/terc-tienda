@@ -216,7 +216,7 @@ export function TerquiHero({
           {/* Textos: cada escena tiene su bloque; los de los equipos se llenan con sus datos */}
           <div className="hx-txt" data-block="intro">
             <span className="hx-eyebrow" data-in="0.35">
-              Tecnología y equipos reacondicionados
+              Tecnología reacondicionada · Chile
             </span>
             <h2 className="hx-title">
               <span data-in="0.5" data-fx="word">
