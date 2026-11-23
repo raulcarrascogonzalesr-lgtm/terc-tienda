@@ -229,6 +229,13 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
       </Field>
 
       <Field
+        label="Ficha técnica"
+        hint='Una línea por dato, así: "Capacidad: 16 kWh". Para un título de grupo, empieza la línea con "## ". Se ve en la tienda en un apartado que se abre, sin salir de la página.'
+      >
+        <textarea name="tech_sheet" rows={8} defaultValue={product?.tech_sheet ?? ""} className="input font-mono text-xs" />
+      </Field>
+
+      <Field
         label="Foto"
         hint={
           product?.image_url ? "Sube una nueva solo si quieres cambiarla" : "JPG o PNG, hasta 5 MB"

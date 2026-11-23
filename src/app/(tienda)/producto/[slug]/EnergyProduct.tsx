@@ -3,6 +3,7 @@ import { AddToCartButton, BuyNowButton } from "@/components/AddToCartButton";
 import { EnergySteps } from "@/components/energy/EnergyParts";
 import { StoreIcon, WhatsAppIcon } from "@/components/icons";
 import { ProductGallery } from "@/components/ProductGallery";
+import { TechSheet } from "@/components/TechSheet";
 import { Terqui } from "@/components/Terqui";
 import { TrackView } from "@/components/TrackView";
 import { ENERGY_INFO, energyCategory, energyHref, WIRESUN_URL } from "@/lib/energy";
@@ -159,6 +160,8 @@ export function EnergyProduct({ product }: { product: Product }) {
               <p className="whitespace-pre-line leading-relaxed text-muted">{product.description}</p>
             </div>
           )}
+
+          <TechSheet text={product.tech_sheet} />
 
           <div className="grid grid-cols-[72px_minmax(0,1fr)] items-center gap-3 rounded-3xl bg-mint-50 p-4">
             <Terqui pose="lupa" className="h-[72px] w-[72px]" />
