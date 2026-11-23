@@ -15,7 +15,7 @@ export function Footer({ categories }: { categories: string[] }) {
         <div className="space-y-4 lg:col-span-2">
           <Logo variant="light" className="h-16 w-auto" />
           <p className="max-w-sm text-sm leading-relaxed">
-            Tecnología reacondicionada, revisada uno por uno, con {warrantyLabel(SITE.warrantyMonths)} de garantía y
+            Tecnología y Equipos Reacondicionados Chile: revisados uno por uno, con {warrantyLabel(SITE.warrantyMonths)} de garantía y
             soporte por WhatsApp después de la compra. {SITE.slogan}.
           </p>
           <p className="flex items-start gap-2 text-xs text-white/60">

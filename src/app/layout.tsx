@@ -16,7 +16,7 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   // Para que la imagen al compartir (opengraph-image.png) use la dirección real de la tienda.
   metadataBase: new URL(SITE_URL),
-  title: "TERC | Computadores reacondicionados con garantía en Chile",
+  title: "TERC | Tecnología y computadores reacondicionados con garantía",
   description: DEFAULT_DESCRIPTION,
   openGraph: { siteName: "TERC", locale: "es_CL", type: "website" },
   other: { "facebook-domain-verification": SITE.metaDomainVerification },
