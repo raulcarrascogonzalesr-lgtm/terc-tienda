@@ -53,6 +53,8 @@ export type CartItem = {
   // Equipos en oferta con garantía reducida: extensión opcional (pago único por unidad).
   warrantyUpgrade?: { months: number; price: number } | null;
   warrantyExtended?: boolean; // el cliente marcó la casilla para extenderla
+  // Producto de Energía (TERC 2.1): no se paga en la página, va como solicitud y se paga por transferencia.
+  energy?: boolean;
 };
 
 // Lo que se cobra por unidad en el carrito: el equipo más la extensión de garantía, si la eligió.
@@ -83,6 +85,7 @@ export type Order = {
     quantity: number;
     warranty_months?: number; // garantía con la que se vendió (pedidos nuevos)
     warranty_extra?: number; // lo que pagó por unidad por extender la garantía (ya va en unit_price)
+    energy?: boolean; // producto de Energía (nuevo, garantía de fábrica)
   }[];
   shipping_zone: string;
   shipping_cost: number;

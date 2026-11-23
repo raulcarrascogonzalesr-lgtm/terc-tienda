@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { energyHref } from "@/lib/energy";
 import { SITE, whatsappLink } from "@/lib/site";
 import { warrantyLabel } from "@/lib/warranty";
 import { StoreIcon, WhatsAppIcon } from "./icons";
@@ -6,7 +7,13 @@ import { Logo } from "./Logo";
 import { ThemeSwitch } from "./ThemeToggle";
 import { TrustStrip } from "./TrustBadges";
 
-export function Footer({ categories }: { categories: string[] }) {
+export function Footer({
+  categories,
+  energyCategories = [],
+}: {
+  categories: string[];
+  energyCategories?: { name: string; short: string }[];
+}) {
   const whatsapp = whatsappLink("Hola, tengo una consulta sobre TERC");
   return (
     <footer className="bg-pine text-white/75">
@@ -25,18 +32,43 @@ export function Footer({ categories }: { categories: string[] }) {
             </span>
           </p>
         </div>
-        {categories.length > 0 && (
+        {(categories.length > 0 || energyCategories.length > 0) && (
           <div>
-            <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Equipos</h2>
-            <ul className="mt-4 space-y-2 text-sm">
-              {categories.map((c) => (
-                <li key={c}>
-                  <Link href={`/?categoria=${encodeURIComponent(c)}#equipos`} className="hover:text-white">
-                    {c}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {categories.length > 0 && (
+              <>
+                <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-gold">Equipos</h2>
+                <ul className="mt-4 space-y-2 text-sm">
+                  {categories.map((c) => (
+                    <li key={c}>
+                      <Link href={`/?categoria=${encodeURIComponent(c)}#equipos`} className="hover:text-white">
+                        {c}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+            {energyCategories.length > 0 && (
+              <>
+                <h2 className={`text-xs font-semibold uppercase tracking-[0.18em] text-gold ${categories.length ? "mt-8" : ""}`}>
+                  Energía
+                </h2>
+                <ul className="mt-4 space-y-2 text-sm">
+                  {energyCategories.map((c) => (
+                    <li key={c.name}>
+                      <Link href={energyHref(c)} className="hover:text-white">
+                        {c.name}
+                      </Link>
+                    </li>
+                  ))}
+                  <li>
+                    <Link href="/energia#como-comprar" className="hover:text-white">
+                      Cómo comprar Energía
+                    </Link>
+                  </li>
+                </ul>
+              </>
+            )}
           </div>
         )}
         <div>

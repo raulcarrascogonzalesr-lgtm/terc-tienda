@@ -6,6 +6,7 @@ import { PreparingBanner } from "@/components/PreparingBanner";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { UtmCapture } from "@/components/UtmCapture";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { energyCategoriesIn, splitWorlds } from "@/lib/energy";
 import { offer } from "@/lib/format";
 import { listProducts } from "@/lib/products";
 import { getShippingFund } from "@/lib/shipping-fund";
@@ -19,8 +20,12 @@ export const revalidate = 60;
 
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
   const [products, open, fund] = await Promise.all([listProducts(), storeIsOpen(), getShippingFund()]);
-  const categories = [...new Set(products.map((p) => p.category))].sort();
-  const offers = products.filter((p) => offer(p));
+  // Dos mundos (TERC 2.1): equipos reacondicionados y Energía. El menú de Energía aparece solo
+  // cuando hay al menos un producto de Energía a la venta.
+  const { pcs, energy } = splitWorlds(products);
+  const categories = [...new Set(pcs.map((p) => p.category))].sort();
+  const energyCategories = energyCategoriesIn(energy).map(({ name, short }) => ({ name, short }));
+  const offers = pcs.filter((p) => offer(p));
   // "Solo por tiempo limitado" se dice únicamente de las ofertas que tienen fecha de término.
   const limited = offers.filter((p) => p.offer_ends_at);
   const limitedOffers = limited.length > 0;
@@ -33,9 +38,16 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
       <ScrollReveal />
       <div className="min-h-screen flex flex-col bg-paper text-ink">
         {!open && <PreparingBanner />}
-        <Header categories={categories} offerPercent={offerPercent} limitedOffers={limitedOffers} offerName={offerName} freeShipping={fund > 0} />
+        <Header
+          categories={categories}
+          energyCategories={energyCategories}
+          offerPercent={offerPercent}
+          limitedOffers={limitedOffers}
+          offerName={offerName}
+          freeShipping={fund > 0}
+        />
         <main className="flex-1 w-full">{children}</main>
-        <Footer categories={categories} />
+        <Footer categories={categories} energyCategories={energyCategories} />
       </div>
       <WhatsAppButton />
       <Analytics />

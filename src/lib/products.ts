@@ -1,3 +1,4 @@
+import { isEnergy } from "./energy";
 import { todayInChile } from "./format";
 import { getShippingFund } from "./shipping-fund";
 import { getPublicClient } from "./supabase";
@@ -52,10 +53,11 @@ function withOfferExpiry(product: Product): Product {
 
 // El cliente ve el precio con el fondo de envío incluido (también el precio "antes" de una oferta,
 // para que el descuento siga siendo el mismo). El panel sigue mostrando el precio guardado.
+// Los productos de Energía no llevan fondo: no viajan por courier, la entrega se coordina aparte.
 function withFund(fund: number) {
   return (product: Product): Product => {
     const p = withOfferExpiry(product);
-    if (fund <= 0) return p;
+    if (fund <= 0 || isEnergy(p)) return p;
     return { ...p, price: p.price + fund, compare_price: p.compare_price ? p.compare_price + fund : p.compare_price };
   };
 }

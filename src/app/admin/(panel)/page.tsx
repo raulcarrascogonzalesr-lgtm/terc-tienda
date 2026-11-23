@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { isRequestOrder } from "@/lib/energy";
 import { storeIsOpen } from "@/lib/store-status";
 import { formatCLP, formatDateTime, ORDER_STATUS_LABELS } from "@/lib/format";
 import { countNewQuotes, loadBusiness } from "./data";
@@ -39,6 +40,8 @@ export default async function HomePage() {
   const vat = vatMonths(orders, movements, thisMonth).at(-1)!;
 
   const toShip = orders.filter((o) => o.status === "paid");
+  // Solicitudes de Energía esperando que TERC confirme stock y mande la cuenta y el monto.
+  const toApprove = orders.filter((o) => o.status === "pending" && isRequestOrder(o));
   const lowStock = products
     .filter((p) => p.active && p.stock <= 1)
     .sort((a, b) => a.stock - b.stock);
@@ -134,8 +137,15 @@ export default async function HomePage() {
         </Card>
       )}
 
-      {(toShip.length > 0 || newQuotes > 0 || lowStock.some((p) => p.stock === 0)) && (
+      {(toShip.length > 0 || toApprove.length > 0 || newQuotes > 0 || lowStock.some((p) => p.stock === 0)) && (
         <div className="flex flex-wrap gap-2">
+          {toApprove.length > 0 && (
+            <Link href={toApprove.length === 1 ? `/admin/pedidos/${toApprove[0].id}` : "/admin/pedidos"}>
+              <Badge tone="warn">
+                {toApprove.length} {toApprove.length === 1 ? "solicitud de Energía" : "solicitudes de Energía"} por aprobar
+              </Badge>
+            </Link>
+          )}
           {toShip.length > 0 && (
             <Link href="/admin/pedidos">
               <Badge tone="warn">

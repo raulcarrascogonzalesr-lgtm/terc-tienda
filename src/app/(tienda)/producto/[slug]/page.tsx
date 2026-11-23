@@ -9,6 +9,7 @@ import { ProductGallery } from "@/components/ProductGallery";
 import { Terqui } from "@/components/Terqui";
 import { TrackView } from "@/components/TrackView";
 import { deliveryText } from "@/lib/delivery";
+import { isEnergy } from "@/lib/energy";
 import { CONDITION, formatCLP, offer, savings } from "@/lib/format";
 import { getProductBySlug } from "@/lib/products";
 import { boxFor } from "@/lib/shipping";
@@ -17,6 +18,7 @@ import { getShippingFund } from "@/lib/shipping-fund";
 import { SITE, whatsappLink } from "@/lib/site";
 import { KIND_LABEL, productSpecs } from "@/lib/specs";
 import { warrantyLabel } from "@/lib/warranty";
+import { EnergyProduct } from "./EnergyProduct";
 import { StickyBuyBar } from "./StickyBuyBar";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -24,7 +26,8 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug((await params).slug);
   if (!product) return { title: "Producto no encontrado" };
-  const title = `${product.name} reacondicionado | TERC`;
+  // Energía (TERC 2.1) es nuevo: no se titula "reacondicionado".
+  const title = isEnergy(product) ? `${product.name} | TERC Energía` : `${product.name} reacondicionado | TERC`;
   const description = productDescription(product);
   return {
     title,
@@ -42,6 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const [product, fund] = await Promise.all([getProductBySlug((await params).slug), getShippingFund()]);
   if (!product) notFound();
+  if (isEnergy(product)) return <EnergyProduct product={product} />;
 
   const sale = offer(product);
   const off = savings(product);
