@@ -34,11 +34,6 @@ export function ProductCard({ product }: { product: Product }) {
             className="stamp absolute left-3 top-3"
           />
         )}
-        {product.stock <= 3 && (
-          <span className="absolute bottom-3 left-3 rounded-full bg-pine px-2.5 py-1 text-[11px] font-semibold text-white">
-            {product.stock === 1 ? "¡Última unidad!" : `¡Quedan ${product.stock}!`}
-          </span>
-        )}
       </Link>
       <div className="flex flex-1 flex-col gap-1 p-4">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">

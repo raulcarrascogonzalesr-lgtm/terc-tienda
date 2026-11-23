@@ -115,11 +115,6 @@ export default async function ProductPage({ params }: Props) {
               <span className="inline-flex items-center gap-1.5 rounded-full bg-pine px-3 py-1 text-xs font-semibold text-white">
                 <StoreIcon name="checklist" className="h-3.5 w-3.5 text-gold" /> Revisado por TERC
               </span>
-              {product.stock <= 3 && (
-                <span className="rounded-full bg-mint-50 px-3 py-1 text-xs font-semibold text-ink">
-                  {product.stock === 1 ? "¡Última unidad!" : `¡Quedan ${product.stock}!`}
-                </span>
-              )}
             </div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
               {product.brand} · {kind}
@@ -238,6 +233,8 @@ export default async function ProductPage({ params }: Props) {
                 </Link>
               </span>
             </p>
+            {/* Raúl (23-11): no mostrar cuántas unidades quedan; solo este aviso, chico y tenue. */}
+            <p className="text-right text-[11px] text-muted/60">Stock no actualizado en tiempo real</p>
           </div>
 
           {/* Lo que va con el equipo: la garantía y el soporte, en grande. */}
@@ -326,7 +323,6 @@ export default async function ProductPage({ params }: Props) {
               {box.weight.toLocaleString("es-CL")} kg · {box.length} × {box.width} × {box.height} cm
               <small>Aproximado, con caja y protección.</small>
             </Row>
-            <Row label="Disponibles">{product.stock}</Row>
           </dl>
 
           {product.description && (
