@@ -59,6 +59,18 @@ Estas secciones necesitan las tablas de `supabase/finanzas.sql` (también inclui
 
 Solo los correos de `ADMIN_EMAILS` pueden entrar. Marcar un pedido como "Pagado" a mano (por ejemplo, una transferencia) también descuenta el stock.
 
+## Energía (TERC 2.1)
+
+Además de los equipos reacondicionados, TERC vende productos de energía **nuevos** (proveedor Esol): UPS, baterías de litio, inversores, paneles solares, cables e iluminación. TERC solo los vende, nunca los instala; quien quiera un kit con instalación se deriva a WireSun Energy.
+
+- **Cargar un producto:** en el panel, Productos → Nuevo, con una de estas categorías (salen en la lista): Respaldo (UPS), Baterías de litio, Inversores y reguladores, Paneles solares, Cables y conectores, Iluminación. Con eso el producto sale en `terc.cl/energia`, en el banner de la portada y en el menú. Mientras no haya ninguno a la venta, la tienda se ve igual que antes.
+- **Garantía:** en "Garantía (meses)" va la de fábrica. El grado y la batería no se muestran en estos productos.
+- **Cómo se compran:** no se pagan con Mercado Pago ni Webpay. Si el carrito tiene algo de Energía, el cliente envía una **solicitud** (nombre, WhatsApp, correo y comuna). Queda como pedido "Pendiente" marcado "Solicitud por aprobar", y a TERC le llega un correo.
+- **Aprobar:** en el pedido, el botón "Enviar cuenta y monto por WhatsApp" abre WhatsApp con el mensaje listo. Para que los datos de la cuenta salgan solos, agrega la variable `TRANSFER_DETAILS` en cPanel (puedes separar líneas con `\n`). Cuando la plata esté en el banco, marca el pedido "Pagado": se descuenta el stock y sale el correo de pago recibido.
+- Estos productos no van en la lista de Google Merchant Center ni llevan el fondo de envío en el precio.
+
+El código está en `src/lib/energy.ts`, `src/app/(tienda)/energia/`, `src/components/energy/` y `src/app/api/solicitud/`.
+
 ## Correos automáticos
 
 La tienda envía estos correos desde `contacto@terc.cl` (la casilla del hosting, por SMTP):

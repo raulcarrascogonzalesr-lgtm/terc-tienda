@@ -1,4 +1,5 @@
 import { button, C, emailEnabled, escapeHtml, layout, sendMail, siteUrl, type MailPose } from "./email";
+import { ENERGY_INFO, isRequestOrder } from "./energy";
 import { formatCLP, QUOTE_KIND_LABELS } from "./format";
 import { courierLabel, isShippingZone } from "./shipping";
 import { SITE } from "./site";
@@ -71,6 +72,15 @@ function tracker(step: 0 | 1 | 2): string {
   </table>`;
 }
 
+// En una solicitud (Energía) todavía no hay pago: el total es "a transferir" y la entrega se coordina.
+function totalLabel(order: Order) {
+  return isRequestOrder(order) && order.status === "pending" ? "Total a transferir" : "Total pagado";
+}
+function shippingLine(order: Order) {
+  if (isRequestOrder(order) && !order.shipping_cost) return { label: "Entrega", value: "Se coordina contigo" };
+  return { label: "Envío", value: formatCLP(order.shipping_cost) };
+}
+
 function itemsCard(order: Order, info: Map<string, ItemInfo>): string {
   const rows = order.items
     .map((i) => {
@@ -93,9 +103,9 @@ function itemsCard(order: Order, info: Map<string, ItemInfo>): string {
       <td align="right" style="padding:10px 0 0;border-top:1px solid ${C.line};font-size:14px;color:${C.muted}">−${formatCLP(order.discount)}</td></tr>`
         : ""
     }
-    <tr><td colspan="2" style="padding:10px 0 4px;border-top:1px solid ${C.line};font-size:14px;color:${C.muted}">Envío</td>
-      <td align="right" style="padding:10px 0 4px;border-top:1px solid ${C.line};font-size:14px;color:${C.muted}">${formatCLP(order.shipping_cost)}</td></tr>
-    <tr><td colspan="2" style="padding:4px 0 10px;font-size:16px;font-weight:bold">Total pagado</td>
+    <tr><td colspan="2" style="padding:10px 0 4px;border-top:1px solid ${C.line};font-size:14px;color:${C.muted}">${shippingLine(order).label}</td>
+      <td align="right" style="padding:10px 0 4px;border-top:1px solid ${C.line};font-size:14px;color:${C.muted}">${shippingLine(order).value}</td></tr>
+    <tr><td colspan="2" style="padding:4px 0 10px;font-size:16px;font-weight:bold">${totalLabel(order)}</td>
       <td align="right" style="padding:4px 0 10px;font-size:16px;font-weight:bold">${formatCLP(order.total)}</td></tr>
   </table>`;
 }
@@ -104,14 +114,18 @@ function itemsText(order: Order): string {
   return [
     ...order.items.map((i) => `${i.quantity} x ${i.name}: ${formatCLP(i.unit_price * i.quantity)}`),
     ...(order.discount ? [`Cupón ${order.coupon_code ?? ""}: −${formatCLP(order.discount)}`] : []),
-    `Envío: ${formatCLP(order.shipping_cost)}`,
-    `Total pagado: ${formatCLP(order.total)}`,
+    `${shippingLine(order).label}: ${shippingLine(order).value}`,
+    `${totalLabel(order)}: ${formatCLP(order.total)}`,
   ].join("\n");
 }
 
 function warrantyMonths(order: Order, info: Map<string, ItemInfo>): number | null {
   // Primero la garantía con la que se vendió (la de una oferta o la extendida); en pedidos antiguos, la del equipo.
-  const months = order.items.map((i) => i.warranty_months ?? info.get(i.product_id)?.warranty_months ?? 0).filter((m) => m > 0);
+  // Los productos de Energía traen garantía de fábrica, no la de TERC.
+  const months = order.items
+    .filter((i) => !i.energy)
+    .map((i) => i.warranty_months ?? info.get(i.product_id)?.warranty_months ?? 0)
+    .filter((m) => m > 0);
   return months.length ? Math.min(...months) : null;
 }
 
@@ -162,8 +176,12 @@ export function paidEmail(order: Order, info: Map<string, ItemInfo>) {
     body: `${tracker(0)}
       ${itemsCard(order, info)}
       ${warrantyCard(months)}
-      ${infoBox("Lo enviamos a", escapeHtml(addressOf(order)))}
-      ${infoBox("¿Qué sigue?", "Revisamos tu equipo una última vez y lo embalamos con cariño. Cuando salga, te mandamos otro correo con el código de seguimiento.")}
+      ${
+        isRequestOrder(order)
+          ? `${energyWarrantyNote(order)}${infoBox("¿Qué sigue?", `Preparamos tu pedido y te escribimos por WhatsApp para coordinar la entrega en ${escapeHtml(order.customer.comuna ?? "tu comuna")}.`)}`
+          : `${infoBox("Lo enviamos a", escapeHtml(addressOf(order)))}
+      ${infoBox("¿Qué sigue?", "Revisamos tu equipo una última vez y lo embalamos con cariño. Cuando salga, te mandamos otro correo con el código de seguimiento.")}`
+      }
       ${terquiTip(order)}
       ${contact(order)}`,
   });
@@ -174,8 +192,9 @@ export function paidEmail(order: Order, info: Map<string, ItemInfo>) {
     itemsText(order),
     months ? `Garantía TERC: ${months} meses. Guarda este correo como respaldo. Cómo funciona: ${POLICY_URL}` : "",
     "",
-    `Lo enviamos a: ${addressOf(order)}`,
-    "Cuando salga, te mandamos otro correo con el código de seguimiento.",
+    ...(isRequestOrder(order)
+      ? [`Te escribimos por WhatsApp para coordinar la entrega en ${order.customer.comuna ?? "tu comuna"}.`]
+      : [`Lo enviamos a: ${addressOf(order)}`, "Cuando salga, te mandamos otro correo con el código de seguimiento."]),
     "",
     helpText,
     "",
@@ -301,6 +320,86 @@ export function saleNotice(order: Order, info: Map<string, ItemInfo>) {
     `Ver el pedido: ${link}`,
   ].join("\n");
   return { subject: `Nueva venta ${formatCLP(order.total)} · ${number}`, html, text };
+}
+
+// Productos de Energía: garantía de fábrica (TERC acompaña) y sin instalación.
+function energyWarrantyNote(order: Order): string {
+  if (!order.items.some((i) => i.energy)) return "";
+  return infoBox(
+    "Productos de Energía",
+    "Son nuevos y traen garantía de fábrica: si algo falla, escríbenos y te acompañamos para hacerla válida. La instalación no está incluida; te recomendamos un instalador eléctrico autorizado SEC.",
+  );
+}
+
+// Al cliente, apenas envía la solicitud: todavía no se cobra nada.
+export function requestReceivedEmail(order: Order, info: Map<string, ItemInfo>) {
+  const number = orderNumber(order.id);
+  const name = firstName(order);
+  const html = layout({
+    preheader: `Recibimos tu solicitud ${number}. Te escribimos por WhatsApp para confirmar.`,
+    pose: "lupa",
+    title: `¡Recibimos tu solicitud${name ? `, ${escapeHtml(name)}` : ""}!`,
+    intro: `Revisamos stock y te escribimos el mismo día hábil por WhatsApp al <strong style="color:${C.pine}">${escapeHtml(order.customer.phone ?? "")}</strong> con la cuenta y el monto a transferir. <strong>No se ha cobrado nada.</strong>`,
+    body: `${itemsCard(order, info)}
+      ${infoBox("Cómo sigue", `1. Confirmamos stock y total.<br>2. Te enviamos la cuenta y el monto (vale por ${ENERGY_INFO.holdHours} horas).<br>3. Transfieres y nos mandas el comprobante.<br>4. Coordinamos la entrega contigo.`)}
+      ${infoBox("Tu número de solicitud", `<strong style="font-size:18px;color:${C.pine}">${number}</strong>`)}
+      ${energyWarrantyNote(order)}
+      ${contact(order)}`,
+  });
+  const text = [
+    `¡Recibimos tu solicitud${name ? `, ${name}` : ""}!`,
+    `Revisamos stock y te escribimos el mismo día hábil por WhatsApp al ${order.customer.phone ?? ""} con la cuenta y el monto a transferir. No se ha cobrado nada.`,
+    "",
+    itemsText(order),
+    "",
+    `Tu número de solicitud: ${number}`,
+    "",
+    helpText,
+    "",
+    "TERC · terc.cl",
+  ].join("\n");
+  return { subject: `Recibimos tu solicitud ${number} · TERC`, html, text };
+}
+
+// A TERC: nueva solicitud para aprobar. Responder el correo le escribe al cliente.
+export function requestNotice(order: Order, info: Map<string, ItemInfo>) {
+  const number = orderNumber(order.id);
+  const c = order.customer;
+  const link = `${siteUrl()}/admin/pedidos/${order.id}`;
+  const html = layout({
+    preheader: `${formatCLP(order.total)} · ${c.name ?? ""} · ${c.comuna ?? ""}`,
+    pose: "lupa",
+    title: `Nueva solicitud ${number}`,
+    intro: `${formatCLP(order.total)} por transferencia · ${escapeHtml(c.name ?? "")}`,
+    body: `${itemsCard(order, info)}
+      ${infoBox("Cliente", `${escapeHtml(c.name ?? "")}<br>${escapeHtml(c.email ?? "")} · WhatsApp ${escapeHtml(c.phone ?? "")}<br>Comuna: ${escapeHtml(c.comuna ?? "")}<br>${escapeHtml(c.document ?? "Boleta")}${c.rut ? ` · RUT ${escapeHtml(c.rut)} · ${escapeHtml(c.business ?? "")}` : ""}${c.note ? `<br>Nota: ${escapeHtml(c.note)}` : ""}`)}
+      ${infoBox("Qué hacer", `1. Confirma stock y precio con el proveedor.<br>2. En el panel, toca "Enviar cuenta y monto por WhatsApp".<br>3. Cuando veas la plata en el banco (no solo la foto del comprobante), marca el pedido como "Pagado".`)}
+      <p style="margin:0;text-align:center">${button(link, "Ver la solicitud en el panel")}</p>`,
+  });
+  const text = [
+    `Nueva solicitud ${number}: ${formatCLP(order.total)} por transferencia`,
+    "",
+    itemsText(order),
+    "",
+    `Cliente: ${c.name ?? ""} · ${c.email ?? ""} · WhatsApp ${c.phone ?? ""} · ${c.comuna ?? ""}`,
+    `${c.document ?? "Boleta"}${c.rut ? ` · RUT ${c.rut} · ${c.business ?? ""}` : ""}`,
+    ...(c.note ? [`Nota: ${c.note}`] : []),
+    "",
+    `Ver la solicitud: ${link}`,
+  ].join("\n");
+  return { subject: `Nueva solicitud ${formatCLP(order.total)} · ${number}`, html, text };
+}
+
+// Se llama al guardar una solicitud: aviso a TERC y confirmación al cliente.
+export async function sendRequestEmails(orderId: string): Promise<void> {
+  const supabase = getAdminClient();
+  if (!supabase || !emailEnabled()) return;
+  const { data } = await supabase.from("orders").select("*").eq("id", orderId).maybeSingle();
+  const order = data as Order | null;
+  if (!order) return;
+  const info = await itemInfo(order);
+  await sendMail({ to: SITE.email, replyTo: order.customer.email, ...requestNotice(order, info) });
+  if (order.customer.email) await sendMail({ to: order.customer.email, replyTo: SITE.email, ...requestReceivedEmail(order, info) });
 }
 
 async function itemInfo(order: Order): Promise<Map<string, ItemInfo>> {

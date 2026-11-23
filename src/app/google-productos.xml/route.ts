@@ -1,3 +1,4 @@
+import { isEnergy } from "@/lib/energy";
 import { todayInChile } from "@/lib/format";
 import { listProducts } from "@/lib/products";
 import { productMargins } from "@/lib/ranking";
@@ -101,7 +102,9 @@ export async function GET() {
     productMargins().catch(() => ({ margins: new Map<string, number>() })),
   ]);
   // Sin foto, Google rechaza el producto: mejor no enviarlo.
-  const items = products.filter((p) => p.image_url).map((p) => item(p, margins.get(p.id)));
+  // Los de Energía no van: se compran con solicitud y transferencia (no se pagan en la página),
+  // y esta lista los describe como reacondicionados.
+  const items = products.filter((p) => p.image_url && !isEnergy(p)).map((p) => item(p, margins.get(p.id)));
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"><channel><title>TERC</title><link>${SITE_URL}</link><description>Equipos reacondicionados con garantía</description>${items.join("")}</channel></rss>`;
   return new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8" } });

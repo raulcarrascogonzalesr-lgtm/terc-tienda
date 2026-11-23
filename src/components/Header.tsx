@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { energyHref } from "@/lib/energy";
 import { SITE } from "@/lib/site";
 import { warrantyLabel } from "@/lib/warranty";
 import { useCart } from "./CartProvider";
@@ -10,14 +12,14 @@ import { Logo } from "./Logo";
 import { Terqui } from "./Terqui";
 import { ThemeToggle } from "./ThemeToggle";
 
-function SearchForm({ className = "" }: { className?: string }) {
+function SearchForm({ className = "", energy = false }: { className?: string; energy?: boolean }) {
   return (
     <form action="/" role="search" className={`relative ${className}`}>
       <input
         type="search"
         name="q"
-        placeholder="¿Qué equipo buscas?"
-        aria-label="Buscar equipos"
+        placeholder={energy ? "¿Qué buscas? Notebook, batería, UPS…" : "¿Qué equipo buscas?"}
+        aria-label={energy ? "Buscar equipos y productos de Energía" : "Buscar equipos"}
         className="w-full rounded-full border border-line/10 bg-paper/70 py-2.5 pl-4 pr-11 text-sm text-ink placeholder:text-muted/80 focus:border-pine-700 focus:bg-surface focus:outline-none focus:ring-4 focus:ring-pine-700/10"
       />
       <button
@@ -31,20 +33,54 @@ function SearchForm({ className = "" }: { className?: string }) {
   );
 }
 
+type EnergyLink = { name: string; short: string };
+
+// Los dos mundos de la tienda: Computadores (reacondicionados) y Energía (nuevos, TERC 2.1).
+function Worlds({ energyWorld }: { energyWorld: boolean }) {
+  const base = "flex items-center gap-1.5 rounded-full px-3 py-1 font-semibold transition";
+  return (
+    <div className="flex shrink-0 items-center rounded-full bg-surface p-1 ring-1 ring-line/[0.08]" role="group" aria-label="Secciones de la tienda">
+      <Link
+        href="/#equipos"
+        aria-current={!energyWorld ? "page" : undefined}
+        className={`${base} ${!energyWorld ? "bg-pine text-white" : "text-muted hover:text-ink"}`}
+      >
+        Computadores
+      </Link>
+      <Link
+        href="/energia"
+        aria-current={energyWorld ? "page" : undefined}
+        className={`${base} ${energyWorld ? "bg-pine text-white" : "text-muted hover:text-ink"}`}
+      >
+        <StoreIcon name="bolt" className="h-4 w-4 text-gold" />
+        Energía
+        {!energyWorld && (
+          <span className="rounded-full bg-gold px-1.5 py-px text-[10px] font-extrabold uppercase tracking-wide text-pine">Nuevo</span>
+        )}
+      </Link>
+    </div>
+  );
+}
+
 export function Header({
   categories,
+  energyCategories,
   offerPercent,
   limitedOffers,
   offerName,
   freeShipping,
 }: {
   categories: string[];
+  energyCategories: EnergyLink[]; // categorías de Energía con productos; vacío = sin menú de Energía
   offerPercent: number; // mayor descuento en oferta; 0 si no hay ofertas
   limitedOffers: boolean; // alguna oferta tiene fecha de término
   offerName: string | null; // nombre de la promoción, si tiene
   freeShipping: boolean; // envío gratis en la Región Metropolitana
 }) {
   const { count } = useCart();
+  const pathname = usePathname() ?? "";
+  const hasEnergy = energyCategories.length > 0;
+  const energyWorld = hasEnergy && pathname.startsWith("/energia");
   // Al bajar, la franja de arriba se va con la página y el menú queda fijo, más compacto y con sombra.
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -106,7 +142,7 @@ export function Header({
                 className={`h-14 w-auto origin-left transition-transform duration-300 ${scrolled ? "scale-[0.86]" : ""}`}
               />
             </Link>
-            <SearchForm className="hidden md:block flex-1 max-w-xl mx-auto" />
+            <SearchForm energy={hasEnergy} className="hidden md:block flex-1 max-w-xl mx-auto" />
             <div className="ml-auto md:ml-0 flex items-center gap-1">
             <ThemeToggle />
             <Link
@@ -125,47 +161,68 @@ export function Header({
             </div>
           </div>
           <div className="md:hidden px-4 pb-3">
-            <SearchForm />
+            <SearchForm energy={hasEnergy} />
           </div>
-          {categories.length > 0 && (
+          {(categories.length > 0 || hasEnergy) && (
             <nav
               aria-label="Categorías"
               className="border-t border-line/[0.06] bg-mint-50/70"
             >
-              <div className="scroll-fade shell h-11 flex items-center gap-1 overflow-x-auto text-sm">
-                <Link
-                  href="/#equipos"
-                  className="shrink-0 rounded-full px-3 py-1.5 font-medium text-ink hover:bg-surface"
-                >
-                  Todos
-                </Link>
-                {offerPercent > 0 && (
-                  <Link
-                    href="/?ofertas=1#equipos"
-                    className="shrink-0 rounded-full px-3 py-1.5 font-semibold text-sale hover:bg-sale-50"
-                  >
-                    Ofertas
-                  </Link>
+              <div className={`scroll-fade shell flex items-center gap-1 overflow-x-auto text-sm ${hasEnergy ? "h-12" : "h-11"}`}>
+                {hasEnergy && <Worlds energyWorld={energyWorld} />}
+                {energyWorld ? (
+                  <>
+                    <Link href="/energia#productos" className="ml-1 shrink-0 rounded-full px-3 py-1.5 font-medium text-ink hover:bg-surface">
+                      Todo Energía
+                    </Link>
+                    {energyCategories.map((c) => (
+                      <Link
+                        key={c.name}
+                        href={energyHref(c)}
+                        className="shrink-0 rounded-full px-3 py-1.5 text-muted hover:bg-surface hover:text-ink"
+                      >
+                        {c.short}
+                      </Link>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/#equipos"
+                      className={`shrink-0 rounded-full px-3 py-1.5 font-medium text-ink hover:bg-surface ${hasEnergy ? "ml-1" : ""}`}
+                    >
+                      Todos
+                    </Link>
+                    {offerPercent > 0 && (
+                      <Link
+                        href="/?ofertas=1#equipos"
+                        className="shrink-0 rounded-full px-3 py-1.5 font-semibold text-sale hover:bg-sale-50"
+                      >
+                        Ofertas
+                      </Link>
+                    )}
+                    {categories.map((c) => (
+                      <Link
+                        key={c}
+                        href={`/?categoria=${encodeURIComponent(c)}#equipos`}
+                        className="shrink-0 rounded-full px-3 py-1.5 text-muted hover:bg-surface hover:text-ink"
+                      >
+                        {c}
+                      </Link>
+                    ))}
+                  </>
                 )}
-                {categories.map((c) => (
-                  <Link
-                    key={c}
-                    href={`/?categoria=${encodeURIComponent(c)}#equipos`}
-                    className="shrink-0 rounded-full px-3 py-1.5 text-muted hover:bg-surface hover:text-ink"
-                  >
-                    {c}
-                  </Link>
-                ))}
+                {/* "Por qué TERC" habla de los reacondicionados: en Energía se deja el espacio para sus categorías. */}
                 <Link
                   href="/por-que-terc"
-                  className="ml-auto flex shrink-0 items-center gap-1 rounded-full py-1.5 pl-1 pr-3 text-muted hover:bg-surface hover:text-ink"
+                  className={`ml-auto shrink-0 items-center gap-1 rounded-full py-1.5 pl-1 pr-3 text-muted hover:bg-surface hover:text-ink ${energyWorld ? "hidden" : "flex"}`}
                 >
                   <Terqui pose="apunta" crop="asoma" className="terqui-peek -my-3 h-11 w-auto" />
                   Por qué TERC
                 </Link>
                 <Link
                   href="/empresas"
-                  className="shrink-0 rounded-full bg-pine px-3.5 py-1.5 font-semibold text-white hover:bg-cta"
+                  className={`shrink-0 rounded-full bg-pine px-3.5 py-1.5 font-semibold text-white hover:bg-cta ${energyWorld ? "ml-auto" : ""}`}
                 >
                   Empresas: precio por volumen
                 </Link>

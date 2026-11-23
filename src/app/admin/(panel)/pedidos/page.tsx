@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { isRequestOrder } from "@/lib/energy";
 import { formatCLP, formatDateTime, ORDER_STATUS_LABELS } from "@/lib/format";
 import { listOrders } from "../data";
 import { PageHeader } from "../ui";
@@ -12,7 +13,7 @@ export default async function OrdersPage() {
       <PageHeader
         eyebrow="Tienda"
         title="Pedidos"
-        subtitle="Las compras hechas en terc.cl. Abre uno para cambiar su estado o agregar el seguimiento."
+        subtitle="Las compras hechas en terc.cl y las solicitudes de Energía (se pagan por transferencia). Abre uno para cambiar su estado o agregar el seguimiento."
       />
       {orders.length === 0 ? (
         <p className="text-[#6b716f]">Todavía no hay pedidos.</p>
@@ -42,7 +43,18 @@ export default async function OrdersPage() {
                   <td className="p-3">{o.customer.name}</td>
                   <td className="p-3">{o.customer.comuna}</td>
                   <td className="p-3 text-right whitespace-nowrap">{formatCLP(o.total)}</td>
-                  <td className="p-3">{ORDER_STATUS_LABELS[o.status]}</td>
+                  <td className="p-3">
+                    {isRequestOrder(o) && o.status === "pending" ? (
+                      <span className="rounded-full bg-[#fbf3d9] px-2 py-0.5 text-xs font-semibold text-[#7a6420]">
+                        Solicitud por aprobar
+                      </span>
+                    ) : (
+                      <>
+                        {ORDER_STATUS_LABELS[o.status]}
+                        {isRequestOrder(o) && <span className="ml-1 text-xs text-[#6b716f]">(transferencia)</span>}
+                      </>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

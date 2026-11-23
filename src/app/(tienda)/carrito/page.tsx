@@ -15,7 +15,9 @@ import { whatsappLink } from "@/lib/site";
 import { UTM_MAX_AGE_MS, UTM_STORAGE_KEY } from "@/lib/utm";
 import { warrantyLabel } from "@/lib/warranty";
 import { cartUnitPrice, type CartItem } from "@/lib/types";
+import { EnergySteps } from "@/components/energy/EnergyParts";
 import { DeliveryForm } from "./DeliveryForm";
+import { RequestForm } from "./RequestForm";
 import { ShippingPicker, type ShippingChoice } from "./ShippingPicker";
 
 function readUtm(): unknown {
@@ -185,6 +187,10 @@ export default function CartPage() {
     }
   }
 
+  // TERC 2.1: si hay productos de Energía, el carrito no se paga aquí: se envía como solicitud
+  // y se paga por transferencia (todo el carrito, aunque traiga también equipos).
+  const hasEnergy = items.some((i) => i.energy);
+  const mixed = hasEnergy && items.some((i) => !i.energy);
   const grandTotal = total - discount + (shipping ?? 0);
   // Ahorro frente a uno nuevo de todo el carrito (solo de los equipos que tienen ese precio).
   const saved = items.reduce((sum, i) => sum + (i.savings ?? 0) * i.quantity, 0);
@@ -230,12 +236,14 @@ export default function CartPage() {
           messages={["Preparando tu pedido…", `Conectando con ${METHOD_LABELS[method]}…`, "Un segundo más"]}
         />
       )}
-      <Steps current={current} />
+      {!hasEnergy && <Steps current={current} />}
 
       {/* El carrito queda montado (escondido) en el paso 2, para no perder la comuna ni el courier elegidos. */}
-      <div className={current === "carrito" ? "grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_400px]" : "hidden"}>
+      <div className={current === "carrito" || hasEnergy ? "grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_400px]" : "hidden"}>
         <section className="min-w-0 space-y-4">
-          <h1 className="text-2xl font-extrabold text-ink">{items.length === 1 ? "Tu equipo" : "Tus equipos"}</h1>
+          <h1 className="text-2xl font-extrabold text-ink">
+            {hasEnergy ? "Tu solicitud de compra" : items.length === 1 ? "Tu equipo" : "Tus equipos"}
+          </h1>
           {items.map((item) => (
             <div
               key={item.productId}
@@ -259,10 +267,19 @@ export default function CartPage() {
                 </Link>
                 {item.specs && <p className="mt-1 text-[13px] text-muted">{item.specs}</p>}
                 <p className="mt-2 flex flex-wrap gap-1.5">
-                  <span className="rounded-full bg-mint-50 px-2 py-1 text-[11.5px] font-bold text-pine-700">
-                    {warrantyLabel(itemWarranty(item))} de garantía
-                  </span>
-                  <span className="rounded-full bg-mint-50 px-2 py-1 text-[11.5px] font-bold text-pine-700">Revisado por TERC</span>
+                  {item.energy ? (
+                    <>
+                      <span className="rounded-full bg-gold/25 px-2 py-1 text-[11.5px] font-bold text-ink">Producto nuevo</span>
+                      <span className="rounded-full bg-mint-50 px-2 py-1 text-[11.5px] font-bold text-pine-700">Garantía de fábrica</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="rounded-full bg-mint-50 px-2 py-1 text-[11.5px] font-bold text-pine-700">
+                        {warrantyLabel(itemWarranty(item))} de garantía
+                      </span>
+                      <span className="rounded-full bg-mint-50 px-2 py-1 text-[11.5px] font-bold text-pine-700">Revisado por TERC</span>
+                    </>
+                  )}
                 </p>
                 {item.warrantyUpgrade && (
                   <label className="mt-2.5 flex cursor-pointer items-start gap-2 rounded-xl border border-line/10 bg-paper px-3 py-2 text-[12.5px] leading-snug text-muted">
@@ -303,7 +320,13 @@ export default function CartPage() {
             </div>
           ))}
 
-          {/* Lo que pasa después de pagar: quita el miedo a la espera antes de pagar. */}
+          {/* Con Energía: cómo sigue la solicitud. Sin Energía: lo que pasa después de pagar. */}
+          {hasEnergy ? (
+            <div className="rounded-3xl bg-surface p-5">
+              <h2 className="mb-4 text-lg font-extrabold text-ink">Cómo sigue tu solicitud</h2>
+              <EnergySteps />
+            </div>
+          ) : (
           <div className="rounded-3xl bg-surface p-5">
             <h2 className="mb-4 text-lg font-extrabold text-ink">Qué pasa después de pagar</h2>
             <ol className="grid gap-4 sm:grid-cols-4">
@@ -320,8 +343,14 @@ export default function CartPage() {
               ))}
             </ol>
           </div>
+          )}
         </section>
 
+        {hasEnergy ? (
+          <aside className="rounded-3xl bg-surface p-5 shadow-[0_16px_40px_-24px_rgba(10,42,42,0.45)] lg:sticky lg:top-28">
+            <RequestForm mixed={mixed} />
+          </aside>
+        ) : (
         <aside className="space-y-4 rounded-3xl bg-surface p-5 shadow-[0_16px_40px_-24px_rgba(10,42,42,0.45)] lg:sticky lg:top-28">
           <h2 className="text-lg font-extrabold text-ink">¿A dónde lo enviamos?</h2>
           <ShippingPicker items={items} onChange={setShippingChoice} />
@@ -378,9 +407,10 @@ export default function CartPage() {
             </p>
           </div>
         </aside>
+        )}
       </div>
 
-      {current === "datos" && shippingChoice && (
+      {current === "datos" && shippingChoice && !hasEnergy && (
         <DeliveryForm
           choice={shippingChoice}
           onBack={backToCart}

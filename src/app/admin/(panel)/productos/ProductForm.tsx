@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { ENERGY_CATEGORIES } from "@/lib/energy";
 import { GRADE_LABELS } from "@/lib/format";
 import type { AdminProduct } from "@/lib/types";
 import { saveProduct } from "../actions";
@@ -44,8 +45,14 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
         <Field label="Marca">
           <input name="brand" required defaultValue={product?.brand} className="input" />
         </Field>
-        <Field label="Categoría" hint="Celulares, Notebooks, Tablets…">
-          <input name="category" required defaultValue={product?.category} className="input" />
+        <Field label="Categoría" hint="Equipos: Notebooks, Computadores… Energía: elige una de la lista">
+          <input name="category" required list="categorias" defaultValue={product?.category} className="input" />
+          {/* Las de Energía (TERC 2.1) hacen que el producto salga en la sección Energía y se compre con solicitud. */}
+          <datalist id="categorias">
+            {["Notebooks", "Computadores", "All-in-One", "Mini PC", "Monitores", ...ENERGY_CATEGORIES.map((c) => c.name)].map((c) => (
+              <option key={c} value={c} />
+            ))}
+          </datalist>
         </Field>
         <Field label="Grado">
           <select name="grade" defaultValue={product?.grade ?? "A"} className="input">

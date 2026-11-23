@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { trackAddToCart } from "@/lib/analytics";
+import { energyCategory } from "@/lib/energy";
 import { savings } from "@/lib/format";
 import { productSpecs } from "@/lib/specs";
 import type { Product } from "@/lib/types";
@@ -12,6 +13,7 @@ import { StoreIcon } from "./icons";
 // Agrega el equipo al carrito (con lo que el carrito muestra: foto, características y ahorro).
 function useAddToCart(product: Product) {
   const { add } = useCart();
+  const energy = energyCategory(product.category);
   return () => {
     add({
       productId: product.id,
@@ -19,13 +21,14 @@ function useAddToCart(product: Product) {
       name: product.name,
       price: product.price,
       maxQuantity: product.stock,
-      cosmetic: product.grade !== "A",
+      cosmetic: !energy && product.grade !== "A",
       image: product.image_url,
-      specs: productSpecs(product).chips.slice(0, 3).join(" · "),
+      specs: energy ? `${energy.name} · producto nuevo` : productSpecs(product).chips.slice(0, 3).join(" · "),
       onDemand: product.on_demand,
       savings: savings(product)?.amount ?? null,
       warrantyMonths: product.warranty_months,
       warrantyUpgrade: product.warranty_upgrade ?? null,
+      energy: Boolean(energy),
     });
     trackAddToCart({ id: product.id, name: product.name, price: product.price, quantity: 1, category: product.category });
   };
@@ -101,7 +104,7 @@ export function BuyNowButton({ product, className = "" }: { product: Product; cl
       }}
       className={`flex w-full items-center justify-center gap-2.5 rounded-full bg-cta px-6 py-4 text-[17px] font-bold text-white shadow-lg shadow-cta/30 transition hover:bg-cta-hover ${className}`}
     >
-      Comprar ahora <StoreIcon name="arrow" className="w-5 h-5" />
+      {energyCategory(product.category) ? "Solicitar compra" : "Comprar ahora"} <StoreIcon name="arrow" className="w-5 h-5" />
     </button>
   );
 }

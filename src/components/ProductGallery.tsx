@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { isEnergy } from "@/lib/energy";
 import { photoProps } from "@/lib/photo";
 import type { Product } from "@/lib/types";
 import { warrantyLabel } from "@/lib/warranty";
@@ -9,12 +10,20 @@ import { Mark } from "./Mark";
 import { PHOTO_BACKDROP, ProductImage } from "./ProductImage";
 
 // Última "foto" de cada producto: la garantía y respaldo de TERC.
+// Los productos de Energía son nuevos: su garantía es la de fábrica y TERC acompaña a usarla.
 function TrustSlide({ product }: { product: Product }) {
-  const points: { icon: IconName; text: string }[] = [
-    { icon: "checklist", text: product.on_demand ? "Revisado antes de enviártelo" : "Revisado uno por uno" },
-    { icon: "chat", text: "Soporte por WhatsApp después de la compra" },
-    { icon: "truck", text: "Envío a todo Chile" },
-  ];
+  const energy = isEnergy(product);
+  const points: { icon: IconName; text: string }[] = energy
+    ? [
+        { icon: "box", text: "Producto nuevo, en su caja" },
+        { icon: "chat", text: "Te ayudamos a elegir por WhatsApp" },
+        { icon: "truck", text: "Entrega en la Región Metropolitana" },
+      ]
+    : [
+        { icon: "checklist", text: product.on_demand ? "Revisado antes de enviártelo" : "Revisado uno por uno" },
+        { icon: "chat", text: "Soporte por WhatsApp después de la compra" },
+        { icon: "truck", text: "Envío a todo Chile" },
+      ];
   return (
     <div className="relative flex aspect-square w-full flex-col justify-between overflow-hidden bg-pine px-14 py-6 text-white sm:px-16 sm:py-10">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(61,181,133,0.25),transparent_60%)]" />
@@ -26,9 +35,11 @@ function TrustSlide({ product }: { product: Product }) {
         </span>
       </div>
       <div className="relative">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-mint">Garantía TERC</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-mint">{energy ? "Garantía de fábrica" : "Garantía TERC"}</p>
         <p className="mt-1 text-5xl font-bold tracking-tight sm:text-7xl">
-          {product.warranty_months % 12 === 0 ? (
+          {energy && !product.warranty_months ? (
+            "Incluida"
+          ) : product.warranty_months % 12 === 0 ? (
             <>
               {product.warranty_months / 12} <span className="text-2xl sm:text-4xl">{product.warranty_months === 12 ? "año" : "años"}</span>
             </>
@@ -39,7 +50,9 @@ function TrustSlide({ product }: { product: Product }) {
           )}
         </p>
         <p className="mt-2 max-w-xs text-xs text-white/75 sm:text-sm">
-          Si algo falla, lo reparamos gratis o te lo cambiamos por uno equivalente. Y el envío lo pagamos nosotros.
+          {energy
+            ? "La da el fabricante. Si algo falla, escríbenos y te acompañamos para hacerla válida."
+            : "Si algo falla, lo reparamos gratis o te lo cambiamos por uno equivalente. Y el envío lo pagamos nosotros."}
         </p>
       </div>
       <ul className="relative space-y-1.5 sm:space-y-2.5">

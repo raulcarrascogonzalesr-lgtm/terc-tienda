@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { energyCategoriesIn, energyHref, splitWorlds } from "@/lib/energy";
 import { listProducts } from "@/lib/products";
 
 export const revalidate = 3600;
@@ -7,7 +8,8 @@ export const revalidate = 3600;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = "https://terc.cl";
   const products = await listProducts().catch(() => []);
-  const categories = [...new Set(products.map((p) => p.category))].sort();
+  const { pcs, energy } = splitWorlds(products);
+  const categories = [...new Set(pcs.map((p) => p.category))].sort();
   return [
     { url: `${base}/`, changeFrequency: "daily", priority: 1 },
     { url: `${base}/por-que-terc`, changeFrequency: "monthly", priority: 0.6 },
@@ -19,6 +21,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily" as const,
       priority: 0.9,
     })),
+    ...(energy.length
+      ? [
+          { url: `${base}/energia`, changeFrequency: "daily" as const, priority: 0.9 },
+          ...energyCategoriesIn(energy).map((c) => ({
+            url: `${base}${energyHref(c).replace("#productos", "")}`,
+            changeFrequency: "daily" as const,
+            priority: 0.8,
+          })),
+        ]
+      : []),
     ...products.map((p) => ({
       url: `${base}/producto/${p.slug}`,
       changeFrequency: "weekly" as const,

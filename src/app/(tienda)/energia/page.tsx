@@ -1,0 +1,258 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { EnergyFacts, EnergySteps, InstallerCard, WireSunCard } from "@/components/energy/EnergyParts";
+import { StoreIcon, WhatsAppIcon } from "@/components/icons";
+import { Mark } from "@/components/Mark";
+import { ProductCard } from "@/components/ProductCard";
+import { Terqui } from "@/components/Terqui";
+import { ENERGY_CATEGORIES, ENERGY_INFO, energyCategory, energyHref, splitWorlds } from "@/lib/energy";
+import { formatCLP } from "@/lib/format";
+import { photoProps } from "@/lib/photo";
+import { listProducts } from "@/lib/products";
+import { whatsappLink } from "@/lib/site";
+import type { Product } from "@/lib/types";
+
+export const revalidate = 60;
+
+type Props = { searchParams: Promise<{ categoria?: string; orden?: string }> };
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const cat = energyCategory((await searchParams).categoria);
+  return {
+    title: cat ? `${cat.name} nuevos con garantía | TERC Energía` : "Energía: baterías de litio, UPS, inversores y paneles solares | TERC",
+    description:
+      "Baterías de litio, UPS, inversores, paneles solares y cables nuevos, con garantía de fábrica y factura. Te confirmamos stock y total, y pagas por transferencia. Entrega en la Región Metropolitana.",
+    alternates: { canonical: cat ? `/energia?categoria=${encodeURIComponent(cat.name)}` : "/energia" },
+  };
+}
+
+const SORTS = {
+  categoria: "Por categoría",
+  "menor-precio": "Menor precio",
+  "mayor-precio": "Mayor precio",
+} as const;
+type Sort = keyof typeof SORTS;
+
+const order = (p: Product) => ENERGY_CATEGORIES.findIndex((c) => c.name === energyCategory(p.category)?.name);
+
+function sortProducts(list: Product[], sort: Sort) {
+  const out = [...list];
+  if (sort === "menor-precio") out.sort((a, b) => a.price - b.price);
+  else if (sort === "mayor-precio") out.sort((a, b) => b.price - a.price);
+  else out.sort((a, b) => order(a) - order(b) || a.price - b.price);
+  return out;
+}
+
+export default async function EnergyPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const cat = energyCategory(params.categoria);
+  const sort: Sort = params.orden && params.orden in SORTS ? (params.orden as Sort) : "categoria";
+  const { energy } = splitWorlds(await listProducts());
+  const list = sortProducts(cat ? energy.filter((p) => energyCategory(p.category)?.name === cat.name) : energy, sort);
+
+  // Tarjetas de categoría: solo las que tienen productos, con foto y precio "desde".
+  const tiles = ENERGY_CATEGORIES.map((c) => {
+    const items = energy.filter((p) => energyCategory(p.category)?.name === c.name);
+    return { c, count: items.length, from: items.length ? Math.min(...items.map((p) => p.price)) : 0, photo: items.find((p) => p.image_url)?.image_url ?? null };
+  }).filter((t) => t.count > 0);
+  // Tres fotos para el banner de arriba (de categorías distintas si se puede).
+  const collage = tiles.map((t) => t.photo).filter((x): x is string => Boolean(x)).slice(0, 3);
+  const wa = whatsappLink("Hola, quiero ayuda para elegir un producto de Energía en TERC");
+
+  const link = (changes: { categoria?: string | null; orden?: string | null }) => {
+    const next = new URLSearchParams();
+    const categoria = changes.categoria === undefined ? (cat?.name ?? null) : changes.categoria;
+    const orden = changes.orden === undefined ? (sort === "categoria" ? null : sort) : changes.orden;
+    if (categoria) next.set("categoria", categoria);
+    if (orden) next.set("orden", orden);
+    const qs = next.toString();
+    return `/energia${qs ? `?${qs}` : ""}#productos`;
+  };
+
+  return (
+    <div className="pb-16">
+      <div className="shell pt-5">
+        <section className="rise relative grid items-center gap-8 overflow-hidden rounded-3xl bg-pine p-6 text-white sm:p-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+          <Mark className="absolute -right-10 -top-10 w-56 opacity-[0.06]" ink="#ffffff" />
+          <div className="relative">
+            <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-gold">
+              <StoreIcon name="bolt" className="h-4 w-4" /> Energía TERC
+            </p>
+            <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-extrabold leading-[1.02] tracking-tight sm:text-5xl">
+              Energía para tu casa y tu oficina
+            </h1>
+            <p className="mt-3 max-w-lg text-[15px] leading-relaxed text-white/80 sm:text-base">
+              Respaldo, baterías de litio, inversores y energía solar a buen precio. Te ayudamos a elegir por WhatsApp; la
+              instalación la hace tu técnico de confianza.
+            </p>
+            <EnergyFacts dark className="mt-5" />
+          </div>
+          {collage.length > 0 && (
+            <div className="relative mx-auto hidden h-64 w-full max-w-sm sm:block" aria-hidden>
+              {collage.map((src, i) => (
+                <div
+                  key={src}
+                  className={`photo-stage absolute overflow-hidden rounded-full ring-4 ring-white/10 ${
+                    ["left-0 top-4 h-48 w-48", "right-2 top-0 h-36 w-36", "bottom-0 right-16 h-32 w-32"][i]
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img {...photoProps(src, "200px", 384)} alt="" className="absolute inset-0 h-full w-full object-contain p-[16%] mix-blend-multiply" />
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+
+      {tiles.length > 0 && (
+        <section className="shell pt-8">
+          <h2 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Categorías</h2>
+          <p className="mt-1 text-sm text-muted">Elige una para ver sus productos.</p>
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {tiles.map(({ c, count, from, photo }) => (
+              <Link
+                key={c.name}
+                href={energyHref(c)}
+                aria-current={cat?.name === c.name ? "page" : undefined}
+                className={`group flex flex-col overflow-hidden rounded-3xl bg-surface p-3 ring-1 transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-pine/10 ${
+                  cat?.name === c.name ? "ring-2 ring-pine-700" : "ring-line/[0.06]"
+                }`}
+              >
+                <div className="photo-stage relative aspect-[4/3] overflow-hidden rounded-2xl">
+                  {photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      {...photoProps(photo, "(min-width: 1024px) 180px, 45vw", 384)}
+                      alt=""
+                      loading="lazy"
+                      className="absolute inset-0 h-full w-full object-contain p-[10%] mix-blend-multiply transition duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <Mark className="absolute inset-[30%] opacity-30" />
+                  )}
+                </div>
+                <b className="mt-3 text-[15px] leading-tight text-ink">{c.name}</b>
+                <span className="mt-0.5 text-xs leading-snug text-muted">{c.blurb}</span>
+                <span className="mt-2 text-xs text-muted">
+                  {count} {count === 1 ? "producto" : "productos"} · desde <b className="text-pine-700">{formatCLP(from)}</b>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section id="productos" className="shell scroll-mt-40 pt-10">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">{cat ? cat.name : "Todo Energía"}</h2>
+            <p className="mt-1 text-sm text-muted">
+              {list.length} {list.length === 1 ? "producto" : "productos"} · se compran con solicitud y se pagan por transferencia
+            </p>
+          </div>
+          {cat && (
+            <Link href="/energia#productos" className="text-sm font-medium text-pine-700 hover:underline">
+              Ver todo Energía
+            </Link>
+          )}
+        </div>
+        {cat?.install && (
+          <p className="mt-3 flex items-start gap-2 rounded-2xl bg-mint-50 px-4 py-3 text-sm text-ink">
+            <StoreIcon name="repair" className="mt-0.5 h-5 w-5 text-pine-700" />
+            <span>{ENERGY_INFO.install}</span>
+          </p>
+        )}
+        {energy.length > 0 && (
+          <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="scroll-fade flex gap-2 overflow-x-auto pb-1">
+              <Link
+                href={link({ categoria: null })}
+                className={`shrink-0 rounded-full border px-4 py-1.5 text-sm ${!cat ? "border-pine bg-pine text-white" : "border-line/10 bg-surface text-ink hover:border-pine-700/40"}`}
+              >
+                Todo
+              </Link>
+              {tiles.map(({ c }) => (
+                <Link
+                  key={c.name}
+                  href={link({ categoria: cat?.name === c.name ? null : c.name })}
+                  className={`shrink-0 rounded-full border px-4 py-1.5 text-sm ${cat?.name === c.name ? "border-pine bg-pine text-white" : "border-line/10 bg-surface text-ink hover:border-pine-700/40"}`}
+                >
+                  {c.short}
+                </Link>
+              ))}
+            </div>
+            <div className="scroll-fade flex items-center gap-1 overflow-x-auto text-sm">
+              <span className="shrink-0 text-muted">Ordenar:</span>
+              {Object.entries(SORTS).map(([key, label]) => (
+                <Link
+                  key={key}
+                  href={link({ orden: key === "categoria" ? null : key })}
+                  className={`shrink-0 rounded-full px-3 py-1.5 ${sort === key ? "bg-surface font-semibold text-ink ring-1 ring-line/10" : "text-muted hover:text-ink"}`}
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {list.length === 0 ? (
+          <div className="mt-6 flex flex-col items-center rounded-2xl border border-dashed border-line/15 bg-surface p-10 text-center">
+            <Terqui pose="cargando" className="mb-2 h-32 w-32" />
+            <p className="font-medium text-ink">Estamos cargando los productos de Energía.</p>
+            <p className="mt-1 max-w-md text-sm text-muted">¿Buscas algo en particular? Escríbenos y te decimos si lo tenemos y a qué precio.</p>
+            {wa && (
+              <a href={wa} target="_blank" rel="noopener" className="mt-4 inline-flex items-center gap-2 rounded-full bg-cta px-5 py-2.5 text-sm font-semibold text-white hover:bg-cta-hover">
+                <WhatsAppIcon className="h-4 w-4" /> Preguntar por WhatsApp
+              </a>
+            )}
+          </div>
+        ) : (
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {list.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="shell pt-12">
+        <WireSunCard />
+      </section>
+
+      <section id="como-comprar" className="shell scroll-mt-40 pt-12">
+        <h2 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">¿Cómo se compra Energía?</h2>
+        <p className="mt-1 text-sm text-muted">Sin tarjeta y sin sorpresas: primero confirmamos stock y total.</p>
+        <EnergySteps className="mt-5" />
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl bg-surface p-4 ring-1 ring-line/[0.06]">
+            <b className="text-ink">¿Cuál necesito?</b>
+            <p className="mt-1 text-[13px] text-muted">
+              Escríbenos por WhatsApp y te recomendamos según lo que quieres respaldar.{" "}
+              {wa && (
+                <a href={wa} target="_blank" rel="noopener" className="font-semibold text-pine-700 hover:underline">
+                  Preguntar
+                </a>
+              )}
+            </p>
+          </div>
+          <div className="rounded-2xl bg-surface p-4 ring-1 ring-line/[0.06]">
+            <b className="text-ink">Entrega</b>
+            <p className="mt-1 text-[13px] text-muted">{ENERGY_INFO.delivery}</p>
+          </div>
+          <div className="rounded-2xl bg-surface p-4 ring-1 ring-line/[0.06]">
+            <b className="text-ink">Garantía</b>
+            <p className="mt-1 text-[13px] text-muted">
+              Garantía de fábrica, y nosotros te acompañamos para hacerla válida. Vendemos el producto; no hacemos instalación.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="shell pt-8">
+        <InstallerCard />
+      </section>
+    </div>
+  );
+}

@@ -6,11 +6,13 @@ import { TerquiHero } from "@/components/home/TerquiHero";
 import { PeaceOfMind } from "@/components/home/PeaceOfMind";
 import { ServiceCard, services, withServices } from "@/components/home/ServiceCard";
 import { WelcomeCurtain } from "@/components/home/WelcomeCurtain";
+import { bannerProducts, EnergyBanner } from "@/components/energy/EnergyParts";
 import { StoreIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
 import { Terqui } from "@/components/Terqui";
 import { OfferCountdown } from "@/components/OfferCountdown";
 import { ProductCard } from "@/components/ProductCard";
+import { energyCategory, energyHref, splitWorlds } from "@/lib/energy";
 import { formatCLP, offer, savings } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { listProducts } from "@/lib/products";
@@ -152,15 +154,21 @@ export default async function HomePage({ searchParams }: Props) {
   const onlyOffers = params.ofertas === "1";
   const sort: Sort = params.orden && params.orden in SORTS ? (params.orden as Sort) : "destacados";
 
-  const [all, fund, rank] = await Promise.all([listProducts(), getShippingFund(), productRanking().catch(() => new Map<string, number>())]);
+  // Las categorías de Energía tienen su propia página.
+  const energyCat = energyCategory(categoria);
+  if (energyCat) redirect(energyHref(energyCat));
+
+  const [catalog, fund, rank] = await Promise.all([listProducts(), getShippingFund(), productRanking().catch(() => new Map<string, number>())]);
+  // La portada es de los equipos; Energía aparece en su banner y en las búsquedas.
+  const { pcs: all, energy } = splitWorlds(catalog);
   const freeShipping = fund > 0;
   const query = normalize(q.trim());
   // Si buscan un SKU exacto (10001, "sku 10001" o "#10001"), van directo a la ficha de ese equipo.
   const skuMatch = query.match(/^(?:sku\s*)?#?(\d+)$/);
-  const bySku = skuMatch && all.find((p) => p.sku === skuMatch[1]);
+  const bySku = skuMatch && catalog.find((p) => p.sku === skuMatch[1]);
   if (bySku) redirect(`/producto/${bySku.slug}`);
   const filtered = sortProducts(
-    all.filter(
+    (query ? catalog : all).filter(
       (p) =>
         (!categoria || p.category === categoria) &&
         (!onlyOffers || offer(p)) &&
@@ -170,6 +178,8 @@ export default async function HomePage({ searchParams }: Props) {
     rank,
   );
   const filtering = Boolean(query || categoria || onlyOffers);
+  // Banner de Energía entre las filas de equipos (solo en la portada y si hay productos con foto).
+  const energyPicks = filtering ? [] : bannerProducts(energy);
   const categories = [...new Set(all.map((p) => p.category))].sort();
 
   const offers = all.filter((p) => offer(p)).sort((a, b) => bestDiscount(b) - bestDiscount(a));
@@ -376,7 +386,14 @@ export default async function HomePage({ searchParams }: Props) {
               {onlyOffers ? "Ofertas" : categoria || (q ? `Resultados para “${q}”` : "Todos los equipos")}
             </h2>
             <p className="mt-1 text-sm text-muted">
-              {filtered.length} {filtered.length === 1 ? "equipo disponible" : "equipos disponibles"}
+              {filtered.length}{" "}
+              {query
+                ? filtered.length === 1
+                  ? "resultado"
+                  : "resultados"
+                : filtered.length === 1
+                  ? "equipo disponible"
+                  : "equipos disponibles"}
             </p>
           </div>
           {filtering && (
@@ -437,19 +454,33 @@ export default async function HomePage({ searchParams }: Props) {
             </Link>
           </div>
         ) : (
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
-            {withServices(filtered, q ? [] : serviceCards).map((cell, i) =>
-              cell.kind === "product" ? (
-                <div key={cell.item.id} data-reveal style={delay((i % 5) * 70)}>
-                  <ProductCard product={cell.item} />
+          (() => {
+            const cells = withServices(filtered, q ? [] : serviceCards);
+            // Con suficientes equipos, el banner va en la tercera fila de la grilla: dos filas de equipos
+            // arriba y el resto abajo, con cualquier número de columnas. Si son pocos, va después.
+            const inGrid = energyPicks.length > 0 && cells.length >= 10;
+            return (
+              <>
+                <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
+                  {cells.map((cell, i) => [
+                    i === 4 && inGrid ? (
+                      <EnergyBanner key="energia" products={energyPicks} className="col-span-full my-2 sm:my-4" style={{ gridRow: 3 }} />
+                    ) : null,
+                    cell.kind === "product" ? (
+                      <div key={cell.item.id} data-reveal style={delay((i % 5) * 70)}>
+                        <ProductCard product={cell.item} />
+                      </div>
+                    ) : (
+                      <div key={cell.service.key} data-reveal style={delay((i % 5) * 70)}>
+                        <ServiceCard service={cell.service} />
+                      </div>
+                    ),
+                  ])}
                 </div>
-              ) : (
-                <div key={cell.service.key} data-reveal style={delay((i % 5) * 70)}>
-                  <ServiceCard service={cell.service} />
-                </div>
-              ),
-            )}
-          </div>
+                {energyPicks.length > 0 && !inGrid && <EnergyBanner products={energyPicks} className="mt-8" />}
+              </>
+            );
+          })()
         )}
       </section>
 

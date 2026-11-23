@@ -4,6 +4,7 @@ import { Preference } from "mercadopago";
 import { getAdminUser } from "@/lib/admin";
 import { addressLine, DWELLINGS, isDwelling, isFixedCourier, normalizePhone, normalizeRut } from "@/lib/address";
 import { checkCoupon, countCouponUses } from "@/lib/coupons";
+import { isEnergy } from "@/lib/energy";
 import { getMercadoPagoClient } from "@/lib/mercadopago";
 import { createWebpayTransaction, getWebpayConfig } from "@/lib/webpay";
 import { saveMarketingConsent } from "@/lib/email-preferences";
@@ -136,6 +137,13 @@ export async function POST(request: Request) {
     }
     if (product.stock < item.quantity) {
       return NextResponse.json({ error: `Sin stock suficiente de ${product.name}` }, { status: 409 });
+    }
+    // Energía (TERC 2.1) no se paga aquí: va como solicitud y se paga por transferencia.
+    if (isEnergy(product)) {
+      return NextResponse.json(
+        { error: "Tu carrito tiene productos de Energía: se compran enviando una solicitud. Recarga el carrito." },
+        { status: 409 },
+      );
     }
     // Extensión de garantía: solo si el equipo la ofrece hoy (equipo en oferta); el precio sale del catálogo.
     const upgrade = item.extendWarranty ? (product.warranty_upgrade ?? null) : null;

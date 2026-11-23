@@ -1,3 +1,4 @@
+import { energyCategory, isEnergy } from "./energy";
 import { CONDITION } from "./format";
 import { SHIPPING_ZONES } from "./shipping";
 import { SITE } from "./site";
@@ -13,6 +14,12 @@ export const DEFAULT_DESCRIPTION =
 
 // Texto corto de un producto para el resultado de Google (unos 155 caracteres como máximo).
 export function productDescription(product: Product): string {
+  // Energía: producto nuevo, con garantía de fábrica y sin instalación.
+  const energy = energyCategory(product.category);
+  if (energy) {
+    const text = `${product.name}, nuevo${product.warranty_months ? `, ${warrantyLabel(product.warranty_months)} de garantía de fábrica` : ""}. ${energy.name} con factura y entrega en la Región Metropolitana.`;
+    return text.length > 160 ? `${text.slice(0, 157).trimEnd()}…` : text;
+  }
   const parts = [
     `${product.name} reacondicionado`,
     CONDITION[product.grade].label.toLowerCase(),
@@ -67,11 +74,12 @@ export function productJsonLd(product: Product, fund = 0) {
       url,
       price: product.price,
       priceCurrency: "CLP",
-      itemCondition: "https://schema.org/RefurbishedCondition",
+      itemCondition: isEnergy(product) ? "https://schema.org/NewCondition" : "https://schema.org/RefurbishedCondition",
       availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       ...(product.offer_ends_at ? { priceValidUntil: product.offer_ends_at } : {}),
       seller: { "@type": "Organization", name: "TERC" },
-      shippingDetails: shippingDetails(product, fund),
+      // Energía no viaja por courier: la entrega se coordina, así que no se publica una tarifa.
+      ...(isEnergy(product) ? {} : { shippingDetails: shippingDetails(product, fund) }),
       hasMerchantReturnPolicy: RETURN_POLICY,
     },
   };

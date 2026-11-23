@@ -81,6 +81,7 @@ export function courierLabel(courier: string) {
 
 // Cómo se muestra en el panel el envío guardado en un pedido.
 export function shippingLabel(zone: string) {
+  if (zone === "solicitud") return "a coordinar (solicitud por transferencia)";
   if (isShippingZone(zone)) return SHIPPING_ZONES[zone].label;
   if (zone.startsWith("shipit:")) return `${courierLabel(zone.slice(7))} (Shipit)`;
   return zone;
