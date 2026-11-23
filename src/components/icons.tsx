@@ -24,6 +24,8 @@ const PATHS = {
   bolt: "M13 2.5L4.5 13.5h6.5l-1 8 8.5-11h-6.5z",
   bank: "M3 9.5l9-5.5 9 5.5M5 10v7.5M9.5 10v7.5M14.5 10v7.5M19 10v7.5M3 20h18",
   box: "M3 7.5l9-4.5 9 4.5v9l-9 4.5-9-4.5zM3 7.5l9 4.5 9-4.5M12 12v9",
+  plug: "M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4",
+  bulb: "M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z",
 } as const;
 
 export type IconName = keyof typeof PATHS;

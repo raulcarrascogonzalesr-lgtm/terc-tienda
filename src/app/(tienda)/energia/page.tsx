@@ -50,13 +50,16 @@ export default async function EnergyPage({ searchParams }: Props) {
   const { energy } = splitWorlds(await listProducts());
   const list = sortProducts(cat ? energy.filter((p) => energyCategory(p.category)?.name === cat.name) : energy, sort);
 
-  // Tarjetas de categoría: solo las que tienen productos, con foto y precio "desde".
+  // Tarjetas de categoría: las que tienen productos, con foto y precio "desde". Mientras no haya
+  // ningún producto de Energía se muestran todas como "Muy pronto" (decisión de Raúl, 23-11).
+  const soon = energy.length === 0;
   const tiles = ENERGY_CATEGORIES.map((c) => {
     const items = energy.filter((p) => energyCategory(p.category)?.name === c.name);
     return { c, count: items.length, from: items.length ? Math.min(...items.map((p) => p.price)) : 0, photo: items.find((p) => p.image_url)?.image_url ?? null };
-  }).filter((t) => t.count > 0);
+  }).filter((t) => soon || t.count > 0);
   // Tres fotos para el banner de arriba (de categorías distintas si se puede).
   const collage = tiles.map((t) => t.photo).filter((x): x is string => Boolean(x)).slice(0, 3);
+  const bubbles = ["left-0 top-4 h-48 w-48", "right-2 top-0 h-36 w-36", "bottom-0 right-16 h-32 w-32"];
   const wa = whatsappLink("Hola, quiero ayuda para elegir un producto de Energía en TERC");
 
   const link = (changes: { categoria?: string | null; orden?: string | null }) => {
@@ -76,7 +79,7 @@ export default async function EnergyPage({ searchParams }: Props) {
           <Mark className="absolute -right-10 -top-10 w-56 opacity-[0.06]" ink="#ffffff" />
           <div className="relative">
             <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-gold">
-              <StoreIcon name="bolt" className="h-4 w-4" /> Energía TERC
+              <StoreIcon name="bolt" className="h-4 w-4" /> {soon ? "Energía TERC · Muy pronto" : "Energía TERC"}
             </p>
             <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-extrabold leading-[1.02] tracking-tight sm:text-5xl">
               Energía para tu casa y tu oficina
@@ -87,17 +90,21 @@ export default async function EnergyPage({ searchParams }: Props) {
             </p>
             <EnergyFacts dark className="mt-5" />
           </div>
-          {collage.length > 0 && (
+          {collage.length > 0 ? (
             <div className="relative mx-auto hidden h-64 w-full max-w-sm sm:block" aria-hidden>
               {collage.map((src, i) => (
-                <div
-                  key={src}
-                  className={`photo-stage absolute overflow-hidden rounded-full ring-4 ring-white/10 ${
-                    ["left-0 top-4 h-48 w-48", "right-2 top-0 h-36 w-36", "bottom-0 right-16 h-32 w-32"][i]
-                  }`}
-                >
+                <div key={src} className={`photo-stage absolute overflow-hidden rounded-full ring-4 ring-white/10 ${bubbles[i]}`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img {...photoProps(src, "200px", 384)} alt="" className="absolute inset-0 h-full w-full object-contain p-[16%] mix-blend-multiply" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            // Sin fotos todavía: los íconos de batería, inversor y panel en las mismas burbujas.
+            <div className="relative mx-auto hidden h-64 w-full max-w-sm sm:block" aria-hidden>
+              {(["battery", "bolt", "sun"] as const).map((icon, i) => (
+                <div key={icon} className={`absolute flex items-center justify-center rounded-full bg-white/[0.07] ring-4 ring-white/10 ${bubbles[i]}`}>
+                  <StoreIcon name={icon} className={`text-gold ${["h-20 w-20", "h-14 w-14", "h-12 w-12"][i]}`} />
                 </div>
               ))}
             </div>
@@ -108,7 +115,9 @@ export default async function EnergyPage({ searchParams }: Props) {
       {tiles.length > 0 && (
         <section className="shell pt-8">
           <h2 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Categorías</h2>
-          <p className="mt-1 text-sm text-muted">Elige una para ver sus productos.</p>
+          <p className="mt-1 text-sm text-muted">
+            {soon ? "Esto es lo que viene. Si buscas algo ya, pregúntanos por WhatsApp." : "Elige una para ver sus productos."}
+          </p>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {tiles.map(({ c, count, from, photo }) => (
               <Link
@@ -119,8 +128,10 @@ export default async function EnergyPage({ searchParams }: Props) {
                   cat?.name === c.name ? "ring-2 ring-pine-700" : "ring-line/[0.06]"
                 }`}
               >
-                <div className="photo-stage relative aspect-[4/3] overflow-hidden rounded-2xl">
-                  {photo ? (
+                <div className={`relative aspect-[4/3] overflow-hidden rounded-2xl ${soon ? "flex items-center justify-center bg-mint-50" : "photo-stage"}`}>
+                  {soon ? (
+                    <StoreIcon name={c.icon} className="h-12 w-12 text-pine-700 transition duration-500 group-hover:scale-110" />
+                  ) : photo ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       {...photoProps(photo, "(min-width: 1024px) 180px, 45vw", 384)}
@@ -134,9 +145,15 @@ export default async function EnergyPage({ searchParams }: Props) {
                 </div>
                 <b className="mt-3 text-[15px] leading-tight text-ink">{c.name}</b>
                 <span className="mt-0.5 text-xs leading-snug text-muted">{c.blurb}</span>
-                <span className="mt-2 text-xs text-muted">
-                  {count} {count === 1 ? "producto" : "productos"} · desde <b className="text-pine-700">{formatCLP(from)}</b>
-                </span>
+                {soon ? (
+                  <span className="mt-2 inline-flex w-fit rounded-full bg-gold px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-pine">
+                    Muy pronto
+                  </span>
+                ) : (
+                  <span className="mt-2 text-xs text-muted">
+                    {count} {count === 1 ? "producto" : "productos"} · desde <b className="text-pine-700">{formatCLP(from)}</b>
+                  </span>
+                )}
               </Link>
             ))}
           </div>
@@ -148,7 +165,9 @@ export default async function EnergyPage({ searchParams }: Props) {
           <div>
             <h2 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">{cat ? cat.name : "Todo Energía"}</h2>
             <p className="mt-1 text-sm text-muted">
-              {list.length} {list.length === 1 ? "producto" : "productos"} · se compran con solicitud y se pagan por transferencia
+              {soon
+                ? "Muy pronto · se comprarán con solicitud y se pagarán por transferencia"
+                : `${list.length} ${list.length === 1 ? "producto" : "productos"} · se compran con solicitud y se pagan por transferencia`}
             </p>
           </div>
           {cat && (
@@ -200,8 +219,10 @@ export default async function EnergyPage({ searchParams }: Props) {
         {list.length === 0 ? (
           <div className="mt-6 flex flex-col items-center rounded-2xl border border-dashed border-line/15 bg-surface p-10 text-center">
             <Terqui pose="cargando" className="mb-2 h-32 w-32" />
-            <p className="font-medium text-ink">Estamos cargando los productos de Energía.</p>
-            <p className="mt-1 max-w-md text-sm text-muted">¿Buscas algo en particular? Escríbenos y te decimos si lo tenemos y a qué precio.</p>
+            <p className="font-medium text-ink">
+              {soon ? "Muy pronto: estamos cargando los productos de Energía." : "Todavía no hay productos en esta categoría."}
+            </p>
+            <p className="mt-1 max-w-md text-sm text-muted">¿Buscas algo en particular? Escríbenos y te decimos si lo conseguimos y a qué precio.</p>
             {wa && (
               <a href={wa} target="_blank" rel="noopener" className="mt-4 inline-flex items-center gap-2 rounded-full bg-cta px-5 py-2.5 text-sm font-semibold text-white hover:bg-cta-hover">
                 <WhatsAppIcon className="h-4 w-4" /> Preguntar por WhatsApp

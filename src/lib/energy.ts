@@ -1,3 +1,4 @@
+import type { IconName } from "@/components/icons";
 import type { Order, Product } from "./types";
 
 // TERC 2.1: además de equipos reacondicionados, TERC vende productos de energía nuevos (proveedor Esol).
@@ -14,6 +15,7 @@ export type EnergyCategory = {
   aliases: string[]; // otras formas de escribirla en el panel
   blurb: string; // una línea para la tarjeta de la categoría
   install: boolean; // se conecta a una instalación eléctrica (la ficha avisa que no la incluye)
+  icon: IconName; // para las tarjetas cuando la categoría aún no tiene productos con foto
 };
 
 export const ENERGY_CATEGORIES: EnergyCategory[] = [
@@ -23,6 +25,7 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     aliases: ["UPS", "Respaldo", "Respaldo UPS"],
     blurb: "Que el computador no se apague con un corte de luz.",
     install: false,
+    icon: "shield",
   },
   {
     name: "Baterías de litio",
@@ -30,6 +33,7 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     aliases: ["Baterías", "Baterias", "Baterías de litio y AGM"],
     blurb: "Litio y AGM para respaldo y sistemas solares.",
     install: true,
+    icon: "battery",
   },
   {
     name: "Inversores y reguladores",
@@ -37,6 +41,7 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     aliases: ["Inversores", "Reguladores", "Inversor"],
     blurb: "Convierten y controlan la energía.",
     install: true,
+    icon: "bolt",
   },
   {
     name: "Paneles solares",
@@ -44,6 +49,7 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     aliases: ["Paneles", "Panel solar"],
     blurb: "Paneles de alta potencia, por unidad.",
     install: true,
+    icon: "sun",
   },
   {
     name: "Cables y conectores",
@@ -51,6 +57,7 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     aliases: ["Cables", "Conectores", "Cable solar"],
     blurb: "Cable solar, MC4 y accesorios.",
     install: true,
+    icon: "plug",
   },
   {
     name: "Iluminación",
@@ -58,6 +65,7 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     aliases: ["Iluminacion", "Luces", "Luces de respaldo", "Iluminación y luces de respaldo"],
     blurb: "Focos recargables y luces de respaldo.",
     install: false,
+    icon: "bulb",
   },
 ];
 
@@ -97,6 +105,13 @@ export function splitWorlds<T extends Pick<Product, "category">>(products: T[]) 
 export function energyCategoriesIn(products: Pick<Product, "category">[]): EnergyCategory[] {
   const present = new Set(products.map((p) => energyCategory(p.category)?.name).filter(Boolean));
   return ENERGY_CATEGORIES.filter((c) => present.has(c.name));
+}
+
+// Categorías del menú de Energía. Raúl decidió (23-11) mostrar Energía desde ya, aunque todavía
+// no haya productos: mientras no haya ninguno se muestran todas, como "Muy pronto".
+export function energyMenu(products: Pick<Product, "category">[]): EnergyCategory[] {
+  const present = energyCategoriesIn(products);
+  return present.length ? present : ENERGY_CATEGORIES;
 }
 
 // Enlace a una categoría de Energía.
