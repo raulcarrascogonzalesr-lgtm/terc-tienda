@@ -28,10 +28,12 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     icon: "shield",
   },
   {
-    name: "Baterías de litio",
+    // Raúl 24-11: también se venden baterías de gel y AGM de Esol, así que la categoría es "Baterías".
+    // Los productos de litio quedan con "Baterías de litio" (alias) y siguen cayendo aquí.
+    name: "Baterías",
     short: "Baterías",
-    aliases: ["Baterías", "Baterias", "Baterías de litio y AGM"],
-    blurb: "Litio y AGM para respaldo y sistemas solares.",
+    aliases: ["Baterías de litio", "Baterias", "Baterías de litio y AGM", "Baterías de gel", "Baterías GEL y AGM", "Baterías AGM"],
+    blurb: "Litio, gel y AGM para respaldo y sistemas solares.",
     install: true,
     icon: "battery",
   },
