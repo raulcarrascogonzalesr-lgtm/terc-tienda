@@ -2,7 +2,7 @@ import Link from "next/link";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
 import { Terqui } from "@/components/Terqui";
-import { ENERGY_CATEGORIES, ENERGY_STEPS, energyCategory, energyHref, WIRESUN_URL } from "@/lib/energy";
+import { ENERGY_CATEGORIES, ENERGY_PRICE_CLAIM, ENERGY_STEPS, energyCategory, energyHref, WIRESUN_URL } from "@/lib/energy";
 import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { whatsappLink } from "@/lib/site";
@@ -205,8 +205,9 @@ export function EnergyBanner({ products, className = "", style }: { products: Pr
           Que un corte de luz no te pare la pega
         </h2>
         <p className="mt-3 max-w-md text-[15px] leading-relaxed text-white/80">
-          Baterías de litio, inversores y respaldo para tu casa y tu oficina, a buen precio y con la misma atención por
-          WhatsApp de siempre.
+          Baterías de litio, inversores y respaldo para tu casa y tu oficina,{" "}
+          <strong className="font-bold text-gold">{ENERGY_PRICE_CLAIM}</strong> y con la misma atención por WhatsApp de
+          siempre.
         </p>
         <ul className="mt-4 flex flex-wrap gap-2 text-[13px]">
           {["Productos nuevos", "Factura", "Garantía de fábrica"].map((t) => (

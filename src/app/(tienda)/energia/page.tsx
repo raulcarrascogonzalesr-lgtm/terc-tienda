@@ -5,7 +5,7 @@ import { StoreIcon, WhatsAppIcon } from "@/components/icons";
 import { Mark } from "@/components/Mark";
 import { ProductCard } from "@/components/ProductCard";
 import { Terqui } from "@/components/Terqui";
-import { ENERGY_CATEGORIES, ENERGY_INFO, energyCategory, energyHref, splitWorlds } from "@/lib/energy";
+import { ENERGY_CATEGORIES, ENERGY_INFO, ENERGY_PRICE_CLAIM, energyCategory, energyHref, splitWorlds } from "@/lib/energy";
 import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { listProducts } from "@/lib/products";
@@ -85,8 +85,8 @@ export default async function EnergyPage({ searchParams }: Props) {
               Energía para tu casa y tu oficina
             </h1>
             <p className="mt-3 max-w-lg text-[15px] leading-relaxed text-white/80 sm:text-base">
-              Respaldo, baterías de litio, inversores y energía solar a buen precio. Te ayudamos a elegir por WhatsApp; la
-              instalación la hace tu técnico de confianza.
+              Respaldo, baterías de litio, inversores y energía solar{" "}
+              <strong className="font-bold text-gold">{ENERGY_PRICE_CLAIM}</strong>. Te ayudamos a elegir por WhatsApp.
             </p>
             <EnergyFacts dark className="mt-5" />
           </div>
@@ -176,12 +176,6 @@ export default async function EnergyPage({ searchParams }: Props) {
             </Link>
           )}
         </div>
-        {cat?.install && (
-          <p className="mt-3 flex items-start gap-2 rounded-2xl bg-mint-50 px-4 py-3 text-sm text-ink">
-            <StoreIcon name="repair" className="mt-0.5 h-5 w-5 text-pine-700" />
-            <span>{ENERGY_INFO.install}</span>
-          </p>
-        )}
         {energy.length > 0 && (
           <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="scroll-fade flex gap-2 overflow-x-auto pb-1">
