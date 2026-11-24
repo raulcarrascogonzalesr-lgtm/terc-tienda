@@ -130,7 +130,7 @@ export function ProductGallery({ product, badges }: { product: Product; badges?:
             {view === "terc" ? (
               <span className="flex h-full w-full flex-col items-center justify-center bg-pine text-white">
                 <StoreIcon name="shield" className="w-5 h-5 text-gold" />
-                <span className="text-[10px] font-semibold">{warrantyLabel(product.warranty_months)}</span>
+                <span className="text-[10px] font-semibold">{isEnergy(product) && !product.warranty_months ? "Fábrica" : warrantyLabel(product.warranty_months)}</span>
               </span>
             ) : view ? (
               <span className={`block h-full w-full ${PHOTO_BACKDROP}`}>
