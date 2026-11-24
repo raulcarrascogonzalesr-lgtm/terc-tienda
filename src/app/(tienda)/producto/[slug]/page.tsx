@@ -5,6 +5,7 @@ import { AddToCartButton, BuyNowButton } from "@/components/AddToCartButton";
 import { DiscountSticker } from "@/components/DiscountSticker";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
 import { OfferCountdown } from "@/components/OfferCountdown";
+import { PickupNote } from "@/components/PickupNote";
 import { ProductGallery } from "@/components/ProductGallery";
 import { ProductDocs } from "@/components/ProductDocs";
 import { TechSheet } from "@/components/TechSheet";
@@ -213,6 +214,7 @@ export default async function ProductPage({ params }: Props) {
                 </p>
               </div>
             </div>
+            <PickupNote />
           </div>
 
           <div id="comprar" className="space-y-2.5">

@@ -10,6 +10,9 @@ export const SITE = {
   // Vacío = no se muestra.
   rut: "76.498.039-5",
   address: "Pleyades 1467, Puente Alto, Región Metropolitana",
+  // Retiro (Raúl 24-11-2026): solo una posibilidad, en chiquitito y SIN promoverlo (es su casa).
+  // Una línea discreta, sin dirección exacta, coordinado por WhatsApp. Vacío = no se muestra.
+  pickup: "Puente Alto",
   slogan: "Segunda vida, primera calidad",
   // Plazo de despacho de los productos del proveedor (se piden después de la compra).
   // La ley exige informarlo, aunque la tienda no los muestre como "a pedido".

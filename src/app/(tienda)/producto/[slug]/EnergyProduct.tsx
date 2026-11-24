@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AddToCartButton, BuyNowButton } from "@/components/AddToCartButton";
 import { EnergySteps } from "@/components/energy/EnergyParts";
 import { StoreIcon, WhatsAppIcon } from "@/components/icons";
+import { PickupNote } from "@/components/PickupNote";
 import { ProductGallery } from "@/components/ProductGallery";
 import { ProductDocs } from "@/components/ProductDocs";
 import { TechSheet } from "@/components/TechSheet";
@@ -97,12 +98,15 @@ export function EnergyProduct({ product }: { product: Product }) {
           </div>
 
           {/* Raúl (23-11): sin recuadro de "Instalación no incluida"; se entiende que TERC no instala. */}
-          <div className="flex items-start gap-3 rounded-3xl border-2 border-mint-50 bg-surface p-5">
-            <StoreIcon name="truck" className="mt-0.5 h-6 w-6 text-pine-700" />
-            <div>
-              <p className="font-bold text-ink">Entrega</p>
-              <p className="text-[13px] text-muted">{ENERGY_INFO.delivery}</p>
+          <div className="space-y-3 rounded-3xl border-2 border-mint-50 bg-surface p-5">
+            <div className="flex items-start gap-3">
+              <StoreIcon name="truck" className="mt-0.5 h-6 w-6 text-pine-700" />
+              <div>
+                <p className="font-bold text-ink">Entrega</p>
+                <p className="text-[13px] text-muted">{ENERGY_INFO.delivery}</p>
+              </div>
             </div>
+            <PickupNote />
           </div>
 
           <div id="comprar" className="space-y-2.5">
