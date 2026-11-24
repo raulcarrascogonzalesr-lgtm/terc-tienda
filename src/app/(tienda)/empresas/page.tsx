@@ -29,7 +29,7 @@ const SERVICES: { kind: QuoteKind; icon: IconName; title: string; text: string }
     kind: "energia",
     icon: "bolt",
     title: "Energía y eléctricos",
-    text: "Baterías de litio, inversores, UPS, paneles, cables y más. Te cotizamos los equipos que necesitas; la instalación no está incluida.",
+    text: "Baterías de litio, inversores, UPS, paneles, cables y más. Te cotizamos los equipos que necesitas, con factura a nombre de tu empresa.",
   },
   {
     kind: "otro",
