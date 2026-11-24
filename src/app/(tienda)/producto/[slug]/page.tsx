@@ -29,7 +29,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug((await params).slug);
   if (!product) return { title: "Producto no encontrado" };
   // Energía (TERC 2.1) es nuevo: no se titula "reacondicionado".
-  const title = isEnergy(product) ? `${product.name} | TERC Energía` : `${product.name} reacondicionado | TERC`;
+  // En Energía va "precio en Chile", que es como la gente busca (ej. "batería pylontech precio").
+  const title = isEnergy(product) ? `${product.name}: precio en Chile | TERC` : `${product.name} reacondicionado | TERC`;
   const description = productDescription(product);
   return {
     title,
