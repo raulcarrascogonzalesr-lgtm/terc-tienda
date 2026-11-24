@@ -2,14 +2,16 @@ import Link from "next/link";
 import { formatCLP, shortDate, todayInChile } from "@/lib/format";
 import { listAllProducts, listExtraCosts } from "../data";
 import type { ExtraCost, Product } from "@/lib/types";
-import { photoProps } from "@/lib/photo";
+import { NO_PHOTO_IMAGE, photoProps } from "@/lib/photo";
 import { productKind, type ProductKind } from "@/lib/specs";
 import { extraCostFor } from "../extra-costs";
 import { netOf } from "../finance";
 import { ICONS } from "../icons";
 import { Icon, PageHeader } from "../ui";
 import { DeleteProductButton } from "./DeleteProductButton";
+import { ImportDocsButton } from "./ImportDocsButton";
 import { ImportPhotosButton } from "./ImportPhotosButton";
+import { isStoredDocument, parseDocuments } from "@/lib/documents";
 
 export const dynamic = "force-dynamic";
 
@@ -78,10 +80,13 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
       : all.filter((p) => simple(`${p.sku} ${p.name} ${p.brand} ${p.supplier_sku ?? ""}`).includes(query));
   const today = todayInChile();
   const ours = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/productos/`;
-  const isExternal = (url: string | null) => !!url?.startsWith("https://") && !url.startsWith(ours);
+  // La imagen de Terqui "aún no tiene foto" es de la tienda (terc.cl), no de otra página.
+  const isExternal = (url: string | null) =>
+    !!url?.startsWith("https://") && !url.startsWith(ours) && !url.includes(NO_PHOTO_IMAGE);
   const externalPhotos = all.filter(
     (p) => isExternal(p.image_url) || p.images.some(isExternal),
   ).length;
+  const externalDocs = all.filter((p) => parseDocuments(p.documents).some((d) => !isStoredDocument(d.url))).length;
   return (
     <section className="space-y-4">
       <PageHeader
@@ -94,6 +99,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         </Link>
       </PageHeader>
       <ImportPhotosButton pending={externalPhotos} />
+      <ImportDocsButton pending={externalDocs} />
       <form className="flex flex-wrap items-center gap-2" role="search">
         <input
           name="q"
