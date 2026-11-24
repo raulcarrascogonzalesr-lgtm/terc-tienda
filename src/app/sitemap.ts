@@ -15,6 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/por-que-terc`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/empresas`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/garantia-y-devoluciones`, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${base}/terminos`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/privacidad`, changeFrequency: "yearly", priority: 0.2 },
     ...categories.map((c) => ({
       url: `${base}/?categoria=${encodeURIComponent(c)}`,
