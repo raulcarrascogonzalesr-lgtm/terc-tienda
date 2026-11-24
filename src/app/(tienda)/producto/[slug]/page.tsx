@@ -6,6 +6,7 @@ import { DiscountSticker } from "@/components/DiscountSticker";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
 import { OfferCountdown } from "@/components/OfferCountdown";
 import { ProductGallery } from "@/components/ProductGallery";
+import { ProductDocs } from "@/components/ProductDocs";
 import { TechSheet } from "@/components/TechSheet";
 import { Terqui } from "@/components/Terqui";
 import { TrackView } from "@/components/TrackView";
@@ -336,6 +337,7 @@ export default async function ProductPage({ params }: Props) {
           )}
 
           <TechSheet text={product.tech_sheet} />
+          <ProductDocs text={product.documents} />
         </div>
       </div>
       <StickyBuyBar product={product} note={deal ? `Ahorras ${formatCLP(deal.amount)}` : null} />

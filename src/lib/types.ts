@@ -26,6 +26,7 @@ export type Product = {
   warranty_upgrade?: { months: number; price: number } | null;
   description: string;
   tech_sheet?: string | null; // ficha técnica: una línea por dato ("Etiqueta: valor"), "## " abre un grupo
+  documents?: string | null; // PDF para descargar, uno por línea: "Ficha técnica | https://…"
   image_url: string | null;
   images: string[]; // fotos extra, en el orden en que se muestran
   // Paquete listo para despachar (con caja, plumavit y cables), para cotizar el envío.

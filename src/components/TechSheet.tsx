@@ -1,7 +1,7 @@
 import { parseTechSheet } from "@/lib/tech-sheet";
 
 // Apartado "Ficha técnica" de la ficha del producto. Se abre y se cierra en la misma página:
-// no enlaza a ningún archivo ni sitio externo (pedido de Raúl, 23-11).
+// no enlaza a ningún sitio externo (pedido de Raúl, 23-11). Los PDF van aparte, en ProductDocs.
 export function TechSheet({ text }: { text: string | null | undefined }) {
   const groups = parseTechSheet(text);
   if (!groups.length) return null;

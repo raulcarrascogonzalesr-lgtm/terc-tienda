@@ -236,6 +236,19 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
       </Field>
 
       <Field
+        label="Documentos para descargar (PDF)"
+        hint='Uno por línea, así: "Ficha técnica | https://…pdf" y "Manual de uso | https://…pdf". Se ven debajo de la ficha técnica. Si el enlace es de otra página, apreta "Guardar documentos en la tienda" en la lista de productos: la tienda solo muestra los guardados en ella.'
+      >
+        <textarea
+          name="documents"
+          rows={3}
+          defaultValue={product?.documents ?? ""}
+          placeholder="Ficha técnica | https://…pdf"
+          className="input font-mono text-xs"
+        />
+      </Field>
+
+      <Field
         label="Foto"
         hint={
           product?.image_url ? "Sube una nueva solo si quieres cambiarla" : "JPG o PNG, hasta 5 MB"

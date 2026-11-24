@@ -12,6 +12,8 @@ import { resendOrderEmail, sendOrderEmailOnce, type EmailKind } from "@/lib/orde
 import { getAdminClient } from "@/lib/supabase";
 import type { OrderStatus, QuoteStatus } from "@/lib/types";
 import { CHANNEL_LABELS, EXPENSE_CATEGORIES, INCOME_CATEGORIES, OTHER_OUTFLOWS } from "./finance";
+import { DOCS_BUCKET, formatDocuments, isStoredDocument, parseDocuments } from "@/lib/documents";
+import { NO_PHOTO_IMAGE } from "@/lib/photo";
 
 function db() {
   const supabase = getAdminClient();
@@ -153,6 +155,7 @@ export async function saveProduct(_prev: SaveResult, form: FormData): Promise<Sa
     warranty_months: intOrNull(form.get("warranty_months")) ?? 12,
     description: String(form.get("description") ?? "").trim(),
     tech_sheet: String(form.get("tech_sheet") ?? "").trim() || null,
+    documents: formatDocuments(parseDocuments(String(form.get("documents") ?? ""))) || null,
     active: form.get("active") === "on",
     on_demand: form.get("on_demand") === "on",
     supplier: String(form.get("supplier") ?? "").trim() || null,
@@ -232,8 +235,9 @@ async function copyPhoto(url: string): Promise<string> {
 export async function importExternalPhotos(): Promise<ImportResult> {
   await requireAdmin();
   const ours = storageUrl();
+  // La imagen de Terqui "aún no tiene foto" es de la tienda: no se copia (así las portadas la siguen reconociendo).
   const isExternal = (url: string | null): url is string =>
-    !!url && url.startsWith("https://") && !url.startsWith(ours);
+    !!url && url.startsWith("https://") && !url.startsWith(ours) && !url.includes(NO_PHOTO_IMAGE);
   const { data, error } = await db().from("products").select("id, name, image_url, images");
   if (error) throw error;
 
@@ -257,6 +261,55 @@ export async function importExternalPhotos(): Promise<ImportResult> {
     const images: string[] = [];
     for (const url of p.images as string[]) images.push(await copy(url));
     await db().from("products").update({ image_url, images }).eq("id", p.id);
+    if (!ok) failed.push(p.name);
+  }
+
+  revalidatePath("/", "layout");
+  return { saved, failed };
+}
+
+// Descarga un PDF de otra página (ficha técnica o manual) y lo guarda en la tienda.
+async function copyDocument(url: string): Promise<string> {
+  const res = await fetch(url, { signal: AbortSignal.timeout(60000), headers: { "user-agent": "Mozilla/5.0" } });
+  if (!res.ok) throw new Error("No se pudo descargar");
+  const body = await res.arrayBuffer();
+  // Un PDF empieza con "%PDF" (algunas páginas responden con otro tipo de archivo).
+  if (new TextDecoder().decode(body.slice(0, 4)) !== "%PDF") throw new Error("No es un PDF");
+  if (body.byteLength > 45 * 1024 * 1024) throw new Error("PDF muy pesado");
+  const path = `${randomUUID()}.pdf`;
+  const supabase = db();
+  const upload = await supabase.storage.from(DOCS_BUCKET).upload(path, body, { contentType: "application/pdf" });
+  if (upload.error) throw upload.error;
+  return supabase.storage.from(DOCS_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+// Copia a la tienda los PDF (ficha técnica, manual) que se pusieron como enlace a otra página.
+// La tienda solo muestra los documentos guardados en ella.
+export async function importExternalDocuments(): Promise<ImportResult> {
+  await requireAdmin();
+  const { data, error } = await db().from("products").select("id, name, documents").not("documents", "is", null);
+  if (error) throw error;
+
+  let saved = 0;
+  const failed: string[] = [];
+  const pending = data.filter((p) => parseDocuments(p.documents).some((d) => !isStoredDocument(d.url)));
+  for (const p of pending.slice(0, 5)) {
+    let ok = true;
+    const docs = [];
+    for (const d of parseDocuments(p.documents)) {
+      if (isStoredDocument(d.url)) {
+        docs.push(d);
+        continue;
+      }
+      try {
+        docs.push({ ...d, url: await copyDocument(d.url) });
+        saved++;
+      } catch {
+        ok = false;
+        docs.push(d);
+      }
+    }
+    await db().from("products").update({ documents: formatDocuments(docs) }).eq("id", p.id);
     if (!ok) failed.push(p.name);
   }
 
