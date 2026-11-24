@@ -32,3 +32,11 @@ export function photoProps(src: string, sizes: string, maxWidth = 1080) {
     sizes,
   };
 }
+
+// Imagen de Terqui para los equipos que todavía no tienen foto ("¡Tan nuevo que aún no tiene foto!").
+// Va en la ficha y en la lista, pero nunca en portadas, banners ni tarjetas de categoría (Raúl, 24-11).
+export const NO_PHOTO_IMAGE = "/terqui/sin-foto.webp";
+
+export function hasRealPhoto(p: { image_url: string | null }): boolean {
+  return !!p.image_url && !p.image_url.includes(NO_PHOTO_IMAGE);
+}

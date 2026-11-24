@@ -1,3 +1,4 @@
+import { hasRealPhoto } from "./photo";
 import type { IconName } from "@/components/icons";
 import type { Order, Product } from "./types";
 
@@ -114,6 +115,28 @@ export function energyCategoriesIn(products: Pick<Product, "category">[]): Energ
 export function energyMenu(products: Pick<Product, "category">[]): EnergyCategory[] {
   const present = energyCategoriesIn(products);
   return present.length ? present : ENERGY_CATEGORIES;
+}
+
+// Las fotos más lindas de Energía, en orden, para portadas, banners y tarjetas de categoría
+// (elegidas el 24-11 mirando todas). Después van las demás con foto real, de la más cara a la más barata.
+const SHOWCASE = [
+  "bateria-litio-pylontech-fidus-plus-16-kwh-incl-ruedas-y-cable",
+  "bateria-litio-nimac-51-2v-nm51-2-200-wall-10-24kwh",
+  "bateria-de-litio-voltronic-lio-ii-4810e-5kwh",
+  "dyness-powerbrick-wheel-top-cover-battery-51-2v-280ah-14-341kwh",
+  "bateria-litio-solis-intellihome-16-kwh",
+  "bateria-de-litio-nimac-12v-300ah",
+  "bateria-litio-nimac-51-2v-nm51-2-300-15-36kwh",
+  "bateria-de-litio-dyness-dl5-0f-100ah-5-12kwh",
+];
+
+// Solo productos con foto real (sin la de Terqui "aún no tiene foto"), las más lindas primero.
+export function showcaseOrder<T extends Pick<Product, "slug" | "price" | "image_url">>(products: T[]): T[] {
+  const rank = (p: T) => {
+    const i = SHOWCASE.indexOf(p.slug);
+    return i < 0 ? SHOWCASE.length : i;
+  };
+  return products.filter(hasRealPhoto).sort((a, b) => rank(a) - rank(b) || b.price - a.price);
 }
 
 // Enlace a una categoría de Energía.

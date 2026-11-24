@@ -14,7 +14,7 @@ import { OfferCountdown } from "@/components/OfferCountdown";
 import { ProductCard } from "@/components/ProductCard";
 import { energyCategory, energyHref, splitWorlds } from "@/lib/energy";
 import { formatCLP, offer, savings } from "@/lib/format";
-import { photoProps } from "@/lib/photo";
+import { hasRealPhoto, photoProps } from "@/lib/photo";
 import { listProducts } from "@/lib/products";
 import { productRanking } from "@/lib/ranking";
 import { jsonLdScript, storeJsonLd } from "@/lib/seo";
@@ -201,7 +201,7 @@ export default async function HomePage({ searchParams }: Props) {
         name,
         count: items.length,
         from: Math.min(...items.map((p) => p.price)),
-        photo: items.find((p) => p.image_url)?.image_url ?? null,
+        photo: items.find(hasRealPhoto)?.image_url ?? null,
       };
     })
     .sort((a, b) => b.count - a.count)
@@ -209,7 +209,7 @@ export default async function HomePage({ searchParams }: Props) {
   // El banner muestra primero los equipos en oferta y luego los destacados, los que más ganancia dejan
   // (solo los que tienen foto). La garantía que cuenta Terqui es la más común del catálogo.
   const featured = all
-    .filter((p) => p.image_url)
+    .filter(hasRealPhoto)
     .sort(
       (a, b) =>
         Number(Boolean(offer(b))) - Number(Boolean(offer(a))) ||

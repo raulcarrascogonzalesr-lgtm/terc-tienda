@@ -5,7 +5,7 @@ import { StoreIcon, WhatsAppIcon } from "@/components/icons";
 import { Mark } from "@/components/Mark";
 import { ProductCard } from "@/components/ProductCard";
 import { Terqui } from "@/components/Terqui";
-import { ENERGY_CATEGORIES, ENERGY_INFO, ENERGY_PRICE_CLAIM, energyCategory, energyHref, splitWorlds } from "@/lib/energy";
+import { ENERGY_CATEGORIES, ENERGY_INFO, ENERGY_PRICE_CLAIM, energyCategory, energyHref, showcaseOrder, splitWorlds } from "@/lib/energy";
 import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { listProducts } from "@/lib/products";
@@ -55,10 +55,12 @@ export default async function EnergyPage({ searchParams }: Props) {
   const soon = energy.length === 0;
   const tiles = ENERGY_CATEGORIES.map((c) => {
     const items = energy.filter((p) => energyCategory(p.category)?.name === c.name);
-    return { c, count: items.length, from: items.length ? Math.min(...items.map((p) => p.price)) : 0, photo: items.find((p) => p.image_url)?.image_url ?? null };
+    return { c, count: items.length, from: items.length ? Math.min(...items.map((p) => p.price)) : 0, photo: showcaseOrder(items)[0]?.image_url ?? null };
   }).filter((t) => soon || t.count > 0);
-  // Tres fotos para el banner de arriba (de categorías distintas si se puede).
-  const collage = tiles.map((t) => t.photo).filter((x): x is string => Boolean(x)).slice(0, 3);
+  // Tres fotos para el banner de arriba: de categorías distintas si se puede, y si no, las más lindas.
+  const collage = [
+    ...new Set([...tiles.map((t) => t.photo), ...showcaseOrder(energy).map((p) => p.image_url)].filter((x): x is string => Boolean(x))),
+  ].slice(0, 3);
   const bubbles = ["left-0 top-4 h-48 w-48", "right-2 top-0 h-36 w-36", "bottom-0 right-16 h-32 w-32"];
   const wa = whatsappLink("Hola, quiero ayuda para elegir un producto de Energía en TERC");
 
