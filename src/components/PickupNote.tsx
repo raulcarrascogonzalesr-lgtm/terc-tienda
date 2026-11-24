@@ -1,28 +1,12 @@
-import { SITE, whatsappLink } from "@/lib/site";
-import { StoreIcon } from "./icons";
+import { SITE } from "@/lib/site";
 
-// Apartado chico de "Retiro en bodega" (Raúl 24-11-2026): el cliente, sobre todo de regiones, puede venir a
-// buscar su producto. Siempre se coordina antes por WhatsApp (no hay horario de atención fijo).
+// Retiro (Raúl 24-11-2026): solo una posibilidad, en letra chica y sin promoverlo. Es su casa, así que
+// no lleva dirección exacta, ícono ni botón: se coordina por WhatsApp caso a caso.
 export function PickupNote({ className = "" }: { className?: string }) {
   if (!SITE.pickup) return null;
-  const wa = whatsappLink("Hola, quiero retirar mi compra en la bodega de TERC");
   return (
-    <div className={`flex items-start gap-3 ${className}`}>
-      <StoreIcon name="box" className="mt-0.5 h-6 w-6 shrink-0 text-pine-700" />
-      <div>
-        <p className="font-bold text-ink">Retiro en bodega</p>
-        <p className="text-[13px] text-muted">
-          ¿Vienes de regiones o prefieres buscarlo tú? Retíralo sin costo en la {SITE.pickup}, coordinando antes por{" "}
-          {wa ? (
-            <a href={wa} target="_blank" rel="noopener" className="font-semibold text-pine-700 hover:underline">
-              WhatsApp
-            </a>
-          ) : (
-            "WhatsApp"
-          )}
-          .
-        </p>
-      </div>
-    </div>
+    <p className={`text-[11px] text-muted/80 ${className}`}>
+      Si lo necesitas, también se puede retirar en {SITE.pickup}, coordinando antes por WhatsApp.
+    </p>
   );
 }

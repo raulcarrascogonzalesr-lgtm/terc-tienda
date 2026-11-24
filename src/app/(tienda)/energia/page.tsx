@@ -10,7 +10,7 @@ import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { listProducts } from "@/lib/products";
 import { breadcrumbJsonLd, itemListJsonLd, jsonLdScript } from "@/lib/seo";
-import { SITE, whatsappLink } from "@/lib/site";
+import { whatsappLink } from "@/lib/site";
 import type { Product } from "@/lib/types";
 
 export const revalidate = 60;
@@ -271,9 +271,6 @@ export default async function EnergyPage({ searchParams }: Props) {
           <div className="rounded-2xl bg-surface p-4 ring-1 ring-line/[0.06]">
             <b className="text-ink">Entrega</b>
             <p className="mt-1 text-[13px] text-muted">{ENERGY_INFO.delivery}</p>
-            {SITE.pickup && (
-              <p className="mt-1 text-[13px] text-muted">También puedes retirarlo sin costo en la {SITE.pickup}, coordinando por WhatsApp.</p>
-            )}
           </div>
           <div className="rounded-2xl bg-surface p-4 ring-1 ring-line/[0.06]">
             <b className="text-ink">Garantía</b>
