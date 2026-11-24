@@ -15,7 +15,7 @@ export function ProductDocs({ text }: { text: string | null | undefined }) {
               href={d.url}
               target="_blank"
               rel="noopener"
-              className="flex items-center gap-3 rounded-2xl border border-line/10 bg-white px-4 py-3 transition hover:border-pine-700/40 hover:bg-mint-50"
+              className="flex items-center gap-3 rounded-2xl border border-line/10 bg-paper px-4 py-3 transition hover:border-mint/60"
             >
               <span aria-hidden className="grid h-10 w-9 shrink-0 place-items-center rounded-md bg-[#c8372d] text-[10px] font-bold tracking-wide text-white">
                 PDF
