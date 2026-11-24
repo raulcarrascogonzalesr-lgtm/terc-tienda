@@ -6,7 +6,7 @@ import { ProductGallery } from "@/components/ProductGallery";
 import { TechSheet } from "@/components/TechSheet";
 import { Terqui } from "@/components/Terqui";
 import { TrackView } from "@/components/TrackView";
-import { ENERGY_INFO, energyCategory, energyHref, WIRESUN_URL } from "@/lib/energy";
+import { ENERGY_INFO, energyCategory, energyHref } from "@/lib/energy";
 import { formatCLP } from "@/lib/format";
 import { jsonLdScript, productJsonLd } from "@/lib/seo";
 import { SITE, whatsappLink } from "@/lib/site";
@@ -82,22 +82,7 @@ export function EnergyProduct({ product }: { product: Product }) {
             </p>
           </div>
 
-          {cat.install && (
-            <div className="flex items-start gap-3 rounded-3xl border-2 border-mint-50 bg-surface p-5">
-              <StoreIcon name="repair" className="mt-0.5 h-6 w-6 text-pine-700" />
-              <div>
-                <p className="font-bold text-ink">Instalación no incluida</p>
-                <p className="text-[13px] text-muted">
-                  Te recomendamos un instalador eléctrico autorizado SEC. ¿Lo necesitas instalado?{" "}
-                  <a href={WIRESUN_URL} target="_blank" rel="noopener" className="font-semibold text-pine-700 hover:underline">
-                    WireSun Energy te hace el kit con instalación
-                  </a>
-                  .
-                </p>
-              </div>
-            </div>
-          )}
-
+          {/* Raúl (23-11): sin recuadro de "Instalación no incluida"; se entiende que TERC no instala. */}
           <div className="flex items-start gap-3 rounded-3xl border-2 border-mint-50 bg-surface p-5">
             <StoreIcon name="truck" className="mt-0.5 h-6 w-6 text-pine-700" />
             <div>
