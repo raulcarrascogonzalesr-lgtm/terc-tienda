@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { StoreIcon } from "@/components/icons";
 import { Terqui } from "@/components/Terqui";
+import { trackLead } from "@/lib/analytics";
 import { QUOTE_KIND_LABELS, QUOTE_KINDS_OFFERED } from "@/lib/format";
 import type { QuoteKind } from "@/lib/types";
 import { submitQuote } from "./actions";
@@ -13,6 +14,13 @@ const field =
 export function QuoteForm({ kind }: { kind: QuoteKind }) {
   const [state, action, pending] = useActionState(submitQuote, null);
   const [selected, setSelected] = useState<QuoteKind>(kind);
+
+  // Para Meta y Google Ads: una empresa pidió cotización (dice si era de equipos o de Energía).
+  const ok = !!state?.ok;
+  useEffect(() => {
+    if (ok) trackLead("cotizacion-empresas", 0, QUOTE_KIND_LABELS[selected]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ok]);
 
   if (state?.ok) {
     return (
