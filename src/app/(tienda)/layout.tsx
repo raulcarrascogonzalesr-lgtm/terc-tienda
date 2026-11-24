@@ -41,6 +41,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
         <Header
           categories={categories}
           energyCategories={energyCategories}
+          energySlugs={energy.map((p) => p.slug)}
           offerPercent={offerPercent}
           limitedOffers={limitedOffers}
           offerName={offerName}
