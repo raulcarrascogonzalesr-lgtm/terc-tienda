@@ -16,10 +16,13 @@ const BASE_COLUMNS = NO_SHEET_COLUMNS.replace(" offer_warranty_months, warranty_
 
 type Query = (columns: string) => PromiseLike<{ data: unknown; error: { code?: string } | null }>;
 async function selectProducts(query: Query) {
+  // 42703 = la columna no existe; 42501 = existe pero la llave pública no tiene permiso para leerla.
+  // En ambos casos la tienda sigue funcionando sin esa columna en vez de caerse entera.
+  const missing = (r: Awaited<ReturnType<Query>>) => r.error?.code === "42703" || r.error?.code === "42501";
   const first = await query(PRODUCT_COLUMNS);
-  if (first.error?.code !== "42703") return first; // 42703 = columna no existe
+  if (!missing(first)) return first;
   const second = await query(NO_SHEET_COLUMNS);
-  return second.error?.code === "42703" ? query(BASE_COLUMNS) : second;
+  return missing(second) ? query(BASE_COLUMNS) : second;
 }
 
 // Oferta con garantía reducida: mientras dura, el equipo trae menos meses y en el carrito se
