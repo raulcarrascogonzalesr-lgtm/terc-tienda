@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { StoreIcon } from "@/components/icons";
 import { Terqui } from "@/components/Terqui";
 import { QUOTE_KIND_LABELS, QUOTE_KINDS_OFFERED } from "@/lib/format";
@@ -12,6 +12,7 @@ const field =
 
 export function QuoteForm({ kind }: { kind: QuoteKind }) {
   const [state, action, pending] = useActionState(submitQuote, null);
+  const [selected, setSelected] = useState<QuoteKind>(kind);
 
   if (state?.ok) {
     return (
@@ -29,13 +30,20 @@ export function QuoteForm({ kind }: { kind: QuoteKind }) {
     <form action={action} className="space-y-4 rounded-3xl bg-surface p-6 sm:p-8 ring-1 ring-line/[0.06]">
       <fieldset>
         <legend className="mb-2 text-sm font-semibold text-ink">¿Qué necesitas?</legend>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-2 sm:grid-cols-3">
           {QUOTE_KINDS_OFFERED.map((value) => (
             <label
               key={value}
               className="flex cursor-pointer items-center gap-2 rounded-xl border border-line/10 px-3 py-2.5 text-sm text-ink has-[:checked]:border-pine-700 has-[:checked]:bg-mint-50 has-[:checked]:font-semibold"
             >
-              <input type="radio" name="kind" value={value} defaultChecked={value === kind} className="accent-pine-700" />
+              <input
+                type="radio"
+                name="kind"
+                value={value}
+                defaultChecked={value === kind}
+                onChange={() => setSelected(value)}
+                className="accent-pine-700"
+              />
               {QUOTE_KIND_LABELS[value]}
             </label>
           ))}
@@ -67,7 +75,7 @@ export function QuoteForm({ kind }: { kind: QuoteKind }) {
 
       <label className="block space-y-1.5">
         <span className="text-sm font-semibold text-ink">
-          Cantidad aproximada de equipos <span className="font-normal text-muted">(opcional)</span>
+          {selected === "energia" ? "Cantidad aproximada de productos" : "Cantidad aproximada de equipos"} <span className="font-normal text-muted">(opcional)</span>
         </span>
         <input name="quantity" inputMode="numeric" placeholder="Ej: 10" className={`${field} sm:max-w-[200px]`} />
       </label>
@@ -78,7 +86,11 @@ export function QuoteForm({ kind }: { kind: QuoteKind }) {
           name="message"
           required
           rows={4}
-          placeholder="Ej: 10 notebooks con 16 GB para una oficina, idealmente iguales."
+          placeholder={
+            selected === "energia"
+              ? "Ej: 2 baterías de litio de 5 kWh y un inversor híbrido de 5 kW para una casa."
+              : "Ej: 10 notebooks con 16 GB para una oficina, idealmente iguales."
+          }
           className={field}
         />
       </label>

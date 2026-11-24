@@ -74,10 +74,11 @@ export const QUOTE_KIND_LABELS = {
   volumen: "Compra por volumen",
   arriendo: "Arriendo de equipos", // ya no se ofrece; queda para leer solicitudes antiguas
   otro: "Otro pedido",
+  energia: "Energía y eléctricos",
 } as const;
 
 // Lo que se puede pedir hoy en el formulario de Empresas (TERC no arrienda equipos).
-export const QUOTE_KINDS_OFFERED = ["volumen", "otro"] as const;
+export const QUOTE_KINDS_OFFERED = ["volumen", "energia", "otro"] as const;
 
 export const QUOTE_STATUS_LABELS = {
   nueva: "Nueva",
