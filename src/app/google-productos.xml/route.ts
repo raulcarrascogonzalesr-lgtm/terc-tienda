@@ -162,6 +162,8 @@ function item(product: Product, margin: number | undefined): string {
           `<g:product_detail>${tag("section_name", "Características")}${tag("attribute_name", name)}${tag("attribute_value", value)}</g:product_detail>`,
       ),
     tag("custom_label_0", marginLabel(margin)),
+    // Envío por courier a todo Chile (en Merchant Center: política "Computadores - courier").
+    tag("shipping_label", "computadores"),
     tag("custom_label_1", KIND_LABEL[specs.kind]),
     tag("custom_label_2", "computadores"),
     tag("custom_label_3", priceRange(product.price)),
