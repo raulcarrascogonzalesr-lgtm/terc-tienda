@@ -75,6 +75,11 @@ export default function TermsPage() {
         <p>
           <strong className="text-ink">Energía:</strong> {ENERGY_INFO.delivery} La fecha de entrega se coordina contigo por WhatsApp.
         </p>
+        {SITE.pickup && (
+          <p>
+            Si lo necesitas, también se puede retirar en {SITE.pickup}, coordinando antes por WhatsApp.
+          </p>
+        )}
       </section>
 
       <section className="space-y-2">
