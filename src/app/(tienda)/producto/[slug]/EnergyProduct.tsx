@@ -72,7 +72,9 @@ export function EnergyProduct({ product }: { product: Product }) {
             <p className="font-[family-name:var(--font-display)] text-4xl font-extrabold tracking-tight tabular-nums text-ink sm:text-5xl">
               {formatCLP(product.price)}
             </p>
-            <p className="text-[13px] text-muted">IVA incluido · producto nuevo · factura o boleta</p>
+            <p className="text-[13px] text-muted">
+              <span className="text-[15px] font-semibold text-ink">IVA incluido</span> · producto nuevo · factura o boleta
+            </p>
             <p className="flex items-start gap-2.5 rounded-2xl bg-mint-50 px-3 py-2.5 text-sm text-ink">
               <StoreIcon name="bank" className="mt-0.5 h-5 w-5 text-pine-700" />
               <span>
@@ -128,10 +130,6 @@ export function EnergyProduct({ product }: { product: Product }) {
                   Ver garantía y devoluciones
                 </Link>
               </small>
-            </Row>
-            <Row label="Instalación">
-              {cat.install ? "No incluida" : "No necesita: se enchufa y funciona"}
-              {cat.install && <small>TERC vende el producto; no hacemos instalaciones.</small>}
             </Row>
             <Row label="Vende">
               TERC, de {SITE.company}

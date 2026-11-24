@@ -10,13 +10,13 @@ import type { Product } from "@/lib/types";
 
 // Piezas de Energía (TERC 2.1) que se repiten en la portada, la página de Energía, la ficha y el carrito.
 
-// Lo que distingue a Energía de los equipos: nuevo, garantía de fábrica, factura y sin instalación.
+// Lo que distingue a Energía de los equipos: nuevo, garantía de fábrica y factura.
+// Raúl (23-11): sin "Instalación no incluida"; se entiende que TERC no instala.
 export const ENERGY_FACTS: { icon: IconName; text: string }[] = [
   { icon: "box", text: "Productos nuevos" },
   { icon: "shield", text: "Garantía de fábrica" },
   { icon: "receipt", text: "Factura" },
   { icon: "truck", text: "Entrega en la RM" },
-  { icon: "repair", text: "Instalación no incluida" },
 ];
 
 export function EnergyFacts({ dark = false, className = "" }: { dark?: boolean; className?: string }) {
@@ -209,7 +209,7 @@ export function EnergyBanner({ products, className = "", style }: { products: Pr
           WhatsApp de siempre.
         </p>
         <ul className="mt-4 flex flex-wrap gap-2 text-[13px]">
-          {["Productos nuevos", "Factura", "Garantía de fábrica", "Instalación no incluida"].map((t) => (
+          {["Productos nuevos", "Factura", "Garantía de fábrica"].map((t) => (
             <li key={t} className="rounded-full bg-white/10 px-3 py-1 text-white/90">
               {t}
             </li>
