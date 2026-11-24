@@ -1,5 +1,6 @@
-import { isEnergy } from "@/lib/energy";
+import { energyCategory, type EnergyCategory } from "@/lib/energy";
 import { todayInChile } from "@/lib/format";
+import { hasRealPhoto } from "@/lib/photo";
 import { listProducts } from "@/lib/products";
 import { productMargins } from "@/lib/ranking";
 import { productDescription, SITE_URL } from "@/lib/seo";
@@ -10,7 +11,7 @@ export const revalidate = 3600;
 
 // Lista de productos para Google Merchant Center (fichas gratis y anuncios de Shopping).
 // Merchant Center la lee sola cada día desde https://terc.cl/google-productos.xml.
-// Solo trae equipos visibles y con stock, con el mismo precio que ve el cliente.
+// Trae los productos visibles y con stock (equipos y Energía), con el mismo precio que ve el cliente.
 
 const escape = (text: string) =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -42,7 +43,84 @@ function marginLabel(margin: number | undefined): string {
   return "ganancia-baja";
 }
 
+// Categoría de Google para Energía (lista oficial de Google, ver
+// https://www.google.com/basepages/producttype/taxonomy-with-ids.es-ES.txt).
+// 1348 = UPS, 276 = Pilas y baterías, 5142 = Inversores de corriente, 6817 = Controladores de carga,
+// 4714 = Paneles solares, 2345 = Cables eléctricos, 503729 = Conectores y terminales,
+// 1436 = Alumbrado de emergencia, 594 = Iluminación.
+function energyGoogleCategory(cat: EnergyCategory, product: Product): number {
+  const text = product.name.toLowerCase();
+  switch (cat.name) {
+    case "Respaldo (UPS)":
+      return 1348;
+    case "Baterías de litio":
+      return 276;
+    case "Inversores y reguladores":
+      return /regulador|controlador|mppt|pwm/.test(text) ? 6817 : 5142;
+    case "Paneles solares":
+      return 4714;
+    case "Cables y conectores":
+      return /conector|mc4|terminal/.test(text) && !/cable/.test(text) ? 503729 : 2345;
+    default:
+      return /emergencia|respaldo|recargable/.test(text) ? 1436 : 594;
+  }
+}
+
+// Ficha de Energía (TERC 2.1): producto NUEVO, garantía de fábrica, solo venta (nunca instalación).
+// - No dice "reacondicionado" ni promete envío a todo Chile.
+// - shipping_label "energia": en Merchant Center se le crea un envío aparte (solo Región
+//   Metropolitana), para que Google no muestre la tarifa de courier de los computadores.
+// - Sin GTIN: los productos de Esol no traen código de barras en la lista. Google igual los
+//   muestra (con un aviso de "rendimiento limitado"); si un fabricante lo publica, se puede agregar.
+function energyItem(product: Product, cat: EnergyCategory, margin: number | undefined): string {
+  const images = [product.image_url, ...product.images].filter((src): src is string => Boolean(src)).map(feedImage);
+  const warranty = product.warranty_months ? `${product.warranty_months} meses de garantía de fábrica` : "Garantía de fábrica";
+  const highlights = [
+    "Producto nuevo, sellado de fábrica",
+    warranty,
+    "Boleta o factura de Wiremax Telecomunicaciones SpA",
+    "Entrega coordinada en la Región Metropolitana",
+    "Asesoría por WhatsApp antes de comprar",
+  ];
+  const lines = [
+    tag("id", product.id),
+    tag("title", product.name.slice(0, 150)),
+    tag("description", (product.description || productDescription(product)).slice(0, 5000)),
+    tag("link", `${SITE_URL}/producto/${product.slug}`),
+    ...(images[0] ? [tag("image_link", images[0])] : []),
+    ...images.slice(1, 11).map((src) => tag("additional_image_link", src)),
+    tag("availability", product.stock > 0 ? "in_stock" : "out_of_stock"),
+    tag("condition", "new"),
+    tag("brand", product.brand),
+    tag("google_product_category", energyGoogleCategory(cat, product)),
+    tag("product_type", `Energía > ${cat.name}`),
+    tag("shipping_label", "energia"),
+    ...highlights.map((text) => tag("product_highlight", text)),
+    tag("custom_label_0", marginLabel(margin)),
+    tag("custom_label_1", cat.name),
+    tag("custom_label_2", "energia"),
+    tag("custom_label_3", priceRange(product.price)),
+  ];
+  if (product.compare_price && product.compare_price > product.price) {
+    lines.push(tag("price", `${product.compare_price} CLP`), tag("sale_price", `${product.price} CLP`));
+    if (product.offer_ends_at) lines.push(tag("sale_price_effective_date", `${todayInChile()}T00:00-03:00/${product.offer_ends_at}T23:59-03:00`));
+  } else {
+    lines.push(tag("price", `${product.price} CLP`));
+  }
+  return `<item>${lines.join("")}</item>`;
+}
+
+// Rango de precio (custom_label_3), para no gastar anuncios en productos de millones que casi
+// nadie compra por internet, o para pujar distinto según el ticket.
+function priceRange(price: number): string {
+  if (price < 1_000_000) return "bajo-1-millon";
+  if (price < 5_000_000) return "1-a-5-millones";
+  return "sobre-5-millones";
+}
+
 function item(product: Product, margin: number | undefined): string {
+  const cat = energyCategory(product.category);
+  if (cat) return energyItem(product, cat, margin);
   const images = [product.image_url, ...product.images].filter((src): src is string => Boolean(src)).map(feedImage);
   const specs = productSpecs(product);
   const months = product.warranty_months || 12;
@@ -84,7 +162,11 @@ function item(product: Product, margin: number | undefined): string {
           `<g:product_detail>${tag("section_name", "Características")}${tag("attribute_name", name)}${tag("attribute_value", value)}</g:product_detail>`,
       ),
     tag("custom_label_0", marginLabel(margin)),
+    // Envío por courier a todo Chile (en Merchant Center: política "Computadores - courier").
+    tag("shipping_label", "computadores"),
     tag("custom_label_1", KIND_LABEL[specs.kind]),
+    tag("custom_label_2", "computadores"),
+    tag("custom_label_3", priceRange(product.price)),
   ];
   if (product.compare_price && product.compare_price > product.price) {
     lines.push(tag("price", `${product.compare_price} CLP`), tag("sale_price", `${product.price} CLP`));
@@ -101,11 +183,10 @@ export async function GET() {
     listProducts().catch(() => []),
     productMargins().catch(() => ({ margins: new Map<string, number>() })),
   ]);
-  // Sin foto, Google rechaza el producto: mejor no enviarlo.
-  // Los de Energía no van: se compran con solicitud y transferencia (no se pagan en la página),
-  // y esta lista los describe como reacondicionados.
-  const items = products.filter((p) => p.image_url && !isEnergy(p)).map((p) => item(p, margins.get(p.id)));
+  // Sin foto real, Google rechaza el producto (la imagen de Terqui "aún no tiene foto" tampoco
+  // sirve): mejor no enviarlo. Desde el 24-11-2026 también van los de Energía (pedido de Raúl).
+  const items = products.filter(hasRealPhoto).map((p) => item(p, margins.get(p.id)));
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"><channel><title>TERC</title><link>${SITE_URL}</link><description>Equipos reacondicionados con garantía</description>${items.join("")}</channel></rss>`;
+<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"><channel><title>TERC</title><link>${SITE_URL}</link><description>Equipos reacondicionados con garantía y productos de Energía nuevos</description>${items.join("")}</channel></rss>`;
   return new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8" } });
 }

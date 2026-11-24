@@ -9,7 +9,7 @@ import { Terqui } from "@/components/Terqui";
 import { TrackView } from "@/components/TrackView";
 import { ENERGY_INFO, energyCategory, energyHref } from "@/lib/energy";
 import { formatCLP } from "@/lib/format";
-import { jsonLdScript, productJsonLd } from "@/lib/seo";
+import { breadcrumbJsonLd, jsonLdScript, productJsonLd } from "@/lib/seo";
 import { SITE, whatsappLink } from "@/lib/site";
 import type { Product } from "@/lib/types";
 import { warrantyLabel } from "@/lib/warranty";
@@ -24,7 +24,18 @@ export function EnergyProduct({ product }: { product: Product }) {
 
   return (
     <div className="shell py-6 sm:py-10">
-      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(productJsonLd(product))} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdScript([
+          productJsonLd(product),
+          breadcrumbJsonLd([
+            { name: "Inicio", path: "/" },
+            { name: "Energía", path: "/energia" },
+            { name: cat.name, path: `/energia?categoria=${encodeURIComponent(cat.name)}` },
+            { name: product.name, path: `/producto/${product.slug}` },
+          ]),
+        ])}
+      />
       <TrackView item={{ id: product.id, name: product.name, price: product.price, quantity: 1, category: product.category }} />
       <nav aria-label="Ruta" className="mb-6 text-sm text-muted">
         <Link href="/" className="hover:text-ink">

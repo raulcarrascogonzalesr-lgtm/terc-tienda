@@ -1,5 +1,5 @@
 import { energyCategory, isEnergy } from "./energy";
-import { CONDITION } from "./format";
+import { CONDITION, formatCLP } from "./format";
 import { SHIPPING_ZONES } from "./shipping";
 import { SITE } from "./site";
 import type { Product } from "./types";
@@ -10,14 +10,16 @@ export const SITE_URL = "https://terc.cl";
 
 // Lo que Google muestra bajo el título cuando no hay una descripción propia.
 export const DEFAULT_DESCRIPTION =
-  "Computadores, notebooks y equipos reacondicionados baratos, revisados uno por uno y con garantía. Paga en cuotas y recibe en todo Chile.";
+  "Computadores y notebooks reacondicionados con garantía, revisados uno por uno. Y en Energía: baterías de litio, UPS e inversores nuevos. Paga en cuotas y recibe en todo Chile.";
 
 // Texto corto de un producto para el resultado de Google (unos 155 caracteres como máximo).
 export function productDescription(product: Product): string {
   // Energía: producto nuevo, con garantía de fábrica y sin instalación.
   const energy = energyCategory(product.category);
+  // Con el precio y las palabras de la categoría, que es lo que la gente compara en Google.
   if (energy) {
-    const text = `${product.name}, nuevo${product.warranty_months ? `, ${warrantyLabel(product.warranty_months)} de garantía de fábrica` : ""}. ${energy.name} con factura y entrega en la Región Metropolitana.`;
+    const warranty = product.warranty_months ? `${warrantyLabel(product.warranty_months)} de garantía de fábrica` : "garantía de fábrica";
+    const text = `${product.name}, nuevo, a ${formatCLP(product.price)}. ${warranty[0].toUpperCase()}${warranty.slice(1)}, factura y entrega en la Región Metropolitana. ${energy.blurb}`;
     return text.length > 160 ? `${text.slice(0, 157).trimEnd()}…` : text;
   }
   const parts = [
@@ -112,6 +114,30 @@ export function storeJsonLd() {
       },
     },
   ];
+}
+
+// Ruta de la página (Inicio > Energía > Baterías de litio > producto). Google la muestra
+// en el resultado en vez de la dirección larga.
+export function breadcrumbJsonLd(steps: { name: string; path: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: steps.map((s, i) => ({ "@type": "ListItem", position: i + 1, name: s.name, item: `${SITE_URL}${s.path}` })),
+  };
+}
+
+// Lista de productos de una página de categoría.
+export function itemListJsonLd(products: Pick<Product, "slug" | "name">[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: products.slice(0, 50).map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${SITE_URL}/producto/${p.slug}`,
+      name: p.name,
+    })),
+  };
 }
 
 // Inserta los datos estructurados en la página. "<" se escapa para que un nombre

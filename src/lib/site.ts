@@ -5,6 +5,11 @@ export const SITE = {
   whatsapp: "56936312578",
   email: "contacto@terc.cl",
   company: "Wiremax Telecomunicaciones SpA",
+  // Identidad de la empresa que vende (pie de página y Términos). Google Merchant exige que la tienda
+  // muestre quién vende, y que coincida con "Información de empresa" en Merchant Center.
+  // Vacío = no se muestra.
+  rut: "76.498.039-5",
+  address: "Pleyades 1467, Puente Alto, Región Metropolitana",
   slogan: "Segunda vida, primera calidad",
   // Plazo de despacho de los productos del proveedor (se piden después de la compra).
   // La ley exige informarlo, aunque la tienda no los muestre como "a pedido".

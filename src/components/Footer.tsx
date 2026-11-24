@@ -102,6 +102,11 @@ export function Footer({
               </Link>
             </li>
             <li>
+              <Link href="/terminos" className="flex items-center gap-2 hover:text-white">
+                <StoreIcon name="checklist" className="w-4 h-4" /> Términos y condiciones
+              </Link>
+            </li>
+            <li>
               <Link href="/privacidad" className="flex items-center gap-2 hover:text-white">
                 <StoreIcon name="shield" className="w-4 h-4" /> Privacidad y cookies
               </Link>
@@ -113,7 +118,10 @@ export function Footer({
         <div className="shell py-5 text-xs text-white/55 flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
           <ThemeSwitch />
           <p>
-            TERC es una marca de {SITE.company}. Tus boletas y facturas salen a nombre de Wiremax.
+            TERC es una marca de {SITE.company}
+            {SITE.rut ? `, RUT ${SITE.rut}` : ""}
+            {SITE.address ? `, ${SITE.address}` : ""}. Tus boletas y facturas salen a nombre de Wiremax.
+            {SITE.whatsapp ? ` Teléfono +${SITE.whatsapp.replace(/^56(9)(\d{4})(\d{4})$/, "56 $1 $2 $3")}.` : ""}
           </p>
           <p>© {new Date().getFullYear()} TERC · Tecnología y Equipos Reacondicionados Chile</p>
         </div>

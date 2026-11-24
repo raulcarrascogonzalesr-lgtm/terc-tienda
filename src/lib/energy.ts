@@ -17,6 +17,8 @@ export type EnergyCategory = {
   blurb: string; // una línea para la tarjeta de la categoría
   install: boolean; // se conecta a una instalación eléctrica (Raúl 23-11: no se avisa en la tienda)
   icon: IconName; // para las tarjetas cuando la categoría aún no tiene productos con foto
+  // Para Google (24-11): las palabras que la gente escribe al buscar, ej. "batería de litio 48v".
+  seo: { title: string; description: string; heading: string };
 };
 
 export const ENERGY_CATEGORIES: EnergyCategory[] = [
@@ -27,6 +29,11 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     blurb: "Que el computador no se apague con un corte de luz.",
     install: false,
     icon: "shield",
+    seo: {
+      title: "UPS y respaldo para cortes de luz: precios en Chile",
+      description: "UPS nuevas para que tu computador, router o servidor no se apague con un corte de luz. Garantía de fábrica, factura y entrega en la Región Metropolitana.",
+      heading: "UPS y respaldo para cortes de luz",
+    },
   },
   {
     // Raúl 24-11: solo baterías de litio; las de plomo (gel y AGM) quedaron ocultas ("son un cacho y muy baratas").
@@ -37,6 +44,11 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     blurb: "Litio para respaldo y sistemas solares.",
     install: true,
     icon: "battery",
+    seo: {
+      title: "Baterías de litio 12V, 24V y 48V: precios en Chile",
+      description: "Baterías de litio nuevas de 12V, 24V, 48V y alto voltaje (Pylontech, Dyness, Huawei, Nimac y más) para respaldo y sistemas solares. Garantía de fábrica y factura.",
+      heading: "Baterías de litio para respaldo y energía solar",
+    },
   },
   {
     name: "Inversores y reguladores",
@@ -45,6 +57,11 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     blurb: "Convierten y controlan la energía.",
     install: true,
     icon: "bolt",
+    seo: {
+      title: "Inversores y reguladores solares: precios en Chile",
+      description: "Inversores híbridos, inversores de corriente y reguladores de carga nuevos para sistemas solares y respaldo. Garantía de fábrica, factura y entrega en la Región Metropolitana.",
+      heading: "Inversores y reguladores de carga",
+    },
   },
   {
     name: "Paneles solares",
@@ -53,6 +70,11 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     blurb: "Paneles de alta potencia, por unidad.",
     install: true,
     icon: "sun",
+    seo: {
+      title: "Paneles solares por unidad: precios en Chile",
+      description: "Paneles solares nuevos de alta potencia, por unidad. Garantía de fábrica, factura y entrega en la Región Metropolitana.",
+      heading: "Paneles solares por unidad",
+    },
   },
   {
     name: "Cables y conectores",
@@ -61,6 +83,11 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     blurb: "Cable solar, MC4 y accesorios.",
     install: true,
     icon: "plug",
+    seo: {
+      title: "Cable solar y conectores MC4: precios en Chile",
+      description: "Cable solar y conectores MC4 nuevos para instalaciones fotovoltaicas. Con factura y entrega en la Región Metropolitana.",
+      heading: "Cable solar y conectores MC4",
+    },
   },
   {
     name: "Iluminación",
@@ -69,6 +96,11 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     blurb: "Focos recargables y luces de respaldo.",
     install: false,
     icon: "bulb",
+    seo: {
+      title: "Luces de emergencia y focos recargables: precios en Chile",
+      description: "Luces de emergencia, focos recargables y luces de respaldo para cortes de luz. Nuevos, con garantía de fábrica y factura.",
+      heading: "Luces de emergencia y focos recargables",
+    },
   },
 ];
 
