@@ -7,7 +7,7 @@ import { useCart } from "@/components/CartProvider";
 import { StoreIcon, WhatsAppIcon } from "@/components/icons";
 import { TerquiLoader } from "@/components/Terqui";
 import { normalizePhone, normalizeRut } from "@/lib/address";
-import { trackBeginCheckout } from "@/lib/analytics";
+import { trackBeginCheckout, trackLead } from "@/lib/analytics";
 import { ENERGY_INFO } from "@/lib/energy";
 import { formatCLP } from "@/lib/format";
 import { whatsappLink } from "@/lib/site";
@@ -74,6 +74,8 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
       });
       const out = await res.json();
       if (!res.ok) throw new Error(out.error ?? "No pudimos enviar tu solicitud");
+      // Para Meta y Google Ads: alguien pidió comprar Energía (la venta se cierra al transferir).
+      trackLead("solicitud-energia", total, mixed ? "Energía y equipos" : "Energía", out.number ? String(out.number) : undefined);
       const params = new URLSearchParams({ n: out.number, w: normalizePhone(data.phone) ?? "", nombre: data.name.split(/\s+/)[0] });
       clear();
       router.push(`/solicitud-enviada?${params}`);

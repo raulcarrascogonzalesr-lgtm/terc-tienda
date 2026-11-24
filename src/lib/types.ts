@@ -25,6 +25,8 @@ export type Product = {
   // Lo calcula la tienda (no está en la base): la extensión que se ofrece en el carrito, si hay.
   warranty_upgrade?: { months: number; price: number } | null;
   description: string;
+  tech_sheet?: string | null; // ficha técnica: una línea por dato ("Etiqueta: valor"), "## " abre un grupo
+  documents?: string | null; // PDF para descargar, uno por línea: "Ficha técnica | https://…"
   image_url: string | null;
   images: string[]; // fotos extra, en el orden en que se muestran
   // Paquete listo para despachar (con caja, plumavit y cables), para cotizar el envío.
@@ -172,7 +174,7 @@ export type ExtraCost = {
 };
 
 // Solicitud de "Empresas y cotizaciones". Solo la ve el panel.
-export type QuoteKind = "volumen" | "arriendo" | "otro";
+export type QuoteKind = "volumen" | "arriendo" | "otro" | "energia";
 export type QuoteStatus = "nueva" | "respondida" | "cerrada";
 
 export type Quote = {

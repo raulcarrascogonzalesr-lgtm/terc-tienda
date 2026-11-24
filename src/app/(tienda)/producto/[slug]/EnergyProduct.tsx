@@ -2,12 +2,15 @@ import Link from "next/link";
 import { AddToCartButton, BuyNowButton } from "@/components/AddToCartButton";
 import { EnergySteps } from "@/components/energy/EnergyParts";
 import { StoreIcon, WhatsAppIcon } from "@/components/icons";
+import { PickupNote } from "@/components/PickupNote";
 import { ProductGallery } from "@/components/ProductGallery";
+import { ProductDocs } from "@/components/ProductDocs";
+import { TechSheet } from "@/components/TechSheet";
 import { Terqui } from "@/components/Terqui";
 import { TrackView } from "@/components/TrackView";
-import { ENERGY_INFO, energyCategory, energyHref, WIRESUN_URL } from "@/lib/energy";
+import { ENERGY_INFO, energyCategory, energyHref } from "@/lib/energy";
 import { formatCLP } from "@/lib/format";
-import { jsonLdScript, productJsonLd } from "@/lib/seo";
+import { breadcrumbJsonLd, jsonLdScript, productJsonLd } from "@/lib/seo";
 import { SITE, whatsappLink } from "@/lib/site";
 import type { Product } from "@/lib/types";
 import { warrantyLabel } from "@/lib/warranty";
@@ -22,7 +25,18 @@ export function EnergyProduct({ product }: { product: Product }) {
 
   return (
     <div className="shell py-6 sm:py-10">
-      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(productJsonLd(product))} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdScript([
+          productJsonLd(product),
+          breadcrumbJsonLd([
+            { name: "Inicio", path: "/" },
+            { name: "Energía", path: "/energia" },
+            { name: cat.name, path: `/energia?categoria=${encodeURIComponent(cat.name)}` },
+            { name: product.name, path: `/producto/${product.slug}` },
+          ]),
+        ])}
+      />
       <TrackView item={{ id: product.id, name: product.name, price: product.price, quantity: 1, category: product.category }} />
       <nav aria-label="Ruta" className="mb-6 text-sm text-muted">
         <Link href="/" className="hover:text-ink">
@@ -71,7 +85,9 @@ export function EnergyProduct({ product }: { product: Product }) {
             <p className="font-[family-name:var(--font-display)] text-4xl font-extrabold tracking-tight tabular-nums text-ink sm:text-5xl">
               {formatCLP(product.price)}
             </p>
-            <p className="text-[13px] text-muted">IVA incluido · producto nuevo · factura o boleta</p>
+            <p className="text-[13px] text-muted">
+              <span className="text-[15px] font-semibold text-ink">IVA incluido</span> · producto nuevo · factura o boleta
+            </p>
             <p className="flex items-start gap-2.5 rounded-2xl bg-mint-50 px-3 py-2.5 text-sm text-ink">
               <StoreIcon name="bank" className="mt-0.5 h-5 w-5 text-pine-700" />
               <span>
@@ -81,28 +97,16 @@ export function EnergyProduct({ product }: { product: Product }) {
             </p>
           </div>
 
-          {cat.install && (
-            <div className="flex items-start gap-3 rounded-3xl border-2 border-mint-50 bg-surface p-5">
-              <StoreIcon name="repair" className="mt-0.5 h-6 w-6 text-pine-700" />
+          {/* Raúl (23-11): sin recuadro de "Instalación no incluida"; se entiende que TERC no instala. */}
+          <div className="space-y-3 rounded-3xl border-2 border-mint-50 bg-surface p-5">
+            <div className="flex items-start gap-3">
+              <StoreIcon name="truck" className="mt-0.5 h-6 w-6 text-pine-700" />
               <div>
-                <p className="font-bold text-ink">Instalación no incluida</p>
-                <p className="text-[13px] text-muted">
-                  Te recomendamos un instalador eléctrico autorizado SEC. ¿Lo necesitas instalado?{" "}
-                  <a href={WIRESUN_URL} target="_blank" rel="noopener" className="font-semibold text-pine-700 hover:underline">
-                    WireSun Energy te hace el kit con instalación
-                  </a>
-                  .
-                </p>
+                <p className="font-bold text-ink">Entrega</p>
+                <p className="text-[13px] text-muted">{ENERGY_INFO.delivery}</p>
               </div>
             </div>
-          )}
-
-          <div className="flex items-start gap-3 rounded-3xl border-2 border-mint-50 bg-surface p-5">
-            <StoreIcon name="truck" className="mt-0.5 h-6 w-6 text-pine-700" />
-            <div>
-              <p className="font-bold text-ink">Entrega</p>
-              <p className="text-[13px] text-muted">{ENERGY_INFO.delivery}</p>
-            </div>
+            <PickupNote />
           </div>
 
           <div id="comprar" className="space-y-2.5">
@@ -143,10 +147,6 @@ export function EnergyProduct({ product }: { product: Product }) {
                 </Link>
               </small>
             </Row>
-            <Row label="Instalación">
-              {cat.install ? "No incluida" : "No necesita: se enchufa y funciona"}
-              {cat.install && <small>TERC vende el producto; no hacemos instalaciones.</small>}
-            </Row>
             <Row label="Vende">
               TERC, de {SITE.company}
               <small>Empresa chilena. Boleta o factura en cada compra.</small>
@@ -159,6 +159,9 @@ export function EnergyProduct({ product }: { product: Product }) {
               <p className="whitespace-pre-line leading-relaxed text-muted">{product.description}</p>
             </div>
           )}
+
+          <TechSheet text={product.tech_sheet} />
+          <ProductDocs text={product.documents} />
 
           <div className="grid grid-cols-[72px_minmax(0,1fr)] items-center gap-3 rounded-3xl bg-mint-50 p-4">
             <Terqui pose="lupa" className="h-[72px] w-[72px]" />

@@ -229,6 +229,26 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
       </Field>
 
       <Field
+        label="Ficha técnica"
+        hint='Una línea por dato, así: "Capacidad: 16 kWh". Para un título de grupo, empieza la línea con "## ". Se ve en la tienda en un apartado que se abre, sin salir de la página.'
+      >
+        <textarea name="tech_sheet" rows={8} defaultValue={product?.tech_sheet ?? ""} className="input font-mono text-xs" />
+      </Field>
+
+      <Field
+        label="Documentos para descargar (PDF)"
+        hint='Uno por línea, así: "Ficha técnica | https://…pdf" y "Manual de uso | https://…pdf". Se ven debajo de la ficha técnica. Si el enlace es de otra página, apreta "Guardar documentos en la tienda" en la lista de productos: la tienda solo muestra los guardados en ella.'
+      >
+        <textarea
+          name="documents"
+          rows={3}
+          defaultValue={product?.documents ?? ""}
+          placeholder="Ficha técnica | https://…pdf"
+          className="input font-mono text-xs"
+        />
+      </Field>
+
+      <Field
         label="Foto"
         hint={
           product?.image_url ? "Sube una nueva solo si quieres cambiarla" : "JPG o PNG, hasta 5 MB"

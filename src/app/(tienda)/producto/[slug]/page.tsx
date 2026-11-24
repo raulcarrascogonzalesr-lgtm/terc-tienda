@@ -5,7 +5,10 @@ import { AddToCartButton, BuyNowButton } from "@/components/AddToCartButton";
 import { DiscountSticker } from "@/components/DiscountSticker";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
 import { OfferCountdown } from "@/components/OfferCountdown";
+import { PickupNote } from "@/components/PickupNote";
 import { ProductGallery } from "@/components/ProductGallery";
+import { ProductDocs } from "@/components/ProductDocs";
+import { TechSheet } from "@/components/TechSheet";
 import { Terqui } from "@/components/Terqui";
 import { TrackView } from "@/components/TrackView";
 import { deliveryText } from "@/lib/delivery";
@@ -27,7 +30,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug((await params).slug);
   if (!product) return { title: "Producto no encontrado" };
   // Energía (TERC 2.1) es nuevo: no se titula "reacondicionado".
-  const title = isEnergy(product) ? `${product.name} | TERC Energía` : `${product.name} reacondicionado | TERC`;
+  // En Energía va "precio en Chile", que es como la gente busca (ej. "batería pylontech precio").
+  const title = isEnergy(product) ? `${product.name}: precio en Chile | TERC` : `${product.name} reacondicionado | TERC`;
   const description = productDescription(product);
   return {
     title,
@@ -183,7 +187,9 @@ export default async function ProductPage({ params }: Props) {
                 Son <strong>menos de {formatCLP(perDay)} al día</strong> durante un año, con garantía incluida.
               </span>
             </p>
-            <p className="text-[13px] text-muted">IVA incluido · Paga con débito, crédito o en cuotas</p>
+            <p className="text-[13px] text-muted">
+              <span className="text-[15px] font-semibold text-ink">IVA incluido</span> · Paga con débito, crédito o en cuotas
+            </p>
           </div>
 
           {/* Envío y fecha de llegada: la persona ya se imagina recibiéndolo. */}
@@ -208,6 +214,7 @@ export default async function ProductPage({ params }: Props) {
                 </p>
               </div>
             </div>
+            <PickupNote />
           </div>
 
           <div id="comprar" className="space-y-2.5">
@@ -331,6 +338,9 @@ export default async function ProductPage({ params }: Props) {
               <p className="whitespace-pre-line leading-relaxed text-muted">{product.description}</p>
             </div>
           )}
+
+          <TechSheet text={product.tech_sheet} />
+          <ProductDocs text={product.documents} />
         </div>
       </div>
       <StickyBuyBar product={product} note={deal ? `Ahorras ${formatCLP(deal.amount)}` : null} />

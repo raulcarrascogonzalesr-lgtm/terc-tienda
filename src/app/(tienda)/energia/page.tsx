@@ -5,10 +5,11 @@ import { StoreIcon, WhatsAppIcon } from "@/components/icons";
 import { Mark } from "@/components/Mark";
 import { ProductCard } from "@/components/ProductCard";
 import { Terqui } from "@/components/Terqui";
-import { ENERGY_CATEGORIES, ENERGY_INFO, energyCategory, energyHref, splitWorlds } from "@/lib/energy";
+import { ENERGY_CATEGORIES, ENERGY_INFO, ENERGY_PRICE_CLAIM, energyCategory, energyHref, showcaseOrder, splitWorlds } from "@/lib/energy";
 import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { listProducts } from "@/lib/products";
+import { breadcrumbJsonLd, itemListJsonLd, jsonLdScript } from "@/lib/seo";
 import { whatsappLink } from "@/lib/site";
 import type { Product } from "@/lib/types";
 
@@ -18,10 +19,12 @@ type Props = { searchParams: Promise<{ categoria?: string; orden?: string }> };
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const cat = energyCategory((await searchParams).categoria);
+  // Títulos y textos con las palabras que la gente busca en Google (ver seo en src/lib/energy.ts).
   return {
-    title: cat ? `${cat.name} nuevos con garantía | TERC Energía` : "Energía: baterías de litio, UPS, inversores y paneles solares | TERC",
-    description:
-      "Baterías de litio, UPS, inversores, paneles solares y cables nuevos, con garantía de fábrica y factura. Te confirmamos stock y total, y pagas por transferencia. Entrega en la Región Metropolitana.",
+    title: cat ? `${cat.seo.title} | TERC` : "Baterías de litio, UPS, inversores y paneles solares en Chile | TERC Energía",
+    description: cat
+      ? cat.seo.description
+      : "Baterías de litio, UPS, inversores, paneles solares y cables nuevos, con garantía de fábrica y factura. Te confirmamos stock y total, y pagas por transferencia. Entrega en la Región Metropolitana.",
     alternates: { canonical: cat ? `/energia?categoria=${encodeURIComponent(cat.name)}` : "/energia" },
   };
 }
@@ -55,10 +58,12 @@ export default async function EnergyPage({ searchParams }: Props) {
   const soon = energy.length === 0;
   const tiles = ENERGY_CATEGORIES.map((c) => {
     const items = energy.filter((p) => energyCategory(p.category)?.name === c.name);
-    return { c, count: items.length, from: items.length ? Math.min(...items.map((p) => p.price)) : 0, photo: items.find((p) => p.image_url)?.image_url ?? null };
+    return { c, count: items.length, from: items.length ? Math.min(...items.map((p) => p.price)) : 0, photo: showcaseOrder(items)[0]?.image_url ?? null };
   }).filter((t) => soon || t.count > 0);
-  // Tres fotos para el banner de arriba (de categorías distintas si se puede).
-  const collage = tiles.map((t) => t.photo).filter((x): x is string => Boolean(x)).slice(0, 3);
+  // Tres fotos para el banner de arriba: de categorías distintas si se puede, y si no, las más lindas.
+  const collage = [
+    ...new Set([...tiles.map((t) => t.photo), ...showcaseOrder(energy).map((p) => p.image_url)].filter((x): x is string => Boolean(x))),
+  ].slice(0, 3);
   const bubbles = ["left-0 top-4 h-48 w-48", "right-2 top-0 h-36 w-36", "bottom-0 right-16 h-32 w-32"];
   const wa = whatsappLink("Hola, quiero ayuda para elegir un producto de Energía en TERC");
 
@@ -72,8 +77,19 @@ export default async function EnergyPage({ searchParams }: Props) {
     return `/energia${qs ? `?${qs}` : ""}#productos`;
   };
 
+  // Para Google: la ruta (Inicio > Energía > categoría) y la lista de productos de esta página.
+  const jsonLd = [
+    breadcrumbJsonLd([
+      { name: "Inicio", path: "/" },
+      { name: "Energía", path: "/energia" },
+      ...(cat ? [{ name: cat.name, path: `/energia?categoria=${encodeURIComponent(cat.name)}` }] : []),
+    ]),
+    ...(list.length ? [itemListJsonLd(list)] : []),
+  ];
+
   return (
     <div className="pb-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(jsonLd)} />
       <div className="shell pt-5">
         <section className="rise relative grid items-center gap-8 overflow-hidden rounded-3xl bg-pine p-6 text-white sm:p-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
           <Mark className="absolute -right-10 -top-10 w-56 opacity-[0.06]" ink="#ffffff" />
@@ -82,11 +98,11 @@ export default async function EnergyPage({ searchParams }: Props) {
               <StoreIcon name="bolt" className="h-4 w-4" /> {soon ? "Energía TERC · Muy pronto" : "Energía TERC"}
             </p>
             <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-extrabold leading-[1.02] tracking-tight sm:text-5xl">
-              Energía para tu casa y tu oficina
+              {cat ? cat.seo.heading : "Energía para tu casa y tu oficina"}
             </h1>
             <p className="mt-3 max-w-lg text-[15px] leading-relaxed text-white/80 sm:text-base">
-              Respaldo, baterías de litio, inversores y energía solar a buen precio. Te ayudamos a elegir por WhatsApp; la
-              instalación la hace tu técnico de confianza.
+              Respaldo, baterías de litio, inversores y energía solar{" "}
+              <strong className="font-bold text-gold">{ENERGY_PRICE_CLAIM}</strong>. Te ayudamos a elegir por WhatsApp.
             </p>
             <EnergyFacts dark className="mt-5" />
           </div>
@@ -176,12 +192,6 @@ export default async function EnergyPage({ searchParams }: Props) {
             </Link>
           )}
         </div>
-        {cat?.install && (
-          <p className="mt-3 flex items-start gap-2 rounded-2xl bg-mint-50 px-4 py-3 text-sm text-ink">
-            <StoreIcon name="repair" className="mt-0.5 h-5 w-5 text-pine-700" />
-            <span>{ENERGY_INFO.install}</span>
-          </p>
-        )}
         {energy.length > 0 && (
           <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="scroll-fade flex gap-2 overflow-x-auto pb-1">

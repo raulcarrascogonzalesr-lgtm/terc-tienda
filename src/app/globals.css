@@ -138,8 +138,16 @@ body {
     inset: 0;
     z-index: -1;
     background: var(--stage-leaf);
-    -webkit-mask: url("/patron-terc.svg") center / 120px 120px;
-    mask: url("/patron-terc.svg") center / 120px 120px;
+    /* Raúl (23-11): las hojas solo en los bordes, nunca encima del producto (con multiply se veían
+       sobre las fotos claras). El degradado borra el patrón en el centro, donde va la foto. */
+    -webkit-mask:
+      url("/patron-terc.svg") center / 120px 120px,
+      radial-gradient(ellipse 62% 78% at 50% 50%, transparent 72%, #000 100%);
+    -webkit-mask-composite: source-in;
+    mask:
+      url("/patron-terc.svg") center / 120px 120px,
+      radial-gradient(ellipse 62% 78% at 50% 50%, transparent 72%, #000 100%);
+    mask-composite: intersect;
     pointer-events: none;
   }
 }

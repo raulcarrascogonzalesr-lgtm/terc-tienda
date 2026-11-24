@@ -65,6 +65,7 @@ function Worlds({ energyWorld }: { energyWorld: boolean }) {
 export function Header({
   categories,
   energyCategories,
+  energySlugs = [],
   offerPercent,
   limitedOffers,
   offerName,
@@ -72,6 +73,7 @@ export function Header({
 }: {
   categories: string[];
   energyCategories: EnergyLink[]; // categorías de Energía con productos; vacío = sin menú de Energía
+  energySlugs?: string[]; // productos de Energía: su ficha mantiene la pestaña Energía activa
   offerPercent: number; // mayor descuento en oferta; 0 si no hay ofertas
   limitedOffers: boolean; // alguna oferta tiene fecha de término
   offerName: string | null; // nombre de la promoción, si tiene
@@ -80,7 +82,9 @@ export function Header({
   const { count } = useCart();
   const pathname = usePathname() ?? "";
   const hasEnergy = energyCategories.length > 0;
-  const energyWorld = hasEnergy && pathname.startsWith("/energia");
+  // Raúl (23-11): al abrir un producto de Energía (Esol) la pestaña Energía sigue marcada.
+  const productSlug = pathname.startsWith("/producto/") ? decodeURIComponent(pathname.slice("/producto/".length).split("/")[0]) : "";
+  const energyWorld = hasEnergy && (pathname.startsWith("/energia") || (productSlug !== "" && energySlugs.includes(productSlug)));
   // Al bajar, la franja de arriba se va con la página y el menú queda fijo, más compacto y con sombra.
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {

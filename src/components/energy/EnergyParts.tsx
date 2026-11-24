@@ -2,7 +2,7 @@ import Link from "next/link";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
 import { Terqui } from "@/components/Terqui";
-import { ENERGY_CATEGORIES, ENERGY_STEPS, energyCategory, energyHref, WIRESUN_URL } from "@/lib/energy";
+import { ENERGY_CATEGORIES, ENERGY_PRICE_CLAIM, ENERGY_STEPS, energyCategory, energyHref, showcaseOrder, WIRESUN_URL } from "@/lib/energy";
 import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { whatsappLink } from "@/lib/site";
@@ -10,13 +10,13 @@ import type { Product } from "@/lib/types";
 
 // Piezas de Energía (TERC 2.1) que se repiten en la portada, la página de Energía, la ficha y el carrito.
 
-// Lo que distingue a Energía de los equipos: nuevo, garantía de fábrica, factura y sin instalación.
+// Lo que distingue a Energía de los equipos: nuevo, garantía de fábrica y factura.
+// Raúl (23-11): sin "Instalación no incluida"; se entiende que TERC no instala.
 export const ENERGY_FACTS: { icon: IconName; text: string }[] = [
   { icon: "box", text: "Productos nuevos" },
   { icon: "shield", text: "Garantía de fábrica" },
   { icon: "receipt", text: "Factura" },
   { icon: "truck", text: "Entrega en la RM" },
-  { icon: "repair", text: "Instalación no incluida" },
 ];
 
 export function EnergyFacts({ dark = false, className = "" }: { dark?: boolean; className?: string }) {
@@ -151,9 +151,9 @@ function MiniProduct({ product }: { product: Product }) {
 }
 
 // Para la portada: primero un par de baterías y de inversores (lo que Raúl quiere mostrar al tiro),
-// después lo que haya. Solo productos con foto.
+// después lo que haya. Solo productos con foto real, las más lindas primero.
 export function bannerProducts(energy: Product[], max = 4): Product[] {
-  const withPhoto = energy.filter((p) => p.image_url);
+  const withPhoto = showcaseOrder(energy);
   const of = (name: string) => withPhoto.filter((p) => energyCategory(p.category)?.name === name);
   const picked = [...of("Baterías de litio").slice(0, 2), ...of("Inversores y reguladores").slice(0, 2)];
   for (const p of withPhoto) if (picked.length < max && !picked.includes(p)) picked.push(p);
@@ -205,11 +205,12 @@ export function EnergyBanner({ products, className = "", style }: { products: Pr
           Que un corte de luz no te pare la pega
         </h2>
         <p className="mt-3 max-w-md text-[15px] leading-relaxed text-white/80">
-          Baterías de litio, inversores y respaldo para tu casa y tu oficina, a buen precio y con la misma atención por
-          WhatsApp de siempre.
+          Baterías de litio, inversores y respaldo para tu casa y tu oficina,{" "}
+          <strong className="font-bold text-gold">{ENERGY_PRICE_CLAIM}</strong> y con la misma atención por WhatsApp de
+          siempre.
         </p>
         <ul className="mt-4 flex flex-wrap gap-2 text-[13px]">
-          {["Productos nuevos", "Factura", "Garantía de fábrica", "Instalación no incluida"].map((t) => (
+          {["Productos nuevos", "Factura", "Garantía de fábrica"].map((t) => (
             <li key={t} className="rounded-full bg-white/10 px-3 py-1 text-white/90">
               {t}
             </li>

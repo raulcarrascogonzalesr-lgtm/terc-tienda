@@ -1,3 +1,4 @@
+import { hasRealPhoto } from "./photo";
 import type { IconName } from "@/components/icons";
 import type { Order, Product } from "./types";
 
@@ -14,8 +15,10 @@ export type EnergyCategory = {
   short: string; // para el menú
   aliases: string[]; // otras formas de escribirla en el panel
   blurb: string; // una línea para la tarjeta de la categoría
-  install: boolean; // se conecta a una instalación eléctrica (la ficha avisa que no la incluye)
+  install: boolean; // se conecta a una instalación eléctrica (Raúl 23-11: no se avisa en la tienda)
   icon: IconName; // para las tarjetas cuando la categoría aún no tiene productos con foto
+  // Para Google (24-11): las palabras que la gente escribe al buscar, ej. "batería de litio 48v".
+  seo: { title: string; description: string; heading: string };
 };
 
 export const ENERGY_CATEGORIES: EnergyCategory[] = [
@@ -26,14 +29,26 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     blurb: "Que el computador no se apague con un corte de luz.",
     install: false,
     icon: "shield",
+    seo: {
+      title: "UPS y respaldo para cortes de luz: precios en Chile",
+      description: "UPS nuevas para que tu computador, router o servidor no se apague con un corte de luz. Garantía de fábrica, factura y entrega en la Región Metropolitana.",
+      heading: "UPS y respaldo para cortes de luz",
+    },
   },
   {
+    // Raúl 24-11: solo baterías de litio; las de plomo (gel y AGM) quedaron ocultas ("son un cacho y muy baratas").
+    // "Baterías" sigue como alias porque esas 22 ocultas tienen esa categoría.
     name: "Baterías de litio",
     short: "Baterías",
-    aliases: ["Baterías", "Baterias", "Baterías de litio y AGM"],
-    blurb: "Litio y AGM para respaldo y sistemas solares.",
+    aliases: ["Baterías", "Baterias", "Baterías de litio y AGM", "Baterías de gel", "Baterías GEL y AGM", "Baterías AGM"],
+    blurb: "Litio para respaldo y sistemas solares.",
     install: true,
     icon: "battery",
+    seo: {
+      title: "Baterías de litio 12V, 24V y 48V: precios en Chile",
+      description: "Baterías de litio nuevas de 12V, 24V, 48V y alto voltaje (Pylontech, Dyness, Huawei, Nimac y más) para respaldo y sistemas solares. Garantía de fábrica y factura.",
+      heading: "Baterías de litio para respaldo y energía solar",
+    },
   },
   {
     name: "Inversores y reguladores",
@@ -42,6 +57,11 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     blurb: "Convierten y controlan la energía.",
     install: true,
     icon: "bolt",
+    seo: {
+      title: "Inversores y reguladores solares: precios en Chile",
+      description: "Inversores híbridos, inversores de corriente y reguladores de carga nuevos para sistemas solares y respaldo. Garantía de fábrica, factura y entrega en la Región Metropolitana.",
+      heading: "Inversores y reguladores de carga",
+    },
   },
   {
     name: "Paneles solares",
@@ -50,6 +70,11 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     blurb: "Paneles de alta potencia, por unidad.",
     install: true,
     icon: "sun",
+    seo: {
+      title: "Paneles solares por unidad: precios en Chile",
+      description: "Paneles solares nuevos de alta potencia, por unidad. Garantía de fábrica, factura y entrega en la Región Metropolitana.",
+      heading: "Paneles solares por unidad",
+    },
   },
   {
     name: "Cables y conectores",
@@ -58,6 +83,11 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     blurb: "Cable solar, MC4 y accesorios.",
     install: true,
     icon: "plug",
+    seo: {
+      title: "Cable solar y conectores MC4: precios en Chile",
+      description: "Cable solar y conectores MC4 nuevos para instalaciones fotovoltaicas. Con factura y entrega en la Región Metropolitana.",
+      heading: "Cable solar y conectores MC4",
+    },
   },
   {
     name: "Iluminación",
@@ -66,6 +96,11 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     blurb: "Focos recargables y luces de respaldo.",
     install: false,
     icon: "bulb",
+    seo: {
+      title: "Luces de emergencia y focos recargables: precios en Chile",
+      description: "Luces de emergencia, focos recargables y luces de respaldo para cortes de luz. Nuevos, con garantía de fábrica y factura.",
+      heading: "Luces de emergencia y focos recargables",
+    },
   },
 ];
 
@@ -114,10 +149,36 @@ export function energyMenu(products: Pick<Product, "category">[]): EnergyCategor
   return present.length ? present : ENERGY_CATEGORIES;
 }
 
+// Las fotos más lindas de Energía, en orden, para portadas, banners y tarjetas de categoría
+// (elegidas el 24-11 mirando todas). Después van las demás con foto real, de la más cara a la más barata.
+const SHOWCASE = [
+  "bateria-litio-pylontech-fidus-plus-16-kwh-incl-ruedas-y-cable",
+  "bateria-litio-nimac-51-2v-nm51-2-200-wall-10-24kwh",
+  "bateria-de-litio-voltronic-lio-ii-4810e-5kwh",
+  "dyness-powerbrick-wheel-top-cover-battery-51-2v-280ah-14-341kwh",
+  "bateria-litio-solis-intellihome-16-kwh",
+  "bateria-de-litio-nimac-12v-300ah",
+  "bateria-litio-nimac-51-2v-nm51-2-300-15-36kwh",
+  "bateria-de-litio-dyness-dl5-0f-100ah-5-12kwh",
+];
+
+// Solo productos con foto real (sin la de Terqui "aún no tiene foto"), las más lindas primero.
+export function showcaseOrder<T extends Pick<Product, "slug" | "price" | "image_url">>(products: T[]): T[] {
+  const rank = (p: T) => {
+    const i = SHOWCASE.indexOf(p.slug);
+    return i < 0 ? SHOWCASE.length : i;
+  };
+  return products.filter(hasRealPhoto).sort((a, b) => rank(a) - rank(b) || b.price - a.price);
+}
+
 // Enlace a una categoría de Energía.
 export function energyHref(category?: Pick<EnergyCategory, "name"> | null) {
   return category ? `/energia?categoria=${encodeURIComponent(category.name)}#productos` : "/energia#productos";
 }
+
+// Frase de precio de Energía (inicio y página de Energía). Raúl (23-11) quiere que quede claro el precio.
+// "Entre los mejores" se puede defender aunque Esol venda un poco más barato al público.
+export const ENERGY_PRICE_CLAIM = "entre los mejores precios del mercado";
 
 // Cómo se compra Energía (carrito, ficha y página de Energía).
 export const ENERGY_STEPS = [
@@ -130,7 +191,6 @@ export const ENERGY_STEPS = [
 // Datos que se muestran en la tienda (garantía de fábrica, plazo de entrega).
 export const ENERGY_INFO = {
   delivery: "Región Metropolitana: lo llevamos nosotros. Regiones: lo cotizamos según el producto.",
-  install: "Instalación no incluida. Te recomendamos un instalador eléctrico autorizado SEC.",
   // Plazo para transferir desde que se le envía la cuenta y el monto al cliente.
   holdHours: 48,
 };
