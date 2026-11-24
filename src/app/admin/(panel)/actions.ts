@@ -725,3 +725,15 @@ export async function saveShippingReal(id: string, form: FormData) {
   if (error) throw error;
   revalidatePath("/admin", "layout");
 }
+
+// Cambia solo el precio con IVA desde la tabla de precios. La tienda se actualiza al tiro.
+export async function updatePrice(form: FormData) {
+  await requireAdmin();
+  const id = String(form.get("id") ?? "");
+  const price = intOrNull(form.get("price"));
+  if (!id || price === null || price <= 0) throw new Error("El precio no es válido");
+  const { data, error } = await db().from("products").update({ price }).eq("id", id).select("sku").maybeSingle();
+  if (error) throw error;
+  revalidatePath("/", "layout");
+  redirect(`/admin/precios?sku=${data?.sku ?? ""}&ok=1#sku-${data?.sku ?? ""}`);
+}

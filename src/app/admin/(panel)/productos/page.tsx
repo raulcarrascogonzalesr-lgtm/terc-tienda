@@ -94,9 +94,18 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         title="Productos"
         subtitle="Precio, costo, margen y stock de cada equipo."
       >
-        <Link href="/admin/productos/nuevo" className="btn-primary">
-          + Nuevo producto
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/admin/precios"
+            className="inline-flex items-center gap-2 rounded-md border border-[#cfd8d3] bg-white px-4 py-2 text-sm font-semibold text-[#0a2a2a] hover:bg-[#f1efe8]"
+          >
+            <Icon path={ICONS.venta} className="w-4 h-4" />
+            Tabla de precios
+          </Link>
+          <Link href="/admin/productos/nuevo" className="btn-primary">
+            + Nuevo producto
+          </Link>
+        </div>
       </PageHeader>
       <ImportPhotosButton pending={externalPhotos} />
       <ImportDocsButton pending={externalDocs} />

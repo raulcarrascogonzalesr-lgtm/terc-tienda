@@ -174,7 +174,7 @@ export type ExtraCost = {
 };
 
 // Solicitud de "Empresas y cotizaciones". Solo la ve el panel.
-export type QuoteKind = "volumen" | "arriendo" | "otro";
+export type QuoteKind = "volumen" | "arriendo" | "otro" | "energia";
 export type QuoteStatus = "nueva" | "respondida" | "cerrada";
 
 export type Quote = {

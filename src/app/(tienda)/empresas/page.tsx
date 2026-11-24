@@ -26,6 +26,12 @@ const SERVICES: { kind: QuoteKind; icon: IconName; title: string; text: string }
     text: "Varios equipos para tu oficina, colegio o pyme. Te armamos una cotización con precio especial por cantidad y factura a nombre de tu empresa.",
   },
   {
+    kind: "energia",
+    icon: "bolt",
+    title: "Energía y eléctricos",
+    text: "Baterías de litio, inversores, UPS, paneles, cables y más. Te cotizamos los equipos que necesitas; la instalación no está incluida.",
+  },
+  {
     kind: "otro",
     icon: "checklist",
     title: "Pedidos especiales",
@@ -131,7 +137,7 @@ function Escena({ html, className, delay }: { html: string; className: string; d
 
 export default async function BusinessPage({ searchParams }: Props) {
   const { tipo } = await searchParams;
-  const kind: QuoteKind = tipo === "otro" ? "otro" : "volumen";
+  const kind: QuoteKind = tipo === "otro" || tipo === "energia" ? tipo : "volumen";
   const whatsapp = whatsappLink("Hola, quiero cotizar equipos para mi empresa");
   const equipos = await equiposDibujados();
 
@@ -239,7 +245,7 @@ export default async function BusinessPage({ searchParams }: Props) {
         </ol>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2">
+      <section className="grid gap-4 md:grid-cols-3">
         {SERVICES.map((s, i) => (
           <a
             key={s.kind}
