@@ -10,6 +10,9 @@ export const SITE = {
   // Vacío = no se muestra.
   rut: "76.498.039-5",
   address: "Pleyades 1467, Puente Alto, Región Metropolitana",
+  // Retiro en bodega (Raúl 24-11-2026): sobre todo para clientes de regiones que prefieren venir a buscar.
+  // Siempre coordinado antes por WhatsApp; no hay horario de atención fijo. Vacío = no se muestra.
+  pickup: "Bodega TERC en Puente Alto (Pleyades 1467)",
   slogan: "Segunda vida, primera calidad",
   // Plazo de despacho de los productos del proveedor (se piden después de la compra).
   // La ley exige informarlo, aunque la tienda no los muestre como "a pedido".
