@@ -64,6 +64,7 @@ export function ProductCard({ product }: { product: Product }) {
           <p className={`text-2xl font-bold tracking-tight ${sale ? "text-sale" : "text-ink"}`}>
             {formatCLP(product.price)}
           </p>
+          <p className="-mt-0.5 text-[11px] text-muted/70">IVA incluido</p>
           {(sale ?? vsNew) && (
             <p className={`text-xs font-semibold ${sale ? "text-sale" : "text-pine-700"}`}>
               Ahorras {formatCLP((sale ?? vsNew)!.amount)}

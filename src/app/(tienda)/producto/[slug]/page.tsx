@@ -184,7 +184,9 @@ export default async function ProductPage({ params }: Props) {
                 Son <strong>menos de {formatCLP(perDay)} al día</strong> durante un año, con garantía incluida.
               </span>
             </p>
-            <p className="text-[13px] text-muted">IVA incluido · Paga con débito, crédito o en cuotas</p>
+            <p className="text-[13px] text-muted">
+              <span className="text-[15px] font-semibold text-ink">IVA incluido</span> · Paga con débito, crédito o en cuotas
+            </p>
           </div>
 
           {/* Envío y fecha de llegada: la persona ya se imagina recibiéndolo. */}
