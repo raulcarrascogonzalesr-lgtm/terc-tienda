@@ -14,7 +14,7 @@ export type EnergyCategory = {
   short: string; // para el menú
   aliases: string[]; // otras formas de escribirla en el panel
   blurb: string; // una línea para la tarjeta de la categoría
-  install: boolean; // se conecta a una instalación eléctrica (la ficha avisa que no la incluye)
+  install: boolean; // se conecta a una instalación eléctrica (Raúl 23-11: no se avisa en la tienda)
   icon: IconName; // para las tarjetas cuando la categoría aún no tiene productos con foto
 };
 
@@ -28,10 +28,12 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
     icon: "shield",
   },
   {
-    name: "Baterías de litio",
+    // Raúl 24-11: también se venden baterías de gel y AGM de Esol, así que la categoría es "Baterías".
+    // Los productos de litio quedan con "Baterías de litio" (alias) y siguen cayendo aquí.
+    name: "Baterías",
     short: "Baterías",
-    aliases: ["Baterías", "Baterias", "Baterías de litio y AGM"],
-    blurb: "Litio y AGM para respaldo y sistemas solares.",
+    aliases: ["Baterías de litio", "Baterias", "Baterías de litio y AGM", "Baterías de gel", "Baterías GEL y AGM", "Baterías AGM"],
+    blurb: "Litio, gel y AGM para respaldo y sistemas solares.",
     install: true,
     icon: "battery",
   },
@@ -119,6 +121,10 @@ export function energyHref(category?: Pick<EnergyCategory, "name"> | null) {
   return category ? `/energia?categoria=${encodeURIComponent(category.name)}#productos` : "/energia#productos";
 }
 
+// Frase de precio de Energía (inicio y página de Energía). Raúl (23-11) quiere que quede claro el precio.
+// "Entre los mejores" se puede defender aunque Esol venda un poco más barato al público.
+export const ENERGY_PRICE_CLAIM = "entre los mejores precios del mercado";
+
 // Cómo se compra Energía (carrito, ficha y página de Energía).
 export const ENERGY_STEPS = [
   { title: "Pides", text: "Envías tu carrito con tus datos." },
@@ -130,7 +136,6 @@ export const ENERGY_STEPS = [
 // Datos que se muestran en la tienda (garantía de fábrica, plazo de entrega).
 export const ENERGY_INFO = {
   delivery: "Región Metropolitana: lo llevamos nosotros. Regiones: lo cotizamos según el producto.",
-  install: "Instalación no incluida. Te recomendamos un instalador eléctrico autorizado SEC.",
   // Plazo para transferir desde que se le envía la cuenta y el monto al cliente.
   holdHours: 48,
 };

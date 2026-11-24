@@ -2,7 +2,7 @@ import Link from "next/link";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
 import { Terqui } from "@/components/Terqui";
-import { ENERGY_CATEGORIES, ENERGY_STEPS, energyCategory, energyHref, WIRESUN_URL } from "@/lib/energy";
+import { ENERGY_CATEGORIES, ENERGY_PRICE_CLAIM, ENERGY_STEPS, energyCategory, energyHref, WIRESUN_URL } from "@/lib/energy";
 import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { whatsappLink } from "@/lib/site";
@@ -155,7 +155,7 @@ function MiniProduct({ product }: { product: Product }) {
 export function bannerProducts(energy: Product[], max = 4): Product[] {
   const withPhoto = energy.filter((p) => p.image_url);
   const of = (name: string) => withPhoto.filter((p) => energyCategory(p.category)?.name === name);
-  const picked = [...of("Baterías de litio").slice(0, 2), ...of("Inversores y reguladores").slice(0, 2)];
+  const picked = [...of("Baterías").slice(0, 2), ...of("Inversores y reguladores").slice(0, 2)];
   for (const p of withPhoto) if (picked.length < max && !picked.includes(p)) picked.push(p);
   return picked.slice(0, max);
 }
@@ -205,8 +205,9 @@ export function EnergyBanner({ products, className = "", style }: { products: Pr
           Que un corte de luz no te pare la pega
         </h2>
         <p className="mt-3 max-w-md text-[15px] leading-relaxed text-white/80">
-          Baterías de litio, inversores y respaldo para tu casa y tu oficina, a buen precio y con la misma atención por
-          WhatsApp de siempre.
+          Baterías de litio, inversores y respaldo para tu casa y tu oficina,{" "}
+          <strong className="font-bold text-gold">{ENERGY_PRICE_CLAIM}</strong> y con la misma atención por WhatsApp de
+          siempre.
         </p>
         <ul className="mt-4 flex flex-wrap gap-2 text-[13px]">
           {["Productos nuevos", "Factura", "Garantía de fábrica"].map((t) => (
