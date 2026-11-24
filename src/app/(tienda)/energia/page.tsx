@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BrandPicker, BrandSection } from "@/components/energy/BrandParts";
 import { EnergyFacts, EnergySteps, InstallerCard, WireSunCard } from "@/components/energy/EnergyParts";
 import { StoreIcon, WhatsAppIcon } from "@/components/icons";
 import { Mark } from "@/components/Mark";
 import { ProductCard } from "@/components/ProductCard";
 import { Terqui } from "@/components/Terqui";
 import { ENERGY_CATEGORIES, ENERGY_INFO, ENERGY_PRICE_CLAIM, energyCategory, energyHref, showcaseOrder, splitWorlds } from "@/lib/energy";
+import { brandFromParam, energyBrand, type EnergyBrand, groupByBrand } from "@/lib/energy-brands";
 import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { listProducts } from "@/lib/products";
@@ -15,43 +17,64 @@ import type { Product } from "@/lib/types";
 
 export const revalidate = 60;
 
-type Props = { searchParams: Promise<{ categoria?: string; orden?: string }> };
+type Props = { searchParams: Promise<{ categoria?: string; marca?: string; orden?: string }> };
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const cat = energyCategory((await searchParams).categoria);
+  const params = await searchParams;
+  const cat = energyCategory(params.categoria);
+  const brand = brandFromParam(params.marca);
+  const query = new URLSearchParams();
+  if (cat) query.set("categoria", cat.name);
+  if (brand) query.set("marca", brand.key);
+  const qs = query.toString();
   // Títulos y textos con las palabras que la gente busca en Google (ver seo en src/lib/energy.ts).
+  const title = brand
+    ? `${cat ? `${cat.seo.heading} ` : ""}${brand.name}: precios en Chile | TERC Energía`
+    : cat
+      ? `${cat.seo.title} | TERC`
+      : "Baterías de litio, UPS, inversores y paneles solares en Chile | TERC Energía";
   return {
-    title: cat ? `${cat.seo.title} | TERC` : "Baterías de litio, UPS, inversores y paneles solares en Chile | TERC Energía",
+    title,
     description: cat
       ? cat.seo.description
       : "Baterías de litio, UPS, inversores, paneles solares y cables nuevos, con garantía de fábrica y factura. Te confirmamos stock y total, y pagas por transferencia. Entrega en la Región Metropolitana.",
-    alternates: { canonical: cat ? `/energia?categoria=${encodeURIComponent(cat.name)}` : "/energia" },
+    alternates: { canonical: `/energia${qs ? `?${qs}` : ""}` },
   };
 }
 
+// Raúl (24-11): por defecto, ordenado por marca y modelo, cada marca en su apartado.
 const SORTS = {
-  categoria: "Por categoría",
+  marca: "Por marca y modelo",
   "menor-precio": "Menor precio",
   "mayor-precio": "Mayor precio",
 } as const;
 type Sort = keyof typeof SORTS;
 
-const order = (p: Product) => ENERGY_CATEGORIES.findIndex((c) => c.name === energyCategory(p.category)?.name);
-
-function sortProducts(list: Product[], sort: Sort) {
-  const out = [...list];
-  if (sort === "menor-precio") out.sort((a, b) => a.price - b.price);
-  else if (sort === "mayor-precio") out.sort((a, b) => b.price - a.price);
-  else out.sort((a, b) => order(a) - order(b) || a.price - b.price);
-  return out;
-}
+// Cuántos productos se ven por marca antes del botón "Ver los N" (cuando no hay una marca elegida).
+const PER_BRAND = 10;
 
 export default async function EnergyPage({ searchParams }: Props) {
   const params = await searchParams;
   const cat = energyCategory(params.categoria);
-  const sort: Sort = params.orden && params.orden in SORTS ? (params.orden as Sort) : "categoria";
+  const brand = brandFromParam(params.marca);
+  const sort: Sort = params.orden && params.orden in SORTS ? (params.orden as Sort) : "marca";
   const { energy } = splitWorlds(await listProducts());
-  const list = sortProducts(cat ? energy.filter((p) => energyCategory(p.category)?.name === cat.name) : energy, sort);
+  const inCategory = cat ? energy.filter((p) => energyCategory(p.category)?.name === cat.name) : energy;
+  // Las marcas de lo que se está mirando (para la fila de logos) y los productos de la marca elegida.
+  const brands = groupByBrand(inCategory).map((g) => ({ brand: g.brand, count: g.products.length }));
+  const inBrand = brand ? inCategory.filter((p) => energyBrand(p.brand).key === brand.key) : inCategory;
+  // Por marca: un bloque por categoría (o solo la elegida) y, dentro, un apartado por marca.
+  const sections =
+    sort === "marca"
+      ? ENERGY_CATEGORIES.map((c) => ({
+          cat: c,
+          groups: groupByBrand(inBrand.filter((p) => energyCategory(p.category)?.name === c.name)),
+        })).filter((x) => x.groups.length > 0)
+      : [];
+  const list =
+    sort === "marca"
+      ? sections.flatMap((x) => x.groups.flatMap((g) => g.products))
+      : [...inBrand].sort((a, b) => (sort === "menor-precio" ? a.price - b.price : b.price - a.price));
 
   // Tarjetas de categoría: las que tienen productos, con foto y precio "desde". Mientras no haya
   // ningún producto de Energía se muestran todas como "Muy pronto" (decisión de Raúl, 23-11).
@@ -67,11 +90,14 @@ export default async function EnergyPage({ searchParams }: Props) {
   const bubbles = ["left-0 top-4 h-48 w-48", "right-2 top-0 h-36 w-36", "bottom-0 right-16 h-32 w-32"];
   const wa = whatsappLink("Hola, quiero ayuda para elegir un producto de Energía en TERC");
 
-  const link = (changes: { categoria?: string | null; orden?: string | null }) => {
+  const link = (changes: { categoria?: string | null; marca?: string | null; orden?: string | null }) => {
     const next = new URLSearchParams();
     const categoria = changes.categoria === undefined ? (cat?.name ?? null) : changes.categoria;
-    const orden = changes.orden === undefined ? (sort === "categoria" ? null : sort) : changes.orden;
+    // Al cambiar de categoría se suelta la marca (puede no tener productos en la otra).
+    const marca = changes.marca === undefined ? (changes.categoria === undefined ? (brand?.key ?? null) : null) : changes.marca;
+    const orden = changes.orden === undefined ? (sort === "marca" ? null : sort) : changes.orden;
     if (categoria) next.set("categoria", categoria);
+    if (marca) next.set("marca", marca);
     if (orden) next.set("orden", orden);
     const qs = next.toString();
     return `/energia${qs ? `?${qs}` : ""}#productos`;
@@ -83,6 +109,7 @@ export default async function EnergyPage({ searchParams }: Props) {
       { name: "Inicio", path: "/" },
       { name: "Energía", path: "/energia" },
       ...(cat ? [{ name: cat.name, path: `/energia?categoria=${encodeURIComponent(cat.name)}` }] : []),
+      ...(brand ? [{ name: brand.name, path: link({ marca: brand.key, orden: null }).replace("#productos", "") }] : []),
     ]),
     ...(list.length ? [itemListJsonLd(list)] : []),
   ];
@@ -179,16 +206,21 @@ export default async function EnergyPage({ searchParams }: Props) {
       <section id="productos" className="shell scroll-mt-40 pt-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">{cat ? cat.name : "Todo Energía"}</h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+              {cat ? cat.name : "Todo Energía"}
+              {brand && <span className="text-pine-700"> · {brand.name}</span>}
+            </h2>
             <p className="mt-1 text-sm text-muted">
               {soon
                 ? "Muy pronto · se comprarán con solicitud y se pagarán por transferencia"
-                : `${list.length} ${list.length === 1 ? "producto" : "productos"} · se compran con solicitud y se pagan por transferencia`}
+                : `${list.length} ${list.length === 1 ? "producto" : "productos"}${
+                    brand ? "" : ` de ${brands.length} ${brands.length === 1 ? "marca" : "marcas"}`
+                  } · se compran con solicitud y se pagan por transferencia`}
             </p>
           </div>
-          {cat && (
-            <Link href="/energia#productos" className="text-sm font-medium text-pine-700 hover:underline">
-              Ver todo Energía
+          {(cat || brand) && (
+            <Link href={brand && cat ? link({ marca: null }) : "/energia#productos"} className="text-sm font-medium text-pine-700 hover:underline">
+              {brand && cat ? `Ver todo ${cat.short}` : "Ver todo Energía"}
             </Link>
           )}
         </div>
@@ -216,7 +248,7 @@ export default async function EnergyPage({ searchParams }: Props) {
               {Object.entries(SORTS).map(([key, label]) => (
                 <Link
                   key={key}
-                  href={link({ orden: key === "categoria" ? null : key })}
+                  href={link({ orden: key === "marca" ? null : key })}
                   className={`shrink-0 rounded-full px-3 py-1.5 ${sort === key ? "bg-surface font-semibold text-ink ring-1 ring-line/10" : "text-muted hover:text-ink"}`}
                 >
                   {label}
@@ -224,6 +256,14 @@ export default async function EnergyPage({ searchParams }: Props) {
               ))}
             </div>
           </div>
+        )}
+
+        {energy.length > 0 && (
+          <BrandPicker
+            brands={brands}
+            active={brand}
+            href={(b: EnergyBrand | null) => link({ marca: b?.key ?? null })}
+          />
         )}
 
         {list.length === 0 ? (
@@ -238,6 +278,30 @@ export default async function EnergyPage({ searchParams }: Props) {
                 <WhatsAppIcon className="h-4 w-4" /> Preguntar por WhatsApp
               </a>
             )}
+          </div>
+        ) : sort === "marca" ? (
+          // Por marca y modelo: sin categoría elegida, un bloque por categoría; dentro, un apartado por marca.
+          <div className="mt-6 space-y-10">
+            {sections.map(({ cat: c, groups }) => (
+              <div key={c.name} className="space-y-4">
+                {!cat && (
+                  <div className="flex flex-wrap items-end justify-between gap-2 border-b border-line/10 pb-2">
+                    <h3 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">{c.name}</h3>
+                    <Link href={link({ categoria: c.name })} className="text-sm font-medium text-pine-700 hover:underline">
+                      Ver solo {c.short.toLowerCase()}
+                    </Link>
+                  </div>
+                )}
+                {groups.map((g) => (
+                  <BrandSection
+                    key={g.brand.key}
+                    group={g}
+                    limit={brand ? undefined : PER_BRAND}
+                    moreHref={link({ categoria: c.name, marca: g.brand.key })}
+                  />
+                ))}
+              </div>
+            ))}
           </div>
         ) : (
           <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
