@@ -2,7 +2,7 @@ import Link from "next/link";
 import { StoreIcon, WhatsAppIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
 import { Terqui } from "@/components/Terqui";
-import { ENERGY_CATEGORIES, ENERGY_PRICE_CLAIM, ENERGY_STEPS, energyCategory, energyHref, WIRESUN_URL } from "@/lib/energy";
+import { ENERGY_CATEGORIES, ENERGY_PRICE_CLAIM, ENERGY_STEPS, energyCategory, energyHref, showcaseOrder, WIRESUN_URL } from "@/lib/energy";
 import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { whatsappLink } from "@/lib/site";
@@ -151,9 +151,9 @@ function MiniProduct({ product }: { product: Product }) {
 }
 
 // Para la portada: primero un par de baterías y de inversores (lo que Raúl quiere mostrar al tiro),
-// después lo que haya. Solo productos con foto.
+// después lo que haya. Solo productos con foto real, las más lindas primero.
 export function bannerProducts(energy: Product[], max = 4): Product[] {
-  const withPhoto = energy.filter((p) => p.image_url);
+  const withPhoto = showcaseOrder(energy);
   const of = (name: string) => withPhoto.filter((p) => energyCategory(p.category)?.name === name);
   const picked = [...of("Baterías de litio").slice(0, 2), ...of("Inversores y reguladores").slice(0, 2)];
   for (const p of withPhoto) if (picked.length < max && !picked.includes(p)) picked.push(p);
