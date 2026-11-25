@@ -28,8 +28,9 @@ export const ENERGY_BRANDS: EnergyBrand[] = [
   { key: "growatt", name: "Growatt", aliases: [], logo: "/marcas/energia/growatt.png" },
   { key: "cotek", name: "Cotek", aliases: [], logo: "/marcas/energia/cotek.png" },
   { key: "ultracell", name: "Ultracell", aliases: [], logo: "/marcas/energia/ultracell.png", dark: true },
+  // Nimac no publica su logo en internet: este lo encontró Raúl (25-11).
+  { key: "nimac", name: "Nimac", aliases: ["Nimac Power Systems"], logo: "/marcas/energia/nimac.png" },
   // Sin logo oficial en internet: se muestra el nombre.
-  { key: "nimac", name: "Nimac", aliases: [] },
   { key: "must", name: "Must", aliases: ["Must Solar", "Must Power"] },
   { key: "gruntek", name: "Gruntek", aliases: [] },
   { key: "powerstar", name: "PowerStar", aliases: ["Power Star"] },
