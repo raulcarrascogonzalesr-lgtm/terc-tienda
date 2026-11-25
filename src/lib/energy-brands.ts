@@ -30,6 +30,9 @@ export const ENERGY_BRANDS: EnergyBrand[] = [
   { key: "ultracell", name: "Ultracell", aliases: [], logo: "/marcas/energia/ultracell.png", dark: true },
   // Nimac no publica su logo en internet: este lo encontró Raúl (25-11).
   { key: "nimac", name: "Nimac", aliases: ["Nimac Power Systems"], logo: "/marcas/energia/nimac.png" },
+  // Logos oficiales bajados de hoymiles.com y solaxpower.com (25-11).
+  { key: "hoymiles", name: "Hoymiles", aliases: [], logo: "/marcas/energia/hoymiles.png" },
+  { key: "solax", name: "SolaX Power", aliases: ["Solax", "SolaX"], logo: "/marcas/energia/solax.png" },
   // Sin logo oficial en internet: se muestra el nombre.
   { key: "must", name: "Must", aliases: ["Must Solar", "Must Power"] },
   { key: "gruntek", name: "Gruntek", aliases: [] },
