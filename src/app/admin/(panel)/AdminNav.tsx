@@ -26,6 +26,7 @@ const GROUPS = [
   {
     title: "Finanzas",
     links: [
+      { href: "/admin/plan", label: "Plan del mes", icon: ICONS.plan },
       { href: "/admin/finanzas", label: "Caja", icon: ICONS.finanzas },
       { href: "/admin/resultados", label: "¿Gané o perdí?", icon: ICONS.resultados },
       { href: "/admin/iva", label: "IVA e impuestos", icon: ICONS.iva },

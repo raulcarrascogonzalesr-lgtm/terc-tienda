@@ -146,6 +146,8 @@ export type Movement = {
   attachment: string | null; // ruta del archivo en el bucket privado "documentos"
   product_id: string | null; // equipo vendido, en ventas fuera de la web
   unit_cost: number | null; // costo neto de ese equipo al momento de la venta
+  apertura?: boolean; // gasto para abrir la tienda: no cuenta en el plan del mes (se devuelve aparte)
+  paid_with?: string | null; // "tarjeta_papa": lo pagó la tarjeta del papá (TERC se lo debe)
   created_at: string;
 };
 

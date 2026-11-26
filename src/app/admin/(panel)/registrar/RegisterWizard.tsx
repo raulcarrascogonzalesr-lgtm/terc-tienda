@@ -136,6 +136,8 @@ export function RegisterWizard({
   const [productId, setProductId] = useState("");
   const [unitCost, setUnitCost] = useState("");
   const [file, setFile] = useState<{ name: string; error?: string } | null>(null);
+  const [apertura, setApertura] = useState(false);
+  const [dadCard, setDadCard] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const top = useRef<HTMLDivElement>(null);
 
@@ -180,7 +182,9 @@ export function RegisterWizard({
     vat <= value &&
     !file?.error;
   const partyLabel = isSale ? "Cliente" : "Proveedor";
-  const newCash = config?.kind === "ingreso" ? cash + value : cash - value;
+  const isExpense = intent === "gasto";
+  const byDadCard = isExpense && dadCard;
+  const newCash = config?.kind === "ingreso" ? cash + value : byDadCard ? cash : cash - value;
 
   function choose(key: IntentKey) {
     setIntent(key);
@@ -204,6 +208,8 @@ export function RegisterWizard({
     setProductId("");
     setUnitCost("");
     setFile(null);
+    setApertura(false);
+    setDadCard(false);
     if (fileInput.current) fileInput.current.value = "";
   }
 
@@ -283,6 +289,8 @@ export function RegisterWizard({
         <input type="hidden" name="campaign_id" value={campaignId} />
         <input type="hidden" name="description" value={description} />
         <input type="hidden" name="vat" value={hasVat ? String(vat) : ""} />
+        <input type="hidden" name="apertura" value={isExpense && apertura ? "1" : ""} />
+        <input type="hidden" name="paid_with" value={byDadCard ? "tarjeta_papa" : ""} />
         <input type="hidden" name="product_id" value={mode === "venta" ? productId : ""} />
         <input
           type="hidden"
@@ -677,6 +685,39 @@ export function RegisterWizard({
                 />
               </Field>
             </div>
+
+            {isExpense && (
+              <div className="p-5 sm:p-6 grid sm:grid-cols-2 gap-3">
+                <label className="flex items-start gap-3 rounded-lg border border-[#e4e2dc] p-3.5 text-sm cursor-pointer has-[:checked]:border-[#4285f4] has-[:checked]:bg-[#eef4ff]">
+                  <input
+                    type="checkbox"
+                    checked={dadCard}
+                    onChange={(e) => setDadCard(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 accent-[#4285f4]"
+                  />
+                  <span>
+                    <span className="font-medium block">Lo pagó la tarjeta de mi papá</span>
+                    <span className="text-[#6b716f]">
+                      No sale de tu caja: queda como deuda con él en el Plan del mes.
+                    </span>
+                  </span>
+                </label>
+                <label className="flex items-start gap-3 rounded-lg border border-[#e4e2dc] p-3.5 text-sm cursor-pointer has-[:checked]:border-[#b3a26a] has-[:checked]:bg-[#f8f4e6]">
+                  <input
+                    type="checkbox"
+                    checked={apertura}
+                    onChange={(e) => setApertura(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 accent-[#b3a26a]"
+                  />
+                  <span>
+                    <span className="font-medium block">Es un gasto de apertura</span>
+                    <span className="text-[#6b716f]">
+                      Para partir la tienda. No cuenta en los gastos del mes: se devuelve aparte.
+                    </span>
+                  </span>
+                </label>
+              </div>
+            )}
 
             <div className="flex flex-wrap items-center justify-between gap-3 p-5 sm:p-6 bg-[#fafaf8] rounded-b-xl">
               <button type="button" onClick={() => setStep(1)} className="btn-secondary">
