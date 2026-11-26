@@ -60,6 +60,7 @@ const RETURN_POLICY = {
   returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
   merchantReturnDays: 10,
   returnMethod: "https://schema.org/ReturnByMail",
+  returnFees: "https://schema.org/FreeReturn", // el envío de vuelta lo paga TERC (Raúl, 26-11-2026)
 };
 
 export function productJsonLd(product: Product, fund = 0) {

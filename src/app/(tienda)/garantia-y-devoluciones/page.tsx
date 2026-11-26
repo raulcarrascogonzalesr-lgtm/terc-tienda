@@ -241,8 +241,9 @@ export default function WarrantyPage() {
         </p>
         <p>
           <strong className="text-ink">Cómo pedirlo:</strong> escríbenos por WhatsApp o a {SITE.email} dentro de esos 10
-          días, con tu número de pedido. Te decimos cómo enviarnos el equipo y, cuando llega y comprobamos que está como lo
-          entregamos, te devolvemos lo que pagaste por el mismo medio de pago.
+          días, con tu número de pedido. Te mandamos la etiqueta de despacho <strong className="text-ink">pagada por TERC</strong>, desde
+          cualquier parte de Chile, y cuando llega y comprobamos que está como lo entregamos, te devolvemos lo que pagaste
+          por el mismo medio de pago.
         </p>
         <p>
           El retracto es distinto de la garantía: si el equipo llega con una falla o no es lo que compraste, no es
