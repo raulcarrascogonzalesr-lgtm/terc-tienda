@@ -136,6 +136,12 @@ export function splitWorlds<T extends Pick<Product, "category">>(products: T[]) 
   return { pcs, energy };
 }
 
+// Las UPS (para el apartado "Que un corte de luz no te corte la pega"), de la más barata a la más cara.
+export const UPS_CATEGORY = "Respaldo (UPS)";
+export function upsProducts<T extends Pick<Product, "category" | "price">>(products: T[]): T[] {
+  return products.filter((p) => energyCategory(p.category)?.name === UPS_CATEGORY).sort((a, b) => a.price - b.price);
+}
+
 // Las categorías de Energía que tienen productos, en el orden de la tienda.
 export function energyCategoriesIn(products: Pick<Product, "category">[]): EnergyCategory[] {
   const present = new Set(products.map((p) => energyCategory(p.category)?.name).filter(Boolean));

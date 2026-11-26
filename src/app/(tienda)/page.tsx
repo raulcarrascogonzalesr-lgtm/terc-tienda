@@ -6,13 +6,14 @@ import { TerquiHero } from "@/components/home/TerquiHero";
 import { PeaceOfMind } from "@/components/home/PeaceOfMind";
 import { ServiceCard, services, withServices } from "@/components/home/ServiceCard";
 import { WelcomeCurtain } from "@/components/home/WelcomeCurtain";
+import { BlackoutBand } from "@/components/energy/BlackoutBand";
 import { bannerProducts, EnergyBanner } from "@/components/energy/EnergyParts";
 import { StoreIcon, type IconName } from "@/components/icons";
 import { Mark } from "@/components/Mark";
 import { Terqui } from "@/components/Terqui";
 import { OfferCountdown } from "@/components/OfferCountdown";
 import { ProductCard } from "@/components/ProductCard";
-import { energyCategory, energyHref, splitWorlds } from "@/lib/energy";
+import { ENERGY_CATEGORIES, energyCategory, energyHref, splitWorlds, upsProducts } from "@/lib/energy";
 import { formatCLP, offer, savings } from "@/lib/format";
 import { hasRealPhoto, photoProps } from "@/lib/photo";
 import { listProducts } from "@/lib/products";
@@ -181,6 +182,8 @@ export default async function HomePage({ searchParams }: Props) {
   // Banner de Energía entre las filas de equipos (solo en la portada). Sin productos con foto,
   // muestra las categorías como "Muy pronto".
   const energyPicks = bannerProducts(energy);
+  // Las UPS sirven para los equipos y para Energía: en la portada tienen su apartado propio.
+  const ups = upsProducts(energy);
   const showEnergy = !filtering;
   const categories = [...new Set(all.map((p) => p.category))].sort();
 
@@ -485,6 +488,13 @@ export default async function HomePage({ searchParams }: Props) {
           })()
         )}
       </section>
+
+      {/* Las UPS: que un corte de luz no apague el computador. */}
+      {!filtering && ups.length > 0 && (
+        <div className="shell pt-10" data-reveal>
+          <BlackoutBand products={ups} moreHref={energyHref(ENERGY_CATEGORIES.find((c) => c.name === "Inversores y reguladores"))} />
+        </div>
+      )}
 
       {/* Después de ver los equipos: la garantía de 1 año y el soporte post venta, en grande. */}
       {!filtering && (
