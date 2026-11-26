@@ -135,8 +135,8 @@ export function EnergyProduct({ product }: { product: Product }) {
             <p className="flex items-start gap-2.5 rounded-2xl bg-mint-50 px-3 py-2.5 text-sm text-ink">
               <StoreIcon name="bank" className="mt-0.5 h-5 w-5 text-pine-700" />
               <span>
-                <strong>Compra con aprobación:</strong> envías tu solicitud, te confirmamos stock y total el mismo día hábil y pagas
-                por transferencia. No se cobra nada al enviarla.
+                <strong>Compra por transferencia:</strong> envías tu pedido, ves la cuenta y transfieres. Confirmamos stock
+                con el proveedor y, si no hay, te devolvemos el 100% en máximo {SITE.transfer.refundDays} días hábiles.
               </span>
             </p>
           </div>

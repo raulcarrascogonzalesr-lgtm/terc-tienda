@@ -25,6 +25,22 @@ export const SITE = {
   // porque el proveedor cubre 6 meses). Las ofertas pueden traer 6 meses: cada equipo guarda la suya. Cada equipo guarda la suya en warranty_months;
   // esta es la que se anuncia en la tienda (barra de arriba, pie de página).
   warrantyMonths: 12,
+  // Pagos (Raúl 26-11-2026, como Winpy): el precio publicado es el de transferencia. Con tarjeta
+  // (Mercado Pago o Webpay, débito, crédito o cuotas) sale este % más caro, por la comisión.
+  // Se muestra chico, como "otros medios de pago". 0 = mismo precio con cualquier medio.
+  cardExtraPercent: 4,
+  // Cuenta para las transferencias (la misma de Wiremax). El asunto lleva el número de pedido
+  // para separar la plata de TERC de la de Wiremax.
+  transfer: {
+    bank: "Banco Santander",
+    accountType: "Cuenta corriente",
+    account: "71453499",
+    holder: "Wiremax Telecomunicaciones SpA",
+    rut: "76.498.039-5",
+    email: "contacto@terc.cl", // a dónde mandar el comprobante
+    holdHours: 48, // cuánto tiempo se guarda el pedido de computadores esperando la transferencia
+    refundDays: 2, // Energía: si no hay stock, en cuántos días hábiles se devuelve la plata
+  },
   // Soporte TERC por WhatsApp (post venta): horario y tiempo de respuesta que se muestran en la tienda.
   // Raúl lo puede cambiar aquí; los textos de la portada, la ficha y la garantía lo toman de aquí.
   support: {

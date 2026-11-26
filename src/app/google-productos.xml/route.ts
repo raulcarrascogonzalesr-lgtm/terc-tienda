@@ -1,5 +1,5 @@
 import { energyCategory, type EnergyCategory } from "@/lib/energy";
-import { todayInChile, windowsLabel } from "@/lib/format";
+import { cardPrice, todayInChile, windowsLabel } from "@/lib/format";
 import { hasRealPhoto } from "@/lib/photo";
 import { listProducts } from "@/lib/products";
 import { productMargins } from "@/lib/ranking";
@@ -89,7 +89,10 @@ function energyItem(product: Product, cat: EnergyCategory, margin: number | unde
     tag("link", `${SITE_URL}/producto/${product.slug}`),
     ...(images[0] ? [tag("image_link", images[0])] : []),
     ...images.slice(1, 11).map((src) => tag("additional_image_link", src)),
-    tag("availability", product.stock > 0 ? "in_stock" : "out_of_stock"),
+    // Energía se pide al proveedor después de la compra (stock "sin límite" en la tienda): a Google
+    // se informa "a pedido" con fecha estimada, para no decir "en stock" de algo no confirmado.
+    tag("availability", product.stock > 0 ? "backorder" : "out_of_stock"),
+    ...(product.stock > 0 ? [tag("availability_date", energyAvailabilityDate())] : []),
     tag("condition", "new"),
     tag("brand", product.brand),
     tag("google_product_category", energyGoogleCategory(cat, product)),
@@ -118,6 +121,18 @@ function priceRange(price: number): string {
   return "sobre-5-millones";
 }
 
+// Energía: disponible a pedido en unos 3 días hábiles desde hoy (plazo aproximado del proveedor).
+function energyAvailabilityDate(): string {
+  const d = new Date(`${todayInChile()}T12:00:00Z`);
+  for (let left = 3; left > 0; ) {
+    d.setUTCDate(d.getUTCDate() + 1);
+    if (d.getUTCDay() !== 0 && d.getUTCDay() !== 6) left--;
+  }
+  return `${d.toISOString().slice(0, 10)}T12:00-03:00`;
+}
+
+// Computadores: a Google va el precio con tarjeta (otros medios de pago), que es el que cualquiera
+// puede pagar; el de transferencia es un descuento por medio de pago (Raúl, 26-11-2026).
 function item(product: Product, margin: number | undefined): string {
   const cat = energyCategory(product.category);
   if (cat) return energyItem(product, cat, margin);
@@ -169,11 +184,11 @@ function item(product: Product, margin: number | undefined): string {
     tag("custom_label_3", priceRange(product.price)),
   ];
   if (product.compare_price && product.compare_price > product.price) {
-    lines.push(tag("price", `${product.compare_price} CLP`), tag("sale_price", `${product.price} CLP`));
+    lines.push(tag("price", `${cardPrice(product.compare_price!)} CLP`), tag("sale_price", `${cardPrice(product.price)} CLP`));
     // La oferta termina sola a medianoche del último día (hora de Chile).
     if (product.offer_ends_at) lines.push(tag("sale_price_effective_date", `${todayInChile()}T00:00-03:00/${product.offer_ends_at}T23:59-03:00`));
   } else {
-    lines.push(tag("price", `${product.price} CLP`));
+    lines.push(tag("price", `${cardPrice(product.price)} CLP`));
   }
   return `<item>${lines.join("")}</item>`;
 }

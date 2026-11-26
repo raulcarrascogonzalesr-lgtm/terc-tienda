@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { isBlackFriday } from "@/lib/black-friday";
 import { energyCategory } from "@/lib/energy";
-import { formatCLP, offer, savings, shortDate } from "@/lib/format";
+import { cardPrice, formatCLP, offer, savings, shortDate } from "@/lib/format";
 import type { Product } from "@/lib/types";
 import { warrantyLabel } from "@/lib/warranty";
 import { AddToCartButton } from "./AddToCartButton";
@@ -68,7 +68,10 @@ export function ProductCard({ product }: { product: Product }) {
           <p className={`text-2xl font-bold tracking-tight ${sale ? "text-sale" : "text-ink"}`}>
             {formatCLP(product.price)}
           </p>
-          <p className="-mt-0.5 text-[11px] text-muted/70">IVA incluido</p>
+          <p className="-mt-0.5 text-[11px] text-muted/70">{energy ? "IVA incluido" : "Transferencia · IVA incluido"}</p>
+          {!energy && cardPrice(product.price) !== product.price && (
+            <p className="text-[11px] text-muted/50">Otros medios de pago {formatCLP(cardPrice(product.price))}</p>
+          )}
           {(sale ?? vsNew) && (
             <p className={`text-xs font-semibold ${sale ? "text-sale" : "text-pine-700"}`}>
               Ahorras {formatCLP((sale ?? vsNew)!.amount)}

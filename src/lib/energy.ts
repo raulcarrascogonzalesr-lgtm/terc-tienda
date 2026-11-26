@@ -7,8 +7,9 @@ import type { Order, Product } from "./types";
 // nombre corto). TERC SOLO los vende: nunca los instala. Quien quiera un kit con instalación se
 // deriva a WireSun Energy.
 //
-// Se compran distinto: no se pagan con Mercado Pago ni Webpay. El cliente envía una solicitud,
-// TERC confirma stock y total, le manda la cuenta y el monto, y el cliente paga por transferencia.
+// Se compran distinto: no se pagan con Mercado Pago ni Webpay. Desde el 26-11-2026 (Raúl) el
+// cliente envía su pedido, ve la cuenta y transfiere al tiro; TERC confirma stock con el proveedor
+// y, si no hay, le devuelve el 100% de la plata.
 
 export type EnergyCategory = {
   name: string; // como se escribe en el panel y se ve en la tienda
@@ -194,8 +195,8 @@ export const ENERGY_PRICE_CLAIM = "entre los mejores precios del mercado";
 // Cómo se compra Energía (carrito, ficha y página de Energía).
 export const ENERGY_STEPS = [
   { title: "Pides", text: "Envías tu carrito con tus datos." },
-  { title: "Confirmamos", text: "Stock y total, el mismo día hábil." },
-  { title: "Transfieres", text: "Te mandamos la cuenta y el monto." },
+  { title: "Transfieres", text: "Te mostramos la cuenta al tiro." },
+  { title: "Confirmamos", text: "Stock con el proveedor. Si no hay, te devolvemos el 100%." },
   { title: "Recibes", text: "Entrega coordinada contigo." },
 ] as const;
 

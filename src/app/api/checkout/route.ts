@@ -1,10 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { Preference } from "mercadopago";
 import { getAdminUser } from "@/lib/admin";
 import { addressLine, DWELLINGS, isDwelling, isFixedCourier, normalizePhone, normalizeRut } from "@/lib/address";
 import { checkCoupon, countCouponUses } from "@/lib/coupons";
 import { isEnergy } from "@/lib/energy";
+import { cardPrice } from "@/lib/format";
+import { sendRequestEmails } from "@/lib/order-emails";
 import { getMercadoPagoClient } from "@/lib/mercadopago";
 import { createWebpayTransaction, getWebpayConfig } from "@/lib/webpay";
 import { saveMarketingConsent } from "@/lib/email-preferences";
@@ -24,17 +26,18 @@ type CheckoutBody = {
   preferredCourier?: unknown; // courier que eligió el cliente cuando el envío va con tarifa fija
   customer?: Record<string, unknown>;
   utm?: unknown;
-  method?: unknown; // "webpay" o "mercadopago" (por defecto)
+  method?: unknown; // "transferencia", "webpay" o "mercadopago" (por defecto)
   coupon?: unknown; // código de cupón de descuento, si el cliente escribió uno
   acceptPolicy?: unknown; // casilla "acepto la política de garantía y devoluciones"
   marketingConsent?: unknown; // casilla (sin marcar de antemano) "quiero recibir consejos y novedades"
 };
 
-type PaymentMethod = "mercadopago" | "webpay";
+type PaymentMethod = "transferencia" | "mercadopago" | "webpay";
 
 // Medios de pago que el carrito puede ofrecer. Webpay en modo prueba (o con WEBPAY_SOLO_ADMIN) solo lo ve el administrador.
 async function availableMethods(): Promise<PaymentMethod[]> {
-  const methods: PaymentMethod[] = [];
+  // Transferencia primero: es el precio publicado (Raúl, 26-11-2026). Con tarjeta sale un poco más caro.
+  const methods: PaymentMethod[] = ["transferencia"];
   const webpay = getWebpayConfig();
   if (webpay && (!webpay.adminOnly || (await getAdminUser()))) methods.push("webpay");
   if (getMercadoPagoClient()) methods.push("mercadopago");
@@ -71,7 +74,10 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const method: PaymentMethod = body.method === "webpay" ? "webpay" : "mercadopago";
+  const method: PaymentMethod =
+    body.method === "webpay" ? "webpay" : body.method === "transferencia" ? "transferencia" : "mercadopago";
+  // Con tarjeta (Mercado Pago o Webpay) cada unidad cuesta el precio de "otros medios de pago".
+  const unit = (price: number) => (method === "transferencia" ? price : cardPrice(price));
   if (!(await availableMethods()).includes(method)) {
     return NextResponse.json({ error: "Ese medio de pago no está disponible" }, { status: 503 });
   }
@@ -200,7 +206,9 @@ export async function POST(request: Request) {
       fund,
     };
   }
-  const subtotal = lines.reduce((sum, l) => sum + (l.product.price + l.warrantyExtra) * l.quantity, 0);
+  // Pedido por transferencia: el panel y los correos lo tratan como pago pendiente de confirmar.
+  if (method === "transferencia") customer.payment = "transferencia";
+  const subtotal = lines.reduce((sum, l) => sum + unit(l.product.price + l.warrantyExtra) * l.quantity, 0);
   const orderId = randomUUID();
 
   const supabase = getAdminClient();
@@ -215,7 +223,13 @@ export async function POST(request: Request) {
     // Cupón de envío gratis: el cliente no paga el envío (la tienda lo paga igual al courier).
     if (check.freeShipping) shipping = { ...shipping, price: 0 };
   }
-  const discount = coupon?.discount ?? 0;
+  // Con tarjeta, el descuento es la diferencia entre los dos precios de tarjeta (igual que en el carrito).
+  const couponExtra = lines.find((l) => l.product.id === coupon?.productId)?.warrantyExtra ?? 0;
+  const couponLine = lines.find((l) => l.product.id === coupon?.productId);
+  const discount =
+    coupon && couponLine && method !== "transferencia"
+      ? unit(couponLine.product.price + couponExtra) - unit(coupon.unitPrice + couponExtra)
+      : (coupon?.discount ?? 0);
   const total = subtotal - discount + shipping.price;
 
   if (supabase) {
@@ -241,7 +255,7 @@ export async function POST(request: Request) {
       items: lines.map((l) => ({
         product_id: l.product.id,
         name: l.warrantyExtra ? `${l.product.name} + garantía extendida a ${warrantyLabel(l.warrantyMonths)}` : l.product.name,
-        unit_price: l.product.price + l.warrantyExtra,
+        unit_price: unit(l.product.price + l.warrantyExtra),
         unit_cost: costById.get(l.product.id) ?? null,
         quantity: l.quantity,
         warranty_months: l.warrantyMonths,
@@ -268,6 +282,13 @@ export async function POST(request: Request) {
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
+
+  // Transferencia: el pedido queda pendiente y se muestran la cuenta y el monto. Se marca pagado
+  // en el panel cuando la plata está en el banco (ahí se descuenta el stock y sale el correo de pago).
+  if (method === "transferencia") {
+    after(() => sendRequestEmails(orderId));
+    return NextResponse.json({ checkoutUrl: `${siteUrl}/pago/transferencia?id=${orderId}`, orderId });
+  }
 
   const webpay = getWebpayConfig();
   if (method === "webpay" && webpay) {
@@ -305,10 +326,10 @@ export async function POST(request: Request) {
         ...lines.flatMap((l) => {
           const discounted = !!coupon?.productId && coupon.productId === l.product.id;
           const title = l.warrantyExtra ? `${l.product.name} + garantía ${warrantyLabel(l.warrantyMonths)}` : l.product.name;
-          const full = { id: l.product.id, title, unit_price: l.product.price + l.warrantyExtra, currency_id: "CLP" };
+          const full = { id: l.product.id, title, unit_price: unit(l.product.price + l.warrantyExtra), currency_id: "CLP" };
           return [
             ...(discounted
-              ? [{ ...full, title: `${title} (cupón ${coupon!.code})`, quantity: 1, unit_price: coupon!.unitPrice + l.warrantyExtra }]
+              ? [{ ...full, title: `${title} (cupón ${coupon!.code})`, quantity: 1, unit_price: unit(coupon!.unitPrice + l.warrantyExtra) }]
               : []),
             ...(l.quantity - (discounted ? 1 : 0) > 0 ? [{ ...full, quantity: l.quantity - (discounted ? 1 : 0) }] : []),
           ];
