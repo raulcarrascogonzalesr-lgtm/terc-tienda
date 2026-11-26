@@ -8,9 +8,8 @@ import { StoreIcon, WhatsAppIcon } from "@/components/icons";
 import { TerquiLoader } from "@/components/Terqui";
 import { normalizePhone, normalizeRut } from "@/lib/address";
 import { trackBeginCheckout, trackLead } from "@/lib/analytics";
-import { ENERGY_INFO } from "@/lib/energy";
 import { formatCLP } from "@/lib/format";
-import { whatsappLink } from "@/lib/site";
+import { SITE, whatsappLink } from "@/lib/site";
 import { UTM_MAX_AGE_MS, UTM_STORAGE_KEY } from "@/lib/utm";
 
 // Carrito con productos de Energía (TERC 2.1): no se paga aquí. El cliente deja 4 datos y envía
@@ -76,7 +75,7 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
       if (!res.ok) throw new Error(out.error ?? "No pudimos enviar tu solicitud");
       // Para Meta y Google Ads: alguien pidió comprar Energía (la venta se cierra al transferir).
       trackLead("solicitud-energia", total, mixed ? "Energía y equipos" : "Energía", out.number ? String(out.number) : undefined);
-      const params = new URLSearchParams({ n: out.number, w: normalizePhone(data.phone) ?? "", nombre: data.name.split(/\s+/)[0] });
+      const params = new URLSearchParams({ n: out.number, id: out.id ?? "", nombre: data.name.split(/\s+/)[0] });
       clear();
       router.push(`/solicitud-enviada?${params}`);
     } catch (err) {
@@ -90,17 +89,18 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
       {sending && <TerquiLoader overlay messages={["Enviando tu solicitud…", "Avisándole a TERC…", "Un segundo más"]} />}
       <div>
         <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-pine-700">
-          <StoreIcon name="bank" className="h-4 w-4" /> Compra con aprobación
+          <StoreIcon name="bank" className="h-4 w-4" /> Compra por transferencia
         </p>
         <h2 className="mt-1 text-lg font-extrabold text-ink">Tus datos para la solicitud</h2>
         <p className="mt-1 text-[13px] text-muted">
-          Solo 4 datos. Te escribimos por WhatsApp el mismo día hábil para confirmar stock y total. No se cobra nada ahora.
+          Solo 4 datos. Al enviarlo te mostramos la cuenta para transferir. Si no tenemos stock, te devolvemos el 100% en
+          máximo {SITE.transfer.refundDays} días hábiles.
         </p>
       </div>
       {mixed && (
         <p className="flex items-start gap-2 rounded-2xl bg-mint-50 px-3 py-2.5 text-[13px] text-ink">
           <StoreIcon name="bolt" className="mt-0.5 h-4 w-4 text-pine-700" />
-          Tu pedido incluye productos de Energía, así que todo el pedido se confirma primero y se paga con una sola transferencia.
+          Tu pedido incluye productos de Energía, así que todo se paga con una sola transferencia.
         </p>
       )}
 
@@ -176,12 +176,12 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
         disabled={sending || !canBuy}
         className="flex w-full items-center justify-center gap-2.5 rounded-full bg-cta px-6 py-4 font-bold text-white shadow-lg shadow-cta/30 transition hover:bg-cta-hover disabled:opacity-50 disabled:shadow-none"
       >
-        {sending ? "Enviando…" : "Enviar solicitud de compra"} <StoreIcon name="arrow" className="h-5 w-5" />
+        {sending ? "Enviando…" : "Enviar pedido y ver la cuenta"} <StoreIcon name="arrow" className="h-5 w-5" />
       </button>
       <ul className="space-y-2 text-[13px] text-muted">
         <li className="flex items-center gap-2">
           <StoreIcon name="bank" className="h-[18px] w-[18px] text-pine-700" />
-          Pagas por transferencia cuando te confirmemos (el monto vale {ENERGY_INFO.holdHours} horas)
+          Si no tenemos stock, te devolvemos el 100% en máximo {SITE.transfer.refundDays} días hábiles
         </li>
         <li className="flex items-center gap-2">
           <StoreIcon name="receipt" className="h-[18px] w-[18px] text-pine-700" />

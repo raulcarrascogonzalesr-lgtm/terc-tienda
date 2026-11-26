@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPreference } from "@/lib/email-preferences";
-import { ENERGY_INFO, isRequestOrder } from "@/lib/energy";
+import { isRequestOrder, REQUEST_ZONE } from "@/lib/energy";
+import { SITE } from "@/lib/site";
+import { transferRows, transferSubject } from "@/lib/transfer";
 import { orderNumber } from "@/lib/order-emails";
 import { formatCLP, formatDateTime, ORDER_STATUS_LABELS } from "@/lib/format";
 import { shippingLabel } from "@/lib/shipping";
@@ -29,22 +31,23 @@ const CUSTOMER_LABELS: Record<string, string> = {
   note: "Nota del cliente",
 };
 
-// Solicitud de compra (Energía, TERC 2.1): mensaje listo para enviarle al cliente la cuenta y el monto.
-// Los datos de la cuenta salen de la variable TRANSFER_DETAILS del hosting (si no está, quedan para pegarlos).
+// Pedido por transferencia (Energía o computadores): recordatorio por WhatsApp con la cuenta y el monto.
+// El cliente ya los vio al enviar el pedido y le llegaron por correo (Raúl, 26-11-2026).
 function approvalMessage(order: Order) {
   const first = (order.customer.name ?? "").trim().split(/\s+/)[0];
+  const number = orderNumber(order.id);
   const lines = order.items.map((i) => `• ${i.quantity} × ${i.name}: ${formatCLP(i.unit_price * i.quantity)}`);
-  const bank = process.env.TRANSFER_DETAILS?.replace(/\\n/g, "\n").trim() || "[Pega aquí los datos de la cuenta]";
   return [
-    `Hola${first ? ` ${first}` : ""}, te escribimos de TERC por tu solicitud ${orderNumber(order.id)}. ¡Tenemos stock!`,
+    `Hola${first ? ` ${first}` : ""}, te escribimos de TERC por tu pedido ${number}.`,
     "",
     ...lines,
     `Total a transferir: ${formatCLP(order.total)} (IVA incluido)`,
     "",
     "Datos para la transferencia:",
-    bank,
+    ...transferRows().map(([k, v]) => `${k}: ${v}`),
+    `Asunto: ${transferSubject(number)}`,
     "",
-    `El monto vale por ${ENERGY_INFO.holdHours} horas. Cuando transfieras, mándanos el comprobante por aquí y coordinamos la entrega en ${order.customer.comuna ?? "tu comuna"}. ¡Gracias!`,
+    "Cuando transfieras, mándanos el comprobante por aquí. ¡Gracias!",
   ].join("\n");
 }
 
@@ -72,38 +75,39 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         ← Volver a pedidos
       </Link>
       <PageHeader
-        eyebrow={request ? "Solicitud por transferencia" : "Pedido"}
+        eyebrow={request ? "Pago por transferencia" : "Pedido"}
         title={`${request ? "Solicitud" : "Pedido"} ${orderNumber(order.id)} del ${formatDateTime(order.created_at)}`}
       />
 
       {request && (
         <div className={`rounded-xl border p-4 text-sm space-y-3 ${order.status === "pending" ? "border-[#b3a26a] bg-[#fbf8ee]" : "border-[#e4e2dc] bg-white"}`}>
           <h2 className="font-semibold">
-            {order.status === "pending" ? "Solicitud por aprobar: el cliente todavía no paga" : "Solicitud de compra por transferencia"}
+            {order.status === "pending" ? "Esperando la transferencia del cliente" : "Pedido por transferencia"}
           </h2>
           <ol className="list-decimal space-y-1 pl-5 text-[#3d4543]">
-            <li>Confirma stock y precio con el proveedor.</li>
+            <li>El cliente ya vio la cuenta y el monto (y le llegaron por correo). Asunto: {transferSubject(orderNumber(order.id))}.</li>
             <li>
-              Envíale al cliente la cuenta y el monto con el botón de abajo (se abre WhatsApp con el mensaje listo; revísalo antes de
-              enviarlo). El monto vale por {ENERGY_INFO.holdHours} horas.
+              Cuando veas la plata en el banco (no solo la foto del comprobante), confirma stock con el proveedor. Si hay, cambia el
+              estado a <strong>Pagado</strong> y guarda: se descuenta el stock y al cliente le llega el correo de pago recibido.
             </li>
-            <li>
-              Cuando veas la plata en el banco (no solo la foto del comprobante), cambia el estado a <strong>Pagado</strong> y guarda:
-              se descuenta el stock y al cliente le llega el correo de pago recibido.
-            </li>
-            <li>Si no transfiere o no hay stock, cámbialo a <strong>Cancelado</strong>.</li>
+            {order.shipping_zone === REQUEST_ZONE ? (
+              <li>
+                Si no hay stock: devuélvele el 100% en máximo {SITE.transfer.refundDays} días hábiles y cámbialo a{" "}
+                <strong>Cancelado</strong>.
+              </li>
+            ) : (
+              <li>
+                Si no transfiere en {SITE.transfer.holdHours} horas, cámbialo a <strong>Cancelado</strong>. Si ya pagó y no hay
+                stock, devuélvele el 100%.
+              </li>
+            )}
           </ol>
           {approveUrl && order.status === "pending" && (
             <a href={approveUrl} target="_blank" rel="noopener" className="btn-primary inline-block">
-              Enviar cuenta y monto por WhatsApp
+              Recordarle la cuenta y el monto por WhatsApp
             </a>
           )}
-          {!process.env.TRANSFER_DETAILS && order.status === "pending" && (
-            <p className="text-xs text-[#6b716f]">
-              El mensaje deja un espacio para pegar los datos de la cuenta. Para que salgan solos, agrega la variable
-              TRANSFER_DETAILS en el hosting.
-            </p>
-          )}
+
         </div>
       )}
 

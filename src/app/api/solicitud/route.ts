@@ -12,8 +12,8 @@ import { sanitizeUtm } from "@/lib/utm";
 import { warrantyLabel } from "@/lib/warranty";
 
 // Solicitud de compra (TERC 2.1). Los productos de Energía no se pagan en la página: el cliente
-// envía su carrito con sus datos, TERC confirma stock y total, le manda la cuenta y el monto, y
-// el cliente paga por transferencia. Si el carrito trae además equipos, todo va en la misma
+// envía su carrito con sus datos, ve la cuenta y transfiere al tiro (Raúl, 26-11-2026); TERC
+// confirma stock y, si no hay, le devuelve el 100%. Si el carrito trae además equipos, todo va en la misma
 // solicitud y en una sola transferencia.
 //
 // Se guarda como un pedido "Pendiente" (customer.payment = "transferencia"). En el panel, al
@@ -170,5 +170,5 @@ export async function POST(request: Request) {
   }
   revalidatePath("/admin", "layout");
   after(() => sendRequestEmails(id));
-  return NextResponse.json({ number: orderNumber(id) });
+  return NextResponse.json({ number: orderNumber(id), id });
 }

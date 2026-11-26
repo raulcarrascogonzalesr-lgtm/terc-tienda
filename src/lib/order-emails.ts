@@ -1,5 +1,6 @@
 import { button, C, emailEnabled, escapeHtml, layout, sendMail, siteUrl, type MailPose } from "./email";
-import { ENERGY_INFO, isRequestOrder } from "./energy";
+import { isRequestOrder, REQUEST_ZONE } from "./energy";
+import { transferRows, transferSubject } from "./transfer";
 import { formatCLP, QUOTE_KIND_LABELS } from "./format";
 import { courierLabel, isShippingZone } from "./shipping";
 import { SITE } from "./site";
@@ -331,34 +332,54 @@ function energyWarrantyNote(order: Order): string {
   );
 }
 
-// Al cliente, apenas envía la solicitud: todavía no se cobra nada.
+// Cuenta, monto y asunto para transferir (correo al cliente).
+function transferBox(order: Order): string {
+  const rows: [string, string][] = [["Monto", formatCLP(order.total)], ...transferRows(), ["Asunto", transferSubject(orderNumber(order.id))]];
+  return infoBox(
+    "Datos para transferir",
+    rows.map(([k, v]) => `${escapeHtml(k)}: <strong style="color:${C.pine}">${escapeHtml(v)}</strong>`).join("<br>"),
+  );
+}
+function transferText(order: Order): string[] {
+  const rows: [string, string][] = [["Monto", formatCLP(order.total)], ...transferRows(), ["Asunto", transferSubject(orderNumber(order.id))]];
+  return ["Datos para transferir:", ...rows.map(([k, v]) => `${k}: ${v}`)];
+}
+
+// Al cliente, apenas envía un pedido por transferencia (Energía o computadores): cuenta y monto.
+// Energía: si no hay stock se devuelve el 100%. Computadores: el pedido se guarda unas horas.
 export function requestReceivedEmail(order: Order, info: Map<string, ItemInfo>) {
   const number = orderNumber(order.id);
   const name = firstName(order);
+  const energy = order.shipping_zone === REQUEST_ZONE;
+  const after = energy
+    ? `Cuando recibimos tu transferencia confirmamos stock con el proveedor y coordinamos la entrega contigo. Si no tenemos stock, te devolvemos el 100% en máximo ${SITE.transfer.refundDays} días hábiles.`
+    : `Guardamos tu pedido por ${SITE.transfer.holdHours} horas. Cuando veamos la transferencia en el banco te confirmamos por correo y lo preparamos para el envío.`;
   const html = layout({
-    preheader: `Recibimos tu solicitud ${number}. Te escribimos por WhatsApp para confirmar.`,
+    preheader: `Tu pedido ${number}: solo falta la transferencia.`,
     pose: "lupa",
-    title: `¡Recibimos tu solicitud${name ? `, ${escapeHtml(name)}` : ""}!`,
-    intro: `Revisamos stock y te escribimos el mismo día hábil por WhatsApp al <strong style="color:${C.pine}">${escapeHtml(order.customer.phone ?? "")}</strong> con la cuenta y el monto a transferir. <strong>No se ha cobrado nada.</strong>`,
-    body: `${itemsCard(order, info)}
-      ${infoBox("Cómo sigue", `1. Confirmamos stock y total.<br>2. Te enviamos la cuenta y el monto (vale por ${ENERGY_INFO.holdHours} horas).<br>3. Transfieres y nos mandas el comprobante.<br>4. Coordinamos la entrega contigo.`)}
-      ${infoBox("Tu número de solicitud", `<strong style="font-size:18px;color:${C.pine}">${number}</strong>`)}
-      ${energyWarrantyNote(order)}
+    title: `¡Recibimos tu pedido${name ? `, ${escapeHtml(name)}` : ""}!`,
+    intro: `Solo falta tu transferencia de <strong style="color:${C.pine}">${formatCLP(order.total)}</strong>. Mándanos el comprobante respondiendo este correo o por WhatsApp.`,
+    body: `${transferBox(order)}
+      ${itemsCard(order, info)}
+      ${infoBox("Cómo sigue", escapeHtml(after))}
+      ${energy ? energyWarrantyNote(order) : ""}
       ${contact(order)}`,
   });
   const text = [
-    `¡Recibimos tu solicitud${name ? `, ${name}` : ""}!`,
-    `Revisamos stock y te escribimos el mismo día hábil por WhatsApp al ${order.customer.phone ?? ""} con la cuenta y el monto a transferir. No se ha cobrado nada.`,
+    `¡Recibimos tu pedido${name ? `, ${name}` : ""}!`,
+    `Solo falta tu transferencia de ${formatCLP(order.total)}. Mándanos el comprobante respondiendo este correo o por WhatsApp.`,
+    "",
+    ...transferText(order),
     "",
     itemsText(order),
     "",
-    `Tu número de solicitud: ${number}`,
+    after,
     "",
     helpText,
     "",
     "TERC · terc.cl",
   ].join("\n");
-  return { subject: `Recibimos tu solicitud ${number} · TERC`, html, text };
+  return { subject: `Tu pedido ${number}: datos para transferir · TERC`, html, text };
 }
 
 // A TERC: nueva solicitud para aprobar. Responder el correo le escribe al cliente.
@@ -373,7 +394,7 @@ export function requestNotice(order: Order, info: Map<string, ItemInfo>) {
     intro: `${formatCLP(order.total)} por transferencia · ${escapeHtml(c.name ?? "")}`,
     body: `${itemsCard(order, info)}
       ${infoBox("Cliente", `${escapeHtml(c.name ?? "")}<br>${escapeHtml(c.email ?? "")} · WhatsApp ${escapeHtml(c.phone ?? "")}<br>Comuna: ${escapeHtml(c.comuna ?? "")}<br>${escapeHtml(c.document ?? "Boleta")}${c.rut ? ` · RUT ${escapeHtml(c.rut)} · ${escapeHtml(c.business ?? "")}` : ""}${c.note ? `<br>Nota: ${escapeHtml(c.note)}` : ""}`)}
-      ${infoBox("Qué hacer", `1. Confirma stock y precio con el proveedor.<br>2. En el panel, toca "Enviar cuenta y monto por WhatsApp".<br>3. Cuando veas la plata en el banco (no solo la foto del comprobante), marca el pedido como "Pagado".`)}
+      ${infoBox("Qué hacer", `El cliente ya vio la cuenta y el monto.<br>1. Cuando veas la plata en el banco (no solo la foto del comprobante), confirma stock con el proveedor.<br>2. Hay stock: marca el pedido como "Pagado".<br>3. No hay stock: devuélvele el 100% en máximo ${SITE.transfer.refundDays} días hábiles y márcalo "Cancelado".`)}
       <p style="margin:0;text-align:center">${button(link, "Ver la solicitud en el panel")}</p>`,
   });
   const text = [

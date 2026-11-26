@@ -1,3 +1,5 @@
+import { SITE } from "./site";
+
 const clp = new Intl.NumberFormat("es-CL", {
   style: "currency",
   currency: "CLP",
@@ -7,6 +9,13 @@ const clp = new Intl.NumberFormat("es-CL", {
 export function formatCLP(value: number): string {
   // "|| 0" evita que un -0 se muestre como "-$0".
   return value < 0 ? `−${clp.format(-value)}` : clp.format(value || 0);
+}
+
+// Precio pagando con tarjeta (Mercado Pago o Webpay): el de transferencia + SITE.cardExtraPercent,
+// redondeado hacia arriba a la decena. Se usa igual en la tienda, el carrito y el cobro.
+export function cardPrice(price: number): number {
+  const pct = SITE.cardExtraPercent;
+  return pct > 0 ? Math.ceil((price * (1 + pct / 100)) / 10) * 10 : price;
 }
 
 function discount(price: number, before: number | null) {

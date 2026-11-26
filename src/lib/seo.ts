@@ -1,5 +1,5 @@
 import { energyCategory, isEnergy } from "./energy";
-import { CONDITION, formatCLP } from "./format";
+import { cardPrice, CONDITION, formatCLP } from "./format";
 import { SHIPPING_ZONES } from "./shipping";
 import { SITE } from "./site";
 import type { Product } from "./types";
@@ -79,7 +79,8 @@ export function productJsonLd(product: Product, fund = 0) {
     offers: {
       "@type": "Offer",
       url,
-      price: product.price,
+      // Computadores: precio con tarjeta, igual que el de Google Merchant (transferencia es un descuento).
+      price: isEnergy(product) ? product.price : cardPrice(product.price),
       priceCurrency: "CLP",
       itemCondition: isEnergy(product) ? "https://schema.org/NewCondition" : "https://schema.org/RefurbishedCondition",
       availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",

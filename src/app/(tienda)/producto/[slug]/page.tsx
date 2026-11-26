@@ -14,7 +14,7 @@ import { TrackView } from "@/components/TrackView";
 import { deliveryText } from "@/lib/delivery";
 import { isEnergy } from "@/lib/energy";
 import { isBlackFriday } from "@/lib/black-friday";
-import { CONDITION, formatCLP, offer, savings, windowsLabel } from "@/lib/format";
+import { cardPrice, CONDITION, formatCLP, offer, savings, windowsLabel } from "@/lib/format";
 import { getProductBySlug } from "@/lib/products";
 import { boxFor } from "@/lib/shipping";
 import { jsonLdScript, productDescription, productJsonLd } from "@/lib/seo";
@@ -192,8 +192,14 @@ export default async function ProductPage({ params }: Props) {
               </span>
             </p>
             <p className="text-[13px] text-muted">
-              <span className="text-[15px] font-semibold text-ink">IVA incluido</span> · Paga con débito, crédito o en cuotas
+              <span className="text-[15px] font-semibold text-ink">Precio por transferencia</span> · IVA incluido
             </p>
+            {/* Raúl (26-11): el precio con tarjeta va chico y tenue, como "otros medios de pago". */}
+            {cardPrice(product.price) !== product.price && (
+              <p className="-mt-2 text-[12px] text-muted/60">
+                Otros medios de pago (débito, crédito o cuotas): {formatCLP(cardPrice(product.price))}
+              </p>
+            )}
           </div>
 
           {/* Envío y fecha de llegada: la persona ya se imagina recibiéndolo. */}

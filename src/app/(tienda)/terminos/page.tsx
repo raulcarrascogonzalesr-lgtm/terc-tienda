@@ -56,13 +56,16 @@ export default function TermsPage() {
           costo de envío se muestra antes de pagar.
         </p>
         <p>
-          <strong className="text-ink">Computadores:</strong> se pagan en la página con los medios que aparecen en el carrito: Mercado Pago
-          (tarjeta, cuotas o saldo) y, cuando está disponible, Webpay. TERC no ve ni guarda los datos de tu tarjeta.
+          <strong className="text-ink">Computadores:</strong> el precio publicado es el precio por transferencia. También puedes pagar
+          con los otros medios que aparecen en el carrito, Mercado Pago (tarjeta, cuotas o saldo) y, cuando está disponible,
+          Webpay, con el precio de otros medios de pago, que se muestra en la ficha y en el carrito antes de pagar. Si eliges
+          transferencia, guardamos tu pedido por {SITE.transfer.holdHours} horas y la compra queda hecha cuando vemos la
+          transferencia en el banco. TERC no ve ni guarda los datos de tu tarjeta.
         </p>
         <p>
-          <strong className="text-ink">Energía:</strong> envías una solicitud sin pagar nada. Te confirmamos stock y total el mismo
-          día hábil, te mandamos los datos para transferir y tienes {ENERGY_INFO.holdHours} horas para hacerlo. La compra queda
-          hecha cuando recibimos la transferencia.
+          <strong className="text-ink">Energía:</strong> se paga por transferencia. Al enviar tu pedido te mostramos los datos
+          para transferir. Cuando recibimos la transferencia confirmamos stock con el proveedor; si no hay, te devolvemos el 100%
+          de lo que pagaste en máximo {SITE.transfer.refundDays} días hábiles.
         </p>
       </section>
 

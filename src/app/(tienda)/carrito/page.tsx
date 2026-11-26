@@ -9,7 +9,7 @@ import { Terqui, TerquiLoader } from "@/components/Terqui";
 import { trackBeginCheckout } from "@/lib/analytics";
 import { MARKETING_CONSENT_TEXT } from "@/lib/consent";
 import { deliveryShort } from "@/lib/delivery";
-import { formatCLP } from "@/lib/format";
+import { cardPrice, formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { whatsappLink } from "@/lib/site";
 import { UTM_MAX_AGE_MS, UTM_STORAGE_KEY } from "@/lib/utm";
@@ -29,12 +29,13 @@ function readUtm(): unknown {
   }
 }
 
-type PaymentMethod = "mercadopago" | "webpay";
+type PaymentMethod = "transferencia" | "mercadopago" | "webpay";
 
-const METHOD_LABELS: Record<PaymentMethod, string> = { webpay: "Webpay", mercadopago: "Mercado Pago" };
+const METHOD_LABELS: Record<PaymentMethod, string> = { transferencia: "Transferencia", webpay: "Webpay", mercadopago: "Mercado Pago" };
 const METHOD_HELP: Record<PaymentMethod, string> = {
-  webpay: "Tarjeta de débito, crédito o prepago (Redcompra).",
-  mercadopago: "Tarjeta, cuotas o saldo en Mercado Pago.",
+  transferencia: "Al confirmar te mostramos la cuenta para transferir.",
+  webpay: "Débito, crédito o prepago. Precio de otros medios de pago.",
+  mercadopago: "Tarjeta, cuotas o saldo. Precio de otros medios de pago.",
 };
 
 const AFTER_PAYMENT: { icon: IconName; title: string; text: string }[] = [
@@ -55,14 +56,14 @@ function itemWarranty(item: CartItem) {
 }
 
 export default function CartPage() {
-  const { items, total, setQuantity, remove, setWarrantyExtended, canBuy } = useCart();
+  const { items, setQuantity, remove, setWarrantyExtended, canBuy } = useCart();
   const [eta, setEta] = useState<string | null>(null);
   const [shippingChoice, setShippingChoice] = useState<ShippingChoice | null>(null);
   const [step, setStep] = useState<Step>("carrito");
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
-  const [methods, setMethods] = useState<PaymentMethod[]>(["mercadopago"]);
-  const [method, setMethod] = useState<PaymentMethod>("mercadopago");
+  const [methods, setMethods] = useState<PaymentMethod[]>(["transferencia"]);
+  const [method, setMethod] = useState<PaymentMethod>("transferencia");
   const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
   const [marketingConsent, setMarketingConsent] = useState(false); // siempre parte sin marcar
 
@@ -191,14 +192,26 @@ export default function CartPage() {
   // y se paga por transferencia (todo el carrito, aunque traiga también equipos).
   const hasEnergy = items.some((i) => i.energy);
   const mixed = hasEnergy && items.some((i) => !i.energy);
-  const grandTotal = total - discount + (shipping ?? 0);
+  // Raúl (26-11-2026): el precio publicado es el de transferencia. Con tarjeta (otros medios de pago)
+  // cada unidad vale un poco más; el servidor cobra con la misma fórmula.
+  const card = !hasEnergy && current === "datos" && method !== "transferencia";
+  const unitFor = (i: CartItem, withCard: boolean) => (withCard ? cardPrice(cartUnitPrice(i)) : cartUnitPrice(i));
+  const couponItem = items.find((i) => i.productId === activeCoupon?.productId);
+  const totalsFor = (withCard: boolean) => {
+    const sum = items.reduce((s, i) => s + unitFor(i, withCard) * i.quantity, 0);
+    const off =
+      withCard && couponItem ? cardPrice(cartUnitPrice(couponItem)) - cardPrice(cartUnitPrice(couponItem) - discount) : discount;
+    return { sum, off, grand: sum - off + (shipping ?? 0) };
+  };
+  const { sum: itemsTotal, off: payDiscount, grand: grandTotal } = totalsFor(card);
+  const cardTotal = totalsFor(true).grand;
   // Ahorro frente a uno nuevo de todo el carrito (solo de los equipos que tienen ese precio).
   const saved = items.reduce((sum, i) => sum + (i.savings ?? 0) * i.quantity, 0);
   const totals = (
     <dl className="space-y-2 border-t border-line/10 pt-4 text-[15px]">
-      <Row label={items.length === 1 && items[0].quantity === 1 ? "Equipo" : "Productos"} value={formatCLP(total)} />
+      <Row label={items.length === 1 && items[0].quantity === 1 ? "Equipo" : "Productos"} value={formatCLP(itemsTotal)} />
       {activeCoupon && !activeCoupon.freeShipping && (
-        <Row label={`Cupón ${activeCoupon.code}`} value={`−${formatCLP(discount)}`} />
+        <Row label={`Cupón ${activeCoupon.code}`} value={`−${formatCLP(payDiscount)}`} />
       )}
       <Row
         label="Envío"
@@ -214,6 +227,11 @@ export default function CartPage() {
           {formatCLP(grandTotal)}
         </dd>
       </div>
+      {!hasEnergy && !card && cardTotal !== grandTotal && (
+        <p className="-mt-1 text-right text-[12px] text-muted/60">
+          {current === "datos" ? "Precio por transferencia. " : ""}Otros medios de pago: {formatCLP(cardTotal)}
+        </p>
+      )}
       {/* Aviso de retracto antes de pagar, junto al precio y del mismo tamaño que las líneas de precio
           (reglamento de exclusiones del derecho a retracto, vigente desde el 28-02-2025). */}
       {/* Raúl (26-11): discreto, sin caja ni color. La frase de la exclusión se mantiene del tamaño de las
@@ -235,7 +253,7 @@ export default function CartPage() {
     </p>
   );
   const whatsapp = whatsappLink("Hola, tengo una duda sobre mi compra en TERC");
-  const methodNames = methods.map((m) => METHOD_LABELS[m]).join(" o ");
+  const methodNames = methods.filter((m) => m !== "transferencia").map((m) => METHOD_LABELS[m]).join(" o ");
   const warranty = Math.min(...items.map(itemWarranty));
 
   return (
@@ -389,7 +407,7 @@ export default function CartPage() {
             </li>
             <li className="flex items-center gap-2">
               <StoreIcon name="lock" className="h-[18px] w-[18px] text-pine-700" />
-              Pagas en {methodNames}: nunca vemos tu tarjeta
+              {methodNames ? `Transferencia o ${methodNames}: nunca vemos tu tarjeta` : "Pagas por transferencia a Wiremax"}
             </li>
             {whatsapp && (
               <li className="flex items-center gap-2">
@@ -435,7 +453,7 @@ export default function CartPage() {
                       {i.quantity} × {i.name}
                       {i.warrantyExtended && i.warrantyUpgrade && ` + garantía ${warrantyLabel(i.warrantyUpgrade.months)}`}
                     </span>
-                    <span className="shrink-0">{formatCLP(cartUnitPrice(i) * i.quantity)}</span>
+                    <span className="shrink-0">{formatCLP(unitFor(i, card) * i.quantity)}</span>
                   </div>
                 ))}
               </div>
@@ -510,7 +528,11 @@ export default function CartPage() {
                 className="flex w-full items-center justify-center gap-2.5 rounded-full bg-cta px-6 py-4 font-bold text-white shadow-lg shadow-cta/30 transition hover:bg-cta-hover disabled:opacity-50 disabled:shadow-none"
               >
                 <StoreIcon name="lock" className="h-5 w-5" />
-                {sending ? "Redirigiendo..." : `Pagar ${formatCLP(grandTotal)} con ${METHOD_LABELS[method]}`}
+                {sending
+                  ? "Redirigiendo..."
+                  : method === "transferencia"
+                    ? `Confirmar pedido de ${formatCLP(grandTotal)} y ver la cuenta`
+                    : `Pagar ${formatCLP(grandTotal)} con ${METHOD_LABELS[method]}`}
               </button>
             </>
           }
