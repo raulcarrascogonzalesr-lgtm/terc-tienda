@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { Terqui } from "@/components/Terqui";
 import { blackFriday } from "@/lib/black-friday";
 import { splitWorlds } from "@/lib/energy";
+import { todayInChile } from "@/lib/format";
 import { listProducts } from "@/lib/products";
 import { whatsappLink } from "@/lib/site";
 
@@ -29,13 +30,21 @@ export default async function BlackFridayPage() {
   const bf = blackFriday(await listProducts());
   const { pcs, energy } = splitWorlds(bf.deals);
 
-  // Llegan desde anuncios: si ya terminó, explicarlo en vez de mostrar una página vacía.
+  // Llegan desde anuncios: sin ofertas, explicarlo en vez de mostrar una página vacía.
+  // Antes del 1 de diciembre dice que parte pronto; después, que ya terminó.
+  const soon = todayInChile() < "2026-12-01";
   if (!bf.active)
     return (
       <div className="shell flex flex-col items-center py-20 text-center">
-        <Terqui pose="duda" className="h-40 w-40" />
-        <h1 className="mt-4 text-3xl font-bold tracking-tight text-ink">El Black Friday de TERC ya terminó</h1>
-        <p className="mt-2 max-w-md text-muted">Gracias por pasar. Igual tenemos equipos con garantía y energía para tu casa u oficina.</p>
+        <Terqui pose={soon ? "guino" : "duda"} className="h-40 w-40" />
+        <h1 className="mt-4 text-3xl font-bold tracking-tight text-ink">
+          {soon ? "El Black Friday de TERC parte muy pronto" : "El Black Friday de TERC ya terminó"}
+        </h1>
+        <p className="mt-2 max-w-md text-muted">
+          {soon
+            ? "Del 27 al 30 de noviembre. Mientras tanto, mira nuestros equipos con garantía y la energía para tu casa u oficina."
+            : "Gracias por pasar. Igual tenemos equipos con garantía y energía para tu casa u oficina."}
+        </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link href="/#equipos" className="rounded-full bg-pine px-5 py-2.5 text-sm font-bold text-white">Ver equipos</Link>
           <Link href="/energia" className="rounded-full bg-gold px-5 py-2.5 text-sm font-bold text-pine">Ver energía</Link>
