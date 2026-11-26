@@ -241,8 +241,9 @@ export default function WarrantyPage() {
         </p>
         <p>
           <strong className="text-ink">Cómo pedirlo:</strong> escríbenos por WhatsApp o a {SITE.email} dentro de esos 10
-          días, con tu número de pedido. Te mandamos la etiqueta de despacho <strong className="text-ink">pagada por TERC</strong>, desde
-          cualquier parte de Chile, y cuando llega y comprobamos que está como lo entregamos, te devolvemos lo que pagaste
+          días, con tu número de pedido. Coordinamos contigo la entrega del equipo:{" "}
+          <strong className="text-ink">el envío de vuelta es de tu cargo</strong> (por courier o dejándolo tú mismo, lo
+          coordinamos por WhatsApp). Cuando llega y comprobamos que está como lo entregamos, te devolvemos lo que pagaste
           por el mismo medio de pago.
         </p>
         <p>
