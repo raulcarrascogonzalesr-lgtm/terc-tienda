@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { formatCLP } from "@/lib/format";
-import { deleteMovement } from "../actions";
+import { deleteMovement, setApertura } from "../actions";
 import { ConfirmButton } from "../ConfirmButton";
 import { DocumentInfo } from "../DocumentInfo";
 import { loadBusiness } from "../data";
 import {
   CATEGORY_LABELS,
+  EXPENSE_CATEGORIES,
   cashBalance,
+  paidWithDadCard,
   lastMonths,
   loanStatus,
   monthLabel,
@@ -170,6 +172,20 @@ export default async function CashPage({
                             Campaña: {campaignName.get(m.campaign_id)}
                           </span>
                         )}
+                        {(paidWithDadCard(m) || m.apertura) && (
+                          <span className="flex flex-wrap gap-1.5 mt-1">
+                            {paidWithDadCard(m) && (
+                              <span className="rounded-full bg-[#eef4ff] text-[#2456b5] px-2 py-0.5 text-[11px] font-semibold">
+                                Tarjeta del papá
+                              </span>
+                            )}
+                            {m.apertura && (
+                              <span className="rounded-full bg-[#f8f4e6] text-[#7a6420] px-2 py-0.5 text-[11px] font-semibold">
+                                Apertura
+                              </span>
+                            )}
+                          </span>
+                        )}
                       </td>
                       <td className="whitespace-nowrap">
                         <DocumentInfo movement={m} />
@@ -180,8 +196,19 @@ export default async function CashPage({
                         {m.kind === "ingreso" ? "+" : "−"}
                         {formatCLP(m.amount)}
                       </td>
-                      <td className="text-right">
-                        <form action={deleteMovement.bind(null, m.id)}>
+                      <td className="text-right whitespace-nowrap">
+                        {m.kind === "egreso" && m.category in EXPENSE_CATEGORIES && (
+                          <form action={setApertura.bind(null, m.id, !m.apertura)} className="inline mr-3">
+                            <button
+                              type="submit"
+                              title="Los gastos de apertura no cuentan en el Plan del mes"
+                              className="text-xs text-[#a3a8a5] hover:text-[#7a6420]"
+                            >
+                              {m.apertura ? "Quitar apertura" : "Es apertura"}
+                            </button>
+                          </form>
+                        )}
+                        <form action={deleteMovement.bind(null, m.id)} className="inline">
                           <ConfirmButton
                             message="¿Borrar este movimiento? Si tiene archivo, también se borra."
                             className="text-xs text-[#a3a8a5] hover:text-[#b3362a]"
