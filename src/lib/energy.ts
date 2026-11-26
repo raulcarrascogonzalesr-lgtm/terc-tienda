@@ -105,6 +105,11 @@ export const ENERGY_CATEGORIES: EnergyCategory[] = [
 ];
 
 // Empresa de kits solares con instalación (Wiremax). El enlace dice que el visitante llega desde TERC.
+// Energía se vende por solicitud y Esol repone: el stock no tiene límite (Raúl, 26-11-2026).
+// Se guarda como 999; desde ese número el panel dice "Sin límite".
+export const UNLIMITED_STOCK = 999;
+export const stockLabel = (stock: number) => (stock >= UNLIMITED_STOCK ? "Sin límite" : String(stock));
+
 export const WIRESUN_URL = "https://www.wiresunenergy.cl/?utm_source=terc&utm_medium=referral&utm_campaign=kits-solares";
 
 function normalize(text: string) {
