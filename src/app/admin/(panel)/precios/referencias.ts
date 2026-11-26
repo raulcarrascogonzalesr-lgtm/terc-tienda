@@ -1,9 +1,9 @@
-// Precios de referencia para la tabla de precios del panel, revisados a mano el 23, 24 y 25-11-2026.
+// Precios de referencia para la tabla de precios del panel, revisados a mano el 23, 24, 25 y 26-11-2026.
 // "esol" es el precio de Esol al público con IVA (esol.cl). "tiendas" son otras tiendas chilenas: [precio con IVA, tienda].
 // Para agregar un producto nuevo: su código del proveedor (supplier_sku), el precio de Esol y las tiendas que vendan el mismo modelo.
 export type Reference = { esol: number; tiendas: [number, string][] };
 
-export const CHECKED_ON = "25-11-2026";
+export const CHECKED_ON = "26-11-2026";
 
 export const REFERENCES: Record<string, Reference> = {
   "IntelliHome-16kWh": { esol: 2315740, tiendas: [[2690000, "Otra tienda"]] },
@@ -209,4 +209,15 @@ export const REFERENCES: Record<string, Reference> = {
   "HMS-1000-2T": { esol: 238000, tiendas: [] },
   "HM-700": { esol: 180880, tiendas: [[208090, "Solarstorm"]] },
   "HM-300": { esol: 121380, tiendas: [[139590, "Solarstorm"]] },
+  // Reguladores Victron SmartSolar (26-11-2026)
+  "SCC115045212": { esol: 204680, tiendas: [[251200, "Enertik"]] },
+  "SCC115060211": { esol: 359380, tiendas: [[428100, "Enertik"]] },
+  "SCC125060221": { esol: 390320, tiendas: [] },
+  "SCC125070221": { esol: 447440, tiendas: [] },
+  "SCC115085411": { esol: 473620, tiendas: [[553400, "Enertik"]] },
+  "SCC125070421": { esol: 478380, tiendas: [[555600, "Enertik"]] },
+  "SCC125085411": { esol: 514080, tiendas: [[630600, "Enertik"]] },
+  "SCC115110411": { esol: 549780, tiendas: [[562500, "Enertik"]] },
+  "SCC125110412": { esol: 573580, tiendas: [[670000, "Solares Center"], [703300, "Enertik"]] },
+  "SCC145110512": { esol: 1261400, tiendas: [[1351800, "Enertik"]] },
 };
