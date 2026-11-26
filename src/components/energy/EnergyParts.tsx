@@ -202,7 +202,7 @@ export function EnergyBanner({ products, className = "", style }: { products: Pr
           <StoreIcon name="bolt" className="h-4 w-4" /> {products.length ? "Nuevo en TERC · Energía" : "Muy pronto en TERC · Energía"}
         </p>
         <h2 id="energia-banner" className="mt-2 font-[family-name:var(--font-display)] text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-4xl">
-          Que un corte de luz no te pare la pega
+          Energía para tu casa y tu negocio
         </h2>
         <p className="mt-3 max-w-md text-[15px] leading-relaxed text-white/80">
           Baterías de litio, inversores y respaldo para tu casa y tu oficina,{" "}

@@ -885,3 +885,79 @@ html[data-welcome="skip"] .welcome-skip {
     display: none;
   }
 }
+
+/* Apartado de las UPS (BlackoutBand.tsx): luces que parpadean, el rayo y el texto que se escribe. */
+.ups-blink {
+  animation: ups-blink 1s steps(2, jump-none) infinite;
+}
+@keyframes ups-blink {
+  to {
+    opacity: 0.25;
+  }
+}
+.ups-ping {
+  animation: ups-ping 1.8s ease-out infinite;
+}
+@keyframes ups-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.18, 1.5);
+    opacity: 0;
+  }
+}
+.ups-flash {
+  animation: ups-flash 2.4s ease-in-out infinite;
+}
+@keyframes ups-flash {
+  0%,
+  8%,
+  16%,
+  100% {
+    opacity: 0;
+  }
+  4%,
+  12% {
+    opacity: 1;
+  }
+}
+.ups-typing {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: ups-typing 2.6s steps(8) infinite;
+}
+@keyframes ups-typing {
+  from {
+    transform: scaleX(0.05);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.ups-caret {
+  animation: ups-blink 0.9s steps(2, jump-none) infinite;
+}
+.ups-led {
+  animation: ups-blink 0.7s steps(2, jump-none) infinite;
+}
+.ups-led-1 {
+  animation-delay: 0.25s;
+}
+.ups-led-2 {
+  animation-delay: 0.5s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ups-blink,
+  .ups-ping,
+  .ups-flash,
+  .ups-typing,
+  .ups-caret,
+  .ups-led {
+    animation: none;
+  }
+  .ups-ping {
+    display: none;
+  }
+}

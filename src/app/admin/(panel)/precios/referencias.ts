@@ -220,4 +220,7 @@ export const REFERENCES: Record<string, Reference> = {
   "SCC115110411": { esol: 549780, tiendas: [[562500, "Enertik"]] },
   "SCC125110412": { esol: 573580, tiendas: [[670000, "Solares Center"], [703300, "Enertik"]] },
   "SCC145110512": { esol: 1261400, tiendas: [[1351800, "Enertik"]] },
+  // UPS Gruntek (26-11-2026)
+  "V.UPS.L.1000": { esol: 65450, tiendas: [[75290, "Solarstorm"]] },
+  "V.UPS.ON.1000": { esol: 174930, tiendas: [[201190, "Solarstorm"]] },
 };

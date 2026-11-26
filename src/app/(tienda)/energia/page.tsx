@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BrandPicker, BrandSection } from "@/components/energy/BrandParts";
+import { BlackoutBand } from "@/components/energy/BlackoutBand";
 import { EnergyFacts, EnergySteps, InstallerCard, WireSunCard } from "@/components/energy/EnergyParts";
 import { StoreIcon, WhatsAppIcon } from "@/components/icons";
 import { Mark } from "@/components/Mark";
 import { ProductCard } from "@/components/ProductCard";
 import { Terqui } from "@/components/Terqui";
-import { ENERGY_CATEGORIES, ENERGY_INFO, ENERGY_PRICE_CLAIM, energyCategory, energyHref, showcaseOrder, splitWorlds } from "@/lib/energy";
+import { ENERGY_CATEGORIES, ENERGY_INFO, ENERGY_PRICE_CLAIM, energyCategory, energyHref, showcaseOrder, splitWorlds, UPS_CATEGORY, upsProducts } from "@/lib/energy";
 import { brandFromParam, energyBrand, type EnergyBrand, groupByBrand } from "@/lib/energy-brands";
 import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
@@ -59,6 +60,7 @@ export default async function EnergyPage({ searchParams }: Props) {
   const brand = brandFromParam(params.marca);
   const sort: Sort = params.orden && params.orden in SORTS ? (params.orden as Sort) : "marca";
   const { energy } = splitWorlds(await listProducts());
+  const ups = upsProducts(energy);
   const inCategory = cat ? energy.filter((p) => energyCategory(p.category)?.name === cat.name) : energy;
   // Las marcas de lo que se está mirando (para la fila de logos) y los productos de la marca elegida.
   const brands = groupByBrand(inCategory).map((g) => ({ brand: g.brand, count: g.products.length }));
@@ -201,6 +203,13 @@ export default async function EnergyPage({ searchParams }: Props) {
             ))}
           </div>
         </section>
+      )}
+
+      {/* Las UPS tienen su apartado (también va en la portada de los equipos). */}
+      {ups.length > 0 && !brand && (!cat || cat.name === UPS_CATEGORY) && (
+        <div className="shell pt-10">
+          <BlackoutBand products={ups} moreHref={energyHref(ENERGY_CATEGORIES.find((c) => c.name === "Inversores y reguladores"))} />
+        </div>
       )}
 
       <section id="productos" className="shell scroll-mt-40 pt-10">
