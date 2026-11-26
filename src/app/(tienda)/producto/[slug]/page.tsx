@@ -14,7 +14,7 @@ import { TrackView } from "@/components/TrackView";
 import { deliveryText } from "@/lib/delivery";
 import { isEnergy } from "@/lib/energy";
 import { isBlackFriday } from "@/lib/black-friday";
-import { CONDITION, formatCLP, offer, savings } from "@/lib/format";
+import { CONDITION, formatCLP, offer, savings, windowsLabel } from "@/lib/format";
 import { getProductBySlug } from "@/lib/products";
 import { boxFor } from "@/lib/shipping";
 import { jsonLdScript, productDescription, productJsonLd } from "@/lib/seo";
@@ -67,7 +67,7 @@ export default async function ProductPage({ params }: Props) {
   const included = [
     `${kind} revisado y limpio`,
     desc.includes("cargador") ? "Cargador" : null,
-    desc.includes("windows") ? "Windows Pro original" : null,
+    windowsLabel(desc),
     "Embalaje con caja y protección",
     "Boleta o factura",
     `${warrantyLabel(product.warranty_months)} de garantía TERC`,
@@ -305,7 +305,7 @@ export default async function ProductPage({ params }: Props) {
           <dl className="divide-y divide-line/[0.06] rounded-3xl bg-surface text-sm">
             <Row label="Estado">
               {CONDITION[product.grade].label}
-              <small>{CONDITION[product.grade].text} Revisado y 100% operativo.</small>
+              <small>{CONDITION[product.grade].text} Revisado y probado por TERC.</small>
             </Row>
             {product.battery_health !== null && (
               <Row label="Salud de batería">
@@ -318,9 +318,8 @@ export default async function ProductPage({ params }: Props) {
             <Row label="Garantía">
               {warranty} por fallas, desde que lo recibes
               <small>
-                Lo reparamos gratis y, si no tiene arreglo, te lo cambiamos por uno equivalente. Batería y cargador: 6 meses. No hay cambios por
-                arrepentimiento: por eso revisamos todo antes de enviarlo y te resolvemos cualquier
-                duda antes de comprar.{" "}
+                Lo reparamos gratis y, si no tiene arreglo, te lo cambiamos por uno equivalente. Batería y cargador: 6 meses. Además tienes 10 días de derecho a retracto si el equipo vuelve sin uso
+                más allá de revisarlo; no aplica a equipos utilizados más allá de su simple inspección.{" "}
                 <Link href="/garantia-y-devoluciones" className="underline">
                   Ver garantía y devoluciones
                 </Link>

@@ -52,11 +52,16 @@ function shippingDetails(product: Product, fund: number) {
   return [zone(fund > 0 ? 0 : SHIPPING_ZONES.rm.price, "RM"), zone(SHIPPING_ZONES.regiones.price)];
 }
 
-// TERC no acepta devoluciones por arrepentimiento (ver /garantia-y-devoluciones); las fallas las cubre la garantía.
+// Derecho a retracto de 10 días desde la recepción (Ley 19.496 art. 3 bis, ver /garantia-y-devoluciones).
+// Debe coincidir con la política de devoluciones configurada en Google Merchant Center.
 const RETURN_POLICY = {
   "@type": "MerchantReturnPolicy",
   applicableCountry: "CL",
-  returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
+  returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+  merchantReturnDays: 10,
+  returnMethod: "https://schema.org/ReturnByMail",
+  // En el retracto el envío de vuelta lo paga el cliente (Raúl, 26-11-2026).
+  returnFees: "https://schema.org/ReturnShippingFees",
 };
 
 export function productJsonLd(product: Product, fund = 0) {

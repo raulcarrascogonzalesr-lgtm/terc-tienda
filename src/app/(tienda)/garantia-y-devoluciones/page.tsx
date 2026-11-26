@@ -6,7 +6,7 @@ import { SITE, whatsappLink } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Garantía y devoluciones | TERC",
   description:
-    "1 año de garantía en todos los equipos reacondicionados de TERC y soporte por WhatsApp. Qué cubre, cómo la solucionamos y cómo pedirla.",
+    "1 año de garantía en los equipos reacondicionados de TERC, derecho a retracto y soporte por WhatsApp. Qué cubre, cómo la solucionamos y cómo pedirla.",
 };
 
 // Resumen que se lee de un vistazo, antes del detalle.
@@ -14,12 +14,12 @@ const SUMMARY: { icon: IconName; title: string; text: string }[] = [
   {
     icon: "shield",
     title: "1 año de garantía",
-    text: "Todos nuestros equipos tienen 12 meses de garantía, contados desde que lo recibes.",
+    text: "Nuestros equipos traen 12 meses de garantía, contados desde que lo recibes. Algunas ofertas traen 6 y se indica en la ficha.",
   },
   {
     icon: "repair",
     title: "Si falla, lo solucionamos",
-    text: "Lo reparamos gratis y, si no tiene arreglo, te lo cambiamos por uno equivalente. Los envíos los pagamos nosotros.",
+    text: "Lo reparamos gratis y, si no tiene arreglo, te lo cambiamos por uno equivalente. Si la falla está cubierta, los envíos los pagamos nosotros.",
   },
   {
     icon: "chat",
@@ -28,8 +28,8 @@ const SUMMARY: { icon: IconName; title: string; text: string }[] = [
   },
   {
     icon: "receipt",
-    title: "Sin devoluciones por arrepentimiento",
-    text: "No aceptamos devoluciones si el equipo funciona bien y es como lo describimos.",
+    title: "Boleta o factura",
+    text: `Cada compra sale con boleta o factura de ${SITE.company}, la empresa detrás de TERC.`,
   },
 ];
 
@@ -57,11 +57,11 @@ const STEPS = [
   },
   {
     title: "Lo revisamos contigo",
-    text: "Te respondemos por WhatsApp, normalmente el mismo día. Muchas veces se soluciona a distancia o en una videollamada, sin enviar nada.",
+    text: "Te respondemos por WhatsApp, normalmente el mismo día hábil. Muchas veces se soluciona a distancia o en una videollamada, sin enviar nada.",
   },
   {
     title: "Te mandamos el envío pagado",
-    text: "Si hay que revisarlo, te enviamos la etiqueta de despacho pagada por TERC, desde cualquier parte de Chile.",
+    text: "Si hay que revisarlo, te enviamos la etiqueta de despacho pagada por TERC, desde cualquier parte de Chile. Si al revisarlo la falla no está cubierta, el envío de vuelta lo pagas tú y te lo avisamos antes.",
   },
   {
     title: "Lo solucionamos",
@@ -115,7 +115,7 @@ export default function WarrantyPage() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-ink">2. La garantía TERC</h2>
         <p>
-          Todos los equipos de TERC tienen <strong className="text-ink">1 año de garantía (12 meses)</strong>, contado
+          Los equipos de TERC traen <strong className="text-ink">1 año de garantía (12 meses)</strong>, contado
           desde el día en que recibes tu pedido. Cubre las fallas técnicas que el equipo tenga y que no te hayamos
           informado antes de la compra.
         </p>
@@ -168,7 +168,9 @@ export default function WarrantyPage() {
           </div>
         </div>
         <p>
-          Los envíos de ida y vuelta de la garantía los paga TERC, desde cualquier parte de Chile.
+          Si la falla está cubierta, los envíos de ida y vuelta los paga TERC, desde cualquier parte de Chile. Si al
+          revisarlo vemos que no está cubierta (por ejemplo, un golpe), te lo mostramos con fotos y el envío de vuelta
+          lo pagas tú; nunca lo cobramos sin avisarte antes.
         </p>
       </section>
 
@@ -184,24 +186,24 @@ export default function WarrantyPage() {
         </div>
         <p>
           Comprar en TERC no termina cuando llega tu equipo. Si tienes una duda, algo no te funciona o necesitas ayuda
-          para configurarlo, escríbenos por WhatsApp: te responde una persona del equipo TERC, no un bot.
+          para dejarlo funcionando, escríbenos por WhatsApp: te responde una persona del equipo TERC, no un bot.
         </p>
         <ul className="grid gap-3 sm:grid-cols-2">
           {[
             {
               icon: "chat" as IconName,
               title: "Qué te ayudamos a resolver",
-              text: "Dudas de uso, configuración inicial (Windows, correo, impresora, Wi-Fi), problemas que aparezcan y revisar si algo está cubierto por la garantía.",
+              text: "Dudas de uso, problemas que aparezcan, revisar si algo está cubierto por la garantía y una configuración inicial básica (correo, impresora, Wi-Fi) en los primeros 30 días. Trabajos técnicos más grandes se cotizan aparte.",
             },
             {
               icon: "video" as IconName,
               title: "Asesoría por videollamada",
-              text: `Si es más fácil verlo juntos, agendamos una videollamada gratis de hasta ${SITE.support.videoCallMinutes} minutos.`,
+              text: `Si es más fácil verlo juntos, en los primeros 30 días agendamos una videollamada gratis de hasta ${SITE.support.videoCallMinutes} minutos.`,
             },
             {
               icon: "clock" as IconName,
               title: "Horario",
-              text: `${SITE.support.hours}. Te respondemos el mismo día dentro de ese horario. Si escribes fuera de horario o un domingo, te respondemos al día siguiente desde las 9:00.`,
+              text: `${SITE.support.hours}. Te respondemos el mismo día dentro de ese horario. Si escribes fuera de horario, un fin de semana o un feriado, te respondemos el siguiente día hábil desde las 9:00. Puedes escribirnos a cualquier hora.`,
             },
             {
               icon: "heart" as IconName,
@@ -221,16 +223,33 @@ export default function WarrantyPage() {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-lg font-semibold text-ink">4. Sin devoluciones por arrepentimiento</h2>
+        <h2 className="text-lg font-semibold text-ink">4. Derecho a retracto: 10 días para arrepentirte</h2>
         <p>
-          Conforme al artículo 3 bis letra b) de la Ley 19.496, en las compras en terc.cl{" "}
-          <strong className="text-ink">no aplica el derecho a retracto</strong>. Esto significa que no aceptamos
-          devoluciones ni devolvemos el dinero si el equipo funciona bien y es como lo describimos, por ejemplo si
-          cambiaste de opinión, encontraste otro más barato o esperabas un equipo nuevo.
+          En las compras en terc.cl tienes <strong className="text-ink">derecho a retracto</strong> (artículo 3 bis de la
+          Ley 19.496): puedes arrepentirte dentro de los <strong className="text-ink">10 días</strong> siguientes a que
+          recibes tu pedido, sin tener que darnos una razón.
         </p>
         <p>
-          Esto no aplica si el equipo llega con una falla técnica o es distinto a lo que muestra la ficha: en ese
-          caso lo solucionamos con la garantía. Si tienes dudas antes de comprar, escríbenos y te ayudamos a elegir.
+          Para que aplique, el equipo tiene que volver <strong className="text-ink">como lo recibiste</strong>: usado solo
+          para revisarlo (encenderlo y comprobar que es lo que compraste), con su cargador, accesorios y caja.{" "}
+          <strong className="text-ink">
+            El derecho a retracto no aplica a un equipo utilizado más allá de su simple inspección
+          </strong>{" "}
+          (por ejemplo, si se instalaron programas, se configuró con tus cuentas o se usó para trabajar o estudiar),
+          porque ya no se puede volver a vender en las mismas condiciones. Así lo permite el reglamento que regula las
+          exclusiones del derecho a retracto.
+        </p>
+        <p>
+          <strong className="text-ink">Cómo pedirlo:</strong> escríbenos por WhatsApp o a {SITE.email} dentro de esos 10
+          días, con tu número de pedido. Coordinamos contigo la entrega del equipo:{" "}
+          <strong className="text-ink">el envío de vuelta es de tu cargo</strong> (por courier o dejándolo tú mismo, lo
+          coordinamos por WhatsApp). Cuando llega y comprobamos que está como lo entregamos, te devolvemos lo que pagaste
+          por el mismo medio de pago.
+        </p>
+        <p>
+          El retracto es distinto de la garantía: si el equipo llega con una falla o no es lo que compraste, no es
+          arrepentimiento y no tienes que cumplir estas condiciones. Lo solucionamos con la garantía, como explicamos
+          arriba.
         </p>
       </section>
 

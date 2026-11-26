@@ -158,7 +158,7 @@ export function TerquiHero({
             <p className="hx-cc-head">
               <Icon d={I.check} /> Revisión TERC
             </p>
-            {["Batería y pantalla", "Teclado, puertos y conexiones", "Disco y memoria", "Limpieza completa", "Windows Pro original"].map(
+            {["Batería y pantalla", "Teclado, puertos y conexiones", "Disco y memoria", "Limpieza completa", "Windows y licencia"].map(
               (row) => (
                 <div key={row} className="hx-cc-row">
                   <i />
@@ -220,7 +220,7 @@ export function TerquiHero({
             </span>
             <h2 className="hx-title">
               <span data-in="0.5" data-fx="word">
-                Rinde como nuevo.
+                Rinde de verdad.
               </span>{" "}
               <em data-in="0.95" data-fx="word">
                 Cuesta bastante menos.
