@@ -28,8 +28,8 @@ const SUMMARY: { icon: IconName; title: string; text: string }[] = [
   },
   {
     icon: "receipt",
-    title: "10 días para arrepentirte",
-    text: "Derecho a retracto: si el equipo vuelve sin uso más allá de revisarlo, te devolvemos lo que pagaste.",
+    title: "Boleta o factura",
+    text: `Cada compra sale con boleta o factura de ${SITE.company}, la empresa detrás de TERC.`,
   },
 ];
 

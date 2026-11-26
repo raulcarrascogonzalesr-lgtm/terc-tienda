@@ -216,11 +216,12 @@ export default function CartPage() {
       </div>
       {/* Aviso de retracto antes de pagar, junto al precio y del mismo tamaño que las líneas de precio
           (reglamento de exclusiones del derecho a retracto, vigente desde el 28-02-2025). */}
-      <p className="rounded-2xl border border-pine-700/20 bg-mint-50 px-3 py-2.5 text-[15px] leading-snug text-ink">
-        <strong>Derecho a retracto:</strong> tienes 10 días desde que lo recibes.{" "}
-        <strong>No aplica a equipos utilizados más allá de su simple inspección.</strong>{" "}
-        <Link href="/garantia-y-devoluciones" target="_blank" className="underline">
-          Ver condiciones
+      {/* Raúl (26-11): discreto, sin caja ni color. La frase de la exclusión se mantiene del tamaño de las
+          líneas de precio porque el reglamento lo exige para que la exclusión valga. */}
+      <p className="pt-1 text-[15px] leading-snug text-muted">
+        No aplica el derecho a retracto a equipos utilizados más allá de su simple inspección.{" "}
+        <Link href="/garantia-y-devoluciones" target="_blank" className="text-xs underline">
+          Condiciones
         </Link>
       </p>
     </dl>
