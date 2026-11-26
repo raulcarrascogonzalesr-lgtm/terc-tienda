@@ -14,17 +14,17 @@ const PILLARS: { icon: IconName; title: string; text: string }[] = [
   {
     icon: "shield",
     title: "1 año de garantía",
-    text: "Lo reparamos gratis o te lo cambiamos por uno equivalente. El envío corre por nuestra cuenta.",
+    text: "Lo reparamos gratis o te lo cambiamos por uno equivalente. Si la falla está cubierta, el envío corre por nuestra cuenta.",
   },
   {
     icon: "chat",
     title: "Soporte por WhatsApp",
-    text: "Te responde una persona, el mismo día, de lunes a sábado de 9:00 a 22:00.",
+    text: `Te responde una persona, ${SITE.support.response}: ${SITE.support.hours.toLowerCase()}.`,
   },
   {
     icon: "video",
     title: "Asesoría por videollamada",
-    text: `Agenda ${SITE.support.videoCallMinutes} minutos gratis para configurar tu equipo o resolver dudas.`,
+    text: `En los primeros 30 días, agenda ${SITE.support.videoCallMinutes} minutos gratis para dejar listo tu equipo o resolver dudas.`,
   },
   {
     icon: "checklist",
@@ -50,7 +50,7 @@ const CHAT: { me?: boolean; text: string }[] = [
 // Con qué ayuda el soporte (textos del documento de garantía).
 const SUPPORT_HELP: { icon: IconName; text: string }[] = [
   { icon: "chat", text: "Dudas de uso, antes y después de comprar" },
-  { icon: "repair", text: "Configuración: Windows, correo, impresora y Wi-Fi" },
+  { icon: "repair", text: "Configuración inicial: correo, impresora y Wi-Fi" },
   { icon: "shield", text: "Problemas con tu equipo y la garantía" },
   { icon: "video", text: `Videollamada gratis de ${SITE.support.videoCallMinutes} minutos` },
 ];
@@ -103,7 +103,7 @@ export function PeaceOfMind({ warranty, whatsapp }: { warranty: number; whatsapp
           {[
             ["Primero, reparamos", "tu equipo gratis, con repuestos de calidad."],
             ["Si no tiene arreglo", "te lo cambiamos por uno igual o equivalente."],
-            ["Envíos gratis", "de ida y vuelta, desde cualquier parte de Chile."],
+            ["Envíos gratis", "de ida y vuelta si la falla está cubierta, desde todo Chile."],
             ["Desde que lo recibes", "cuenta tu año completo."],
           ].map(([title, text]) => (
             <li key={title} className="flex items-start gap-3 rounded-2xl bg-white/[0.07] px-4 py-3.5">

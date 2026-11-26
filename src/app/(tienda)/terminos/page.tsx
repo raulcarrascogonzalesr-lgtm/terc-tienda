@@ -85,7 +85,7 @@ export default function TermsPage() {
       <section className="space-y-2">
         <h2 className="font-semibold text-ink">5. Garantía, cambios y devoluciones</h2>
         <p>
-          La garantía, cómo pedirla, qué pasa si un paquete llega dañado y por qué no aplica el derecho a retracto están explicados
+          La garantía, cómo pedirla, qué pasa si un paquete llega dañado y cómo funciona el derecho a retracto de 10 días están explicados
           en{" "}
           <Link href="/garantia-y-devoluciones" className="underline">
             Garantía y devoluciones

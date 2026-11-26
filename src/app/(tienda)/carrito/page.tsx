@@ -214,6 +214,15 @@ export default function CartPage() {
           {formatCLP(grandTotal)}
         </dd>
       </div>
+      {/* Aviso de retracto antes de pagar, junto al precio y del mismo tamaño que las líneas de precio
+          (reglamento de exclusiones del derecho a retracto, vigente desde el 28-02-2025). */}
+      <p className="rounded-2xl border border-pine-700/20 bg-mint-50 px-3 py-2.5 text-[15px] leading-snug text-ink">
+        <strong>Derecho a retracto:</strong> tienes 10 días desde que lo recibes.{" "}
+        <strong>No aplica a equipos utilizados más allá de su simple inspección.</strong>{" "}
+        <Link href="/garantia-y-devoluciones" target="_blank" className="underline">
+          Ver condiciones
+        </Link>
+      </p>
     </dl>
   );
   const savedBar = saved > 0 && (

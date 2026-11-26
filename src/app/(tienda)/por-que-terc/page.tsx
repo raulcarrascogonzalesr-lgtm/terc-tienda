@@ -118,7 +118,7 @@ export default function WhyTercPage() {
         <div className="mt-12 border-t border-line/[0.06] pt-10">
           <h3 className="font-semibold text-ink">¿Cómo describimos el estado de cada equipo?</h3>
           <p className="mt-1.5 text-sm text-muted">
-            Todos los equipos están revisados y 100% operativos. Lo único que cambia es cómo se ven.
+            Todos los equipos pasan por la misma revisión técnica. Lo que cambia es cómo se ven.
           </p>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             {CONDITIONS.map((c) => (

@@ -1,5 +1,5 @@
 import { energyCategory, type EnergyCategory } from "@/lib/energy";
-import { todayInChile } from "@/lib/format";
+import { todayInChile, windowsLabel } from "@/lib/format";
 import { hasRealPhoto } from "@/lib/photo";
 import { listProducts } from "@/lib/products";
 import { productMargins } from "@/lib/ranking";
@@ -127,11 +127,11 @@ function item(product: Product, margin: number | undefined): string {
   const highlights = [
     `${months} meses de garantía TERC`,
     "Revisado y probado uno por uno",
-    "Windows Pro original (licencia OEM)",
+    windowsLabel((product.description ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")),
     specs.kind === "notebook" ? "Incluye cargador" : "Incluye cable de poder",
     "Soporte por WhatsApp antes y después de la compra",
     "Boleta o factura de Wiremax Telecomunicaciones SpA",
-  ];
+  ].filter((x): x is string => Boolean(x));
   const details: [string, string | null][] = [
     ["Tipo", KIND_LABEL[specs.kind]],
     ["Procesador", specs.cpu],

@@ -64,7 +64,7 @@ export function services({
       tone: "gold",
       eyebrow: "Asesoría gratis",
       title: "Lo dejamos listo juntos",
-      text: `Videollamada de ${SITE.support.videoCallMinutes} minutos para configurar tu correo, impresora y Wi-Fi.`,
+      text: `En los primeros 30 días, videollamada de ${SITE.support.videoCallMinutes} minutos para configurar tu correo, impresora y Wi-Fi.`,
       cta: { label: "Agendar por WhatsApp", ...chat },
     },
   ];

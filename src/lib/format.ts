@@ -20,6 +20,15 @@ export function savings(product: { price: number; list_price: number | null }) {
   return discount(product.price, product.list_price);
 }
 
+// Windows que se muestra en "Qué incluye", según lo que dice la descripción del equipo (ya normalizada:
+// minúsculas y sin tildes). Solo dice "Pro" si la descripción lo dice; si no menciona Windows, nada.
+export function windowsLabel(desc: string): string | null {
+  if (!desc.includes("windows")) return null;
+  if (/windows\s*(10|11)?\s*pro\b/.test(desc)) return "Windows Pro original (licencia OEM)";
+  if (/windows\s*(10|11)?\s*home\b/.test(desc)) return "Windows Home original";
+  return "Windows original";
+}
+
 // Rebaja frente al precio anterior de TERC, cuando el equipo está en oferta.
 export function offer(product: { price: number; compare_price: number | null }) {
   return discount(product.price, product.compare_price);
