@@ -6,6 +6,7 @@ import { PreparingBanner } from "@/components/PreparingBanner";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { UtmCapture } from "@/components/UtmCapture";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { blackFriday } from "@/lib/black-friday";
 import { energyMenu, splitWorlds } from "@/lib/energy";
 import { offer } from "@/lib/format";
 import { listProducts } from "@/lib/products";
@@ -32,6 +33,8 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
   const offerPercent = Math.max(0, ...(limitedOffers ? limited : offers).map((p) => offer(p)!.percent));
   // Nombre de la promoción, si alguna oferta tiene uno (por ejemplo "Remate de Terqui").
   const offerName = offers.find((p) => p.offer_name)?.offer_name ?? null;
+  // Black Friday: cuenta Energía y equipos, y cambia la franja de arriba a negro y dorado.
+  const bf = blackFriday(products);
   return (
     <CartProvider storeOpen={open}>
       <UtmCapture />
@@ -46,6 +49,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
           limitedOffers={limitedOffers}
           offerName={offerName}
           freeShipping={fund > 0}
+          blackFriday={bf.active ? { ends: bf.ends, maxPercent: bf.maxPercent } : null}
         />
         <main className="flex-1 w-full">{children}</main>
         <Footer categories={categories} energyCategories={energyCategories} />

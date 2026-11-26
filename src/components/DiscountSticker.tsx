@@ -8,7 +8,7 @@ export function DiscountSticker({
 }: {
   percent: number;
   label: string;
-  tone?: "sale" | "gold";
+  tone?: "sale" | "gold" | "black";
   size?: "sm" | "md" | "lg";
   className?: string;
 }) {
@@ -17,7 +17,7 @@ export function DiscountSticker({
     md: "h-20 w-20 text-2xl [&>small]:text-[10px]",
     lg: "h-24 w-24 sm:h-28 sm:w-28 text-3xl sm:text-4xl [&>small]:text-[10px] sm:[&>small]:text-xs",
   };
-  const tones = { sale: "bg-sale text-white", gold: "bg-gold text-pine" };
+  const tones = { sale: "bg-sale text-white", gold: "bg-gold text-pine", black: "bg-[#0b0b0a] text-gold" };
   return (
     <span
       className={`flex -rotate-[8deg] flex-col items-center justify-center rounded-full font-extrabold leading-none tracking-tight shadow-lg shadow-black/15 ring-4 ring-white/90 ${sizes[size]} ${tones[tone]} ${className}`}

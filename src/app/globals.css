@@ -961,3 +961,39 @@ html[data-welcome="skip"] .welcome-skip {
     display: none;
   }
 }
+
+/* ---------- Black Friday (se ve solo mientras hay ofertas "Black Friday") ---------- */
+.bf-glow {
+  background:
+    radial-gradient(60% 80% at 85% 20%, rgb(179 162 106 / 0.28), transparent 60%),
+    radial-gradient(40% 60% at 10% 110%, rgb(200 68 42 / 0.25), transparent 70%);
+}
+.bf-stripes {
+  background: repeating-linear-gradient(-45deg, #b3a26a 0 14px, transparent 14px 34px);
+  mask-image: linear-gradient(to left, black, transparent);
+}
+.bf-outline {
+  color: transparent;
+  -webkit-text-stroke: 2px #b3a26a;
+}
+@media (min-width: 640px) {
+  .bf-outline {
+    -webkit-text-stroke-width: 3px;
+  }
+}
+.bf-spin {
+  animation: bf-spin 30s linear infinite;
+}
+@keyframes bf-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.bf-bar {
+  background: linear-gradient(90deg, #0b0b0a, #1d1a12 50%, #0b0b0a);
+}
+@media (prefers-reduced-motion: reduce) {
+  .bf-spin {
+    animation: none;
+  }
+}

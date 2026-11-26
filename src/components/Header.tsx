@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { energyHref } from "@/lib/energy";
 import { SITE } from "@/lib/site";
 import { warrantyLabel } from "@/lib/warranty";
+import { BlackFridayClock } from "./black-friday/BlackFridayClock";
 import { useCart } from "./CartProvider";
 import { StoreIcon } from "./icons";
 import { Logo } from "./Logo";
@@ -70,6 +71,7 @@ export function Header({
   limitedOffers,
   offerName,
   freeShipping,
+  blackFriday = null,
 }: {
   categories: string[];
   energyCategories: EnergyLink[]; // categorías de Energía con productos; vacío = sin menú de Energía
@@ -78,6 +80,7 @@ export function Header({
   limitedOffers: boolean; // alguna oferta tiene fecha de término
   offerName: string | null; // nombre de la promoción, si tiene
   freeShipping: boolean; // envío gratis en la Región Metropolitana
+  blackFriday?: { ends: string | null; maxPercent: number } | null; // Black Friday vigente
 }) {
   const { count } = useCart();
   const pathname = usePathname() ?? "";
@@ -95,7 +98,25 @@ export function Header({
   }, []);
   return (
     <>
-      {offerPercent > 0 ? (
+      {blackFriday ? (
+        <Link href="/black-friday" className="bf-bar block text-[13px] font-semibold text-white">
+          <div className="shell h-9 flex items-center justify-center gap-2 sm:gap-3">
+            <strong className="rounded bg-gold px-1.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-black">Black Friday</strong>
+            <span>
+              Hasta <strong className="text-gold">−{blackFriday.maxPercent}%</strong>
+              <span className="hidden sm:inline"> en equipos y energía</span>
+            </span>
+            {blackFriday.ends && (
+              <span className="hidden sm:inline text-white/70">
+                · <BlackFridayClock endsOn={blackFriday.ends} compact />
+              </span>
+            )}
+            <span className="flex items-center gap-1 text-gold underline underline-offset-2">
+              <span className="hidden sm:inline">Ver ofertas</span> <StoreIcon name="arrow" className="w-3.5 h-3.5" />
+            </span>
+          </div>
+        </Link>
+      ) : offerPercent > 0 ? (
         <Link
           href="/?ofertas=1#equipos"
           className="block bg-sale text-[13px] font-semibold text-white"
@@ -179,6 +200,14 @@ export function Header({
                     <Link href="/energia#productos" className="ml-1 shrink-0 rounded-full px-3 py-1.5 font-medium text-ink hover:bg-surface">
                       Todo Energía
                     </Link>
+                    {blackFriday && (
+                      <Link
+                        href="/black-friday#energia"
+                        className="shrink-0 rounded-full bg-[#0b0b0a] px-3 py-1.5 font-bold text-gold hover:brightness-125"
+                      >
+                        Black Friday
+                      </Link>
+                    )}
                     {energyCategories.map((c) => (
                       <Link
                         key={c.name}
@@ -197,7 +226,15 @@ export function Header({
                     >
                       Todos
                     </Link>
-                    {offerPercent > 0 && (
+                    {blackFriday && (
+                      <Link
+                        href="/black-friday"
+                        className="shrink-0 rounded-full bg-[#0b0b0a] px-3 py-1.5 font-bold text-gold hover:brightness-125"
+                      >
+                        Black Friday
+                      </Link>
+                    )}
+                    {!blackFriday && offerPercent > 0 && (
                       <Link
                         href="/?ofertas=1#equipos"
                         className="shrink-0 rounded-full px-3 py-1.5 font-semibold text-sale hover:bg-sale-50"

@@ -13,6 +13,7 @@ import { Terqui } from "@/components/Terqui";
 import { TrackView } from "@/components/TrackView";
 import { deliveryText } from "@/lib/delivery";
 import { isEnergy } from "@/lib/energy";
+import { isBlackFriday } from "@/lib/black-friday";
 import { CONDITION, formatCLP, offer, savings } from "@/lib/format";
 import { getProductBySlug } from "@/lib/products";
 import { boxFor } from "@/lib/shipping";
@@ -52,6 +53,7 @@ export default async function ProductPage({ params }: Props) {
   if (isEnergy(product)) return <EnergyProduct product={product} />;
 
   const sale = offer(product);
+  const bf = isBlackFriday(product);
   const off = savings(product);
   const deal = sale ?? off;
   const box = boxFor(product);
@@ -103,8 +105,8 @@ export default async function ProductPage({ params }: Props) {
               deal && (
                 <DiscountSticker
                   percent={deal.percent}
-                  label={sale ? "dcto." : "vs. nuevo"}
-                  tone={sale ? "sale" : "gold"}
+                  label={bf ? "black" : sale ? "dcto." : "vs. nuevo"}
+                  tone={bf ? "black" : sale ? "sale" : "gold"}
                   size="lg"
                   className="absolute left-4 top-4"
                 />
@@ -137,7 +139,9 @@ export default async function ProductPage({ params }: Props) {
           </div>
 
           {sale && (
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-sale px-4 py-3 text-white">
+            <div
+              className={`flex flex-wrap items-center justify-between gap-2 rounded-2xl px-4 py-3 ${bf ? "bf-bar text-gold ring-1 ring-gold/40" : "bg-sale text-white"}`}
+            >
               <span className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide">
                 <StoreIcon name="tag" className="w-4 h-4" /> {product.offer_name ?? "Oferta irresistible"}
               </span>
