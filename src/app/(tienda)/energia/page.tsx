@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BlackFridayBand } from "@/components/black-friday/BlackFridayBand";
+import { blackFriday } from "@/lib/black-friday";
 import { BrandPicker, BrandSection } from "@/components/energy/BrandParts";
 import { BlackoutBand } from "@/components/energy/BlackoutBand";
 import { EnergyFacts, EnergySteps, InstallerCard, WireSunCard } from "@/components/energy/EnergyParts";
@@ -61,6 +63,8 @@ export default async function EnergyPage({ searchParams }: Props) {
   const sort: Sort = params.orden && params.orden in SORTS ? (params.orden as Sort) : "marca";
   const { energy } = splitWorlds(await listProducts());
   const ups = upsProducts(energy);
+  // Black Friday: solo las ofertas de Energía, arriba de todo (sin filtros de categoría o marca).
+  const bf = blackFriday(energy);
   const inCategory = cat ? energy.filter((p) => energyCategory(p.category)?.name === cat.name) : energy;
   // Las marcas de lo que se está mirando (para la fila de logos) y los productos de la marca elegida.
   const brands = groupByBrand(inCategory).map((g) => ({ brand: g.brand, count: g.products.length }));
@@ -119,6 +123,13 @@ export default async function EnergyPage({ searchParams }: Props) {
   return (
     <div className="pb-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(jsonLd)} />
+      {bf.active && !cat && !brand && (
+        <div className="shell pt-5">
+          <div className="rise">
+            <BlackFridayBand deals={bf.deals} ends={bf.ends} maxPercent={bf.maxPercent} />
+          </div>
+        </div>
+      )}
       <div className="shell pt-5">
         <section className="rise relative grid items-center gap-8 overflow-hidden rounded-3xl bg-pine p-6 text-white sm:p-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
           <Mark className="absolute -right-10 -top-10 w-56 opacity-[0.06]" ink="#ffffff" />

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { shortDate } from "@/lib/format";
 
 // Momento exacto en que termina el último día de la oferta: medianoche en Chile.
-function endOfDayInChile(date: string): number {
+export function endOfDayInChile(date: string): number {
   const [y, m, d] = date.split("-").map(Number);
   const guess = Date.UTC(y, m - 1, d + 1, 3);
   const zone = new Intl.DateTimeFormat("en-US", { timeZone: "America/Santiago", timeZoneName: "shortOffset" })

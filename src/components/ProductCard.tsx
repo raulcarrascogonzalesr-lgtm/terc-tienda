@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { isBlackFriday } from "@/lib/black-friday";
 import { energyCategory } from "@/lib/energy";
 import { formatCLP, offer, savings, shortDate } from "@/lib/format";
 import type { Product } from "@/lib/types";
@@ -10,6 +11,7 @@ import { HoverPhotos } from "./HoverPhotos";
 
 export function ProductCard({ product }: { product: Product }) {
   const sale = offer(product);
+  const bf = isBlackFriday(product);
   // Energía: producto nuevo, con garantía de fábrica (no es reacondicionado ni se compara con uno nuevo).
   const energy = energyCategory(product.category);
   const vsNew = energy ? null : savings(product);
@@ -28,8 +30,8 @@ export function ProductCard({ product }: { product: Product }) {
         {(sale ?? vsNew) && (
           <DiscountSticker
             percent={(sale ?? vsNew)!.percent}
-            label={sale ? "dcto." : "vs. nuevo"}
-            tone={sale ? "sale" : "gold"}
+            label={bf ? "black" : sale ? "dcto." : "vs. nuevo"}
+            tone={bf ? "black" : sale ? "sale" : "gold"}
             size="sm"
             className="stamp absolute left-3 top-3"
           />
@@ -45,7 +47,9 @@ export function ProductCard({ product }: { product: Product }) {
         </Link>
         <div className="mt-auto pt-3">
           {sale && (
-            <p className="mb-1 inline-block rounded bg-sale-50 px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-sale">
+            <p
+              className={`mb-1 inline-block rounded px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide ${bf ? "bg-[#0b0b0a] text-gold" : "bg-sale-50 text-sale"}`}
+            >
               {product.offer_name ??
                 (product.offer_ends_at ? `Oferta hasta el ${shortDate(product.offer_ends_at)}` : "Oferta")}
             </p>

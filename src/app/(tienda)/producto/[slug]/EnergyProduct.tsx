@@ -9,7 +9,10 @@ import { TechSheet } from "@/components/TechSheet";
 import { Terqui } from "@/components/Terqui";
 import { TrackView } from "@/components/TrackView";
 import { ENERGY_INFO, energyCategory, energyHref } from "@/lib/energy";
-import { formatCLP } from "@/lib/format";
+import { DiscountSticker } from "@/components/DiscountSticker";
+import { OfferCountdown } from "@/components/OfferCountdown";
+import { isBlackFriday } from "@/lib/black-friday";
+import { formatCLP, offer } from "@/lib/format";
 import { breadcrumbJsonLd, jsonLdScript, productJsonLd } from "@/lib/seo";
 import { SITE, whatsappLink } from "@/lib/site";
 import type { Product } from "@/lib/types";
@@ -20,6 +23,9 @@ import { StickyBuyBar } from "./StickyBuyBar";
 // con compra por solicitud (se confirma stock y total y se paga por transferencia).
 export function EnergyProduct({ product }: { product: Product }) {
   const cat = energyCategory(product.category)!;
+  // Oferta (por ejemplo Black Friday): precio de antes tachado, sello y cuenta regresiva.
+  const sale = offer(product);
+  const bf = isBlackFriday(product);
   const whatsapp = whatsappLink(`Hola, me interesa ${product.name}. ¿Me pueden ayudar?`);
   const warranty = product.warranty_months ? `${warrantyLabel(product.warranty_months)} de garantía de fábrica` : "Garantía de fábrica";
 
@@ -57,9 +63,19 @@ export function EnergyProduct({ product }: { product: Product }) {
           <ProductGallery
             product={product}
             badges={
-              <span className="absolute left-4 top-4 rounded-full bg-gold px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-pine">
-                Nuevo
-              </span>
+              sale ? (
+                <DiscountSticker
+                  percent={sale.percent}
+                  label={bf ? "black" : "dcto."}
+                  tone={bf ? "black" : "sale"}
+                  size="lg"
+                  className="stamp absolute left-4 top-4"
+                />
+              ) : (
+                <span className="absolute left-4 top-4 rounded-full bg-gold px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-pine">
+                  Nuevo
+                </span>
+              )
             }
           />
         </div>
@@ -81,10 +97,38 @@ export function EnergyProduct({ product }: { product: Product }) {
             <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-ink text-balance">{product.name}</h1>
           </div>
 
+          {sale && (
+            <div
+              className={`flex flex-wrap items-center justify-between gap-2 rounded-2xl px-4 py-3 ${bf ? "bf-bar text-gold ring-1 ring-gold/40" : "bg-sale text-white"}`}
+            >
+              <span className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide">
+                <StoreIcon name="tag" className="h-4 w-4" /> {product.offer_name ?? "Oferta"}
+              </span>
+              {product.offer_ends_at && (
+                <span className="flex items-center gap-1.5 text-sm font-semibold">
+                  <StoreIcon name="clock" className="h-4 w-4" />
+                  <OfferCountdown endsOn={product.offer_ends_at} />
+                </span>
+              )}
+            </div>
+          )}
+
           <div className="space-y-3 rounded-3xl bg-surface p-5 shadow-[0_10px_30px_-18px_rgba(10,42,42,0.4)]">
-            <p className="font-[family-name:var(--font-display)] text-4xl font-extrabold tracking-tight tabular-nums text-ink sm:text-5xl">
-              {formatCLP(product.price)}
-            </p>
+            {sale && (
+              <p className="text-sm text-muted">
+                Antes <span className="line-through">{formatCLP(sale.before)}</span>
+              </p>
+            )}
+            <div className="flex flex-wrap items-center gap-3">
+              <p
+                className={`font-[family-name:var(--font-display)] text-4xl font-extrabold tracking-tight tabular-nums sm:text-5xl ${sale ? "text-sale" : "text-ink"}`}
+              >
+                {formatCLP(product.price)}
+              </p>
+              {sale && (
+                <span className="rounded-full bg-sale px-3 py-1.5 text-[13px] font-extrabold text-white">Ahorras {formatCLP(sale.amount)}</span>
+              )}
+            </div>
             <p className="text-[13px] text-muted">
               <span className="text-[15px] font-semibold text-ink">IVA incluido</span> · producto nuevo · factura o boleta
             </p>

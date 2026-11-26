@@ -6,6 +6,7 @@ import { TerquiHero } from "@/components/home/TerquiHero";
 import { PeaceOfMind } from "@/components/home/PeaceOfMind";
 import { ServiceCard, services, withServices } from "@/components/home/ServiceCard";
 import { WelcomeCurtain } from "@/components/home/WelcomeCurtain";
+import { BlackFridayBand } from "@/components/black-friday/BlackFridayBand";
 import { BlackoutBand } from "@/components/energy/BlackoutBand";
 import { bannerProducts, EnergyBanner } from "@/components/energy/EnergyParts";
 import { StoreIcon, type IconName } from "@/components/icons";
@@ -13,6 +14,7 @@ import { Mark } from "@/components/Mark";
 import { Terqui } from "@/components/Terqui";
 import { OfferCountdown } from "@/components/OfferCountdown";
 import { ProductCard } from "@/components/ProductCard";
+import { blackFriday } from "@/lib/black-friday";
 import { ENERGY_CATEGORIES, energyCategory, energyHref, splitWorlds, upsProducts } from "@/lib/energy";
 import { formatCLP, offer, savings } from "@/lib/format";
 import { hasRealPhoto, photoProps } from "@/lib/photo";
@@ -187,6 +189,8 @@ export default async function HomePage({ searchParams }: Props) {
   const showEnergy = !filtering;
   const categories = [...new Set(all.map((p) => p.category))].sort();
 
+  // Black Friday (Energía y equipos juntos): letrero negro arriba de todo y tarjeta propia.
+  const bf = blackFriday(catalog);
   const offers = all.filter((p) => offer(p)).sort((a, b) => bestDiscount(b) - bestDiscount(a));
   const maxOffer = offers.length ? bestDiscount(offers[0]) : 0;
   // "Solo por tiempo limitado" se dice únicamente de las ofertas que tienen fecha de término.
@@ -208,7 +212,7 @@ export default async function HomePage({ searchParams }: Props) {
       };
     })
     .sort((a, b) => b.count - a.count)
-    .slice(0, offers.length ? 3 : 4);
+    .slice(0, offers.length || bf.active ? 3 : 4);
   // El banner muestra primero los equipos en oferta y luego los destacados, los que más ganancia dejan
   // (solo los que tienen foto). La garantía que cuenta Terqui es la más común del catálogo.
   const featured = all
@@ -262,6 +266,13 @@ export default async function HomePage({ searchParams }: Props) {
       {!filtering && (
         <>
           <WelcomeCurtain />
+          {bf.active && (
+            <div className="shell pt-5">
+              <div className="rise">
+                <BlackFridayBand deals={bf.deals} ends={bf.ends} maxPercent={bf.maxPercent} />
+              </div>
+            </div>
+          )}
           <div className="shell pt-5">
             <div className="rise">
               <TerquiHero
@@ -274,7 +285,25 @@ export default async function HomePage({ searchParams }: Props) {
           </div>
           <section className="shell pt-4">
             <div className="rise grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" style={delay(120)}>
-              {offers.length > 0 && (
+              {bf.active ? (
+                <Link
+                  href="/black-friday"
+                  className="group relative flex min-h-40 flex-col justify-between overflow-hidden rounded-3xl bg-[#0b0b0a] p-4 sm:p-5 text-white transition hover:brightness-125"
+                >
+                  <div aria-hidden className="bf-glow absolute inset-0" />
+                  <span className="relative text-[11px] sm:text-xs font-black uppercase tracking-[0.16em] text-gold">Black Friday</span>
+                  <div className="relative">
+                    <p className="text-xs sm:text-sm font-semibold text-white/80">Hasta</p>
+                    <p className="font-[family-name:var(--font-display)] text-4xl sm:text-6xl font-extrabold leading-none tracking-tight text-gold">
+                      −{bf.maxPercent}%
+                    </p>
+                    <p className="mt-2 flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                      Solo hasta el lunes
+                      <StoreIcon name="arrow" className="w-4 h-4 transition group-hover:translate-x-1" />
+                    </p>
+                  </div>
+                </Link>
+              ) : offers.length > 0 && (
                 <Link
                   href="/?ofertas=1#equipos"
                   className="group relative flex min-h-40 flex-col justify-between overflow-hidden rounded-3xl bg-sale p-4 sm:p-5 text-white transition hover:brightness-105"
@@ -349,7 +378,7 @@ export default async function HomePage({ searchParams }: Props) {
         </section>
       )}
 
-      {!filtering && offers.length > 0 && (
+      {!filtering && !bf.active && offers.length > 0 && (
         <section className="mt-8 bg-gradient-to-b from-sale-50 to-paper py-10">
           <div className="shell">
             <div data-reveal className="mb-6 flex flex-wrap items-end justify-between gap-4">
