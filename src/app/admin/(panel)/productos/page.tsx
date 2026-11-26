@@ -4,7 +4,7 @@ import { listAllProducts, listExtraCosts } from "../data";
 import type { AdminProduct, ExtraCost, Product } from "@/lib/types";
 import { NO_PHOTO_IMAGE, photoProps } from "@/lib/photo";
 import { KIND_LABEL, productKind, type ProductKind } from "@/lib/specs";
-import { ENERGY_CATEGORIES, energyCategory } from "@/lib/energy";
+import { ENERGY_CATEGORIES, energyCategory, stockLabel } from "@/lib/energy";
 import { extraCostFor } from "../extra-costs";
 import { netOf } from "../finance";
 import { ICONS } from "../icons";
@@ -191,7 +191,7 @@ function ProductRow({
         )}
       </td>
       <td className={`p-3 text-right whitespace-nowrap ${p.stock === 0 ? "text-[#b3362a]" : ""}`}>
-        {p.stock}
+        {stockLabel(p.stock)}
         {p.on_demand && <span className="block text-xs text-[#6b716f]">del proveedor</span>}
       </td>
       <td className="p-3">{p.active ? "Sí" : "No"}</td>

@@ -108,7 +108,7 @@ export function ProductForm({ product }: { product?: AdminProduct }) {
           Del proveedor: no lo tengo yo, se lo pido al proveedor cuando alguien lo compra.
           <span className="block text-xs text-[#6b716f]">
             El stock es la cantidad que informa el proveedor. El cliente lo ve como stock normal,
-            pero no cuenta como plata invertida.
+            pero no cuenta como plata invertida. Energía (Esol) va con 999 = sin límite.
           </span>
         </span>
       </label>
