@@ -80,12 +80,16 @@ export const INTENTS: Record<
   },
   devolucion: {
     title: "Le devolví plata a mi papá",
-    text: "Un abono al préstamo. Baja la deuda y no cuenta como gasto.",
+    text: "Un abono al préstamo o lo que pagó su tarjeta. Baja la deuda y no cuenta como gasto.",
     icon: ICONS.devolucion,
     kind: "egreso",
     docs: null,
     options: {
-      devolucion_prestamo: { label: "Devolución del préstamo", help: "" },
+      devolucion_prestamo: { label: "Devolución del préstamo", help: "La plata que te prestó para partir." },
+      devolucion_tarjeta: {
+        label: "Lo de su tarjeta (Google Ads)",
+        help: "Lo que Google le cobró a su tarjeta de crédito.",
+      },
     },
   },
 };

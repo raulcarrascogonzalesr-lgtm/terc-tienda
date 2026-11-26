@@ -11,7 +11,7 @@ import { emailEnabled } from "@/lib/email";
 import { resendOrderEmail, sendOrderEmailOnce, type EmailKind } from "@/lib/order-emails";
 import { getAdminClient } from "@/lib/supabase";
 import type { OrderStatus, QuoteStatus } from "@/lib/types";
-import { CHANNEL_LABELS, EXPENSE_CATEGORIES, INCOME_CATEGORIES, OTHER_OUTFLOWS } from "./finance";
+import { CHANNEL_LABELS, DAD_CARD, EXPENSE_CATEGORIES, INCOME_CATEGORIES, OTHER_OUTFLOWS } from "./finance";
 import { DOCS_BUCKET, formatDocuments, isStoredDocument, parseDocuments } from "@/lib/documents";
 import { NO_PHOTO_IMAGE } from "@/lib/photo";
 
@@ -437,9 +437,16 @@ export async function addMovement(_prev: MovementResult, form: FormData): Promis
   }
 
   const campaignId = String(form.get("campaign_id") ?? "") || null;
+  // Solo para gastos: si es de la apertura o si lo pagó la tarjeta del papá. Las columnas se
+  // mandan solo cuando van marcadas, así nada se cae si falta correr supabase/plan-del-mes.sql.
+  const isExpense = category in EXPENSE_CATEGORIES;
+  const extra: Record<string, unknown> = {};
+  if (isExpense && form.get("apertura") === "1") extra.apertura = true;
+  if (isExpense && form.get("paid_with") === DAD_CARD) extra.paid_with = DAD_CARD;
   const { error } = await db()
     .from("movements")
     .insert({
+      ...extra,
       kind,
       category,
       amount,
@@ -457,12 +464,62 @@ export async function addMovement(_prev: MovementResult, form: FormData): Promis
     });
   if (error) {
     if (attachment) await db().storage.from("documentos").remove([attachment]);
-    return { error: error.message };
+    return { error: missingPlanColumns(error.message) ?? error.message };
   }
   if (productId) await changeStock(productId, -1);
 
   revalidatePath("/", "layout");
   return { ok: true };
+}
+
+function missingPlanColumns(message: string): string | null {
+  return /apertura|paid_with/.test(message)
+    ? "Falta correr supabase/plan-del-mes.sql en Supabase (columnas de apertura y tarjeta)."
+    : null;
+}
+
+// Plan del mes: anotar al tiro un cobro de Google Ads en la tarjeta del papá o lo que se le devolvió.
+export async function addDadCardMove(
+  _prev: MovementResult,
+  form: FormData,
+): Promise<MovementResult> {
+  await requireAdmin();
+  const type = String(form.get("type") ?? "");
+  if (type !== "cobro" && type !== "devolucion") return { error: "Elige qué anotar" };
+  const amount = intOrNull(form.get("amount"));
+  if (amount === null || amount <= 0) return { error: "Escribe el monto, solo números" };
+  const date = String(form.get("date") ?? "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: "La fecha no es válida" };
+  const campaignId = String(form.get("campaign_id") ?? "") || null;
+  const row =
+    type === "cobro"
+      ? {
+          kind: "egreso",
+          category: "publicidad",
+          paid_with: DAD_CARD,
+          doc_type: "otro",
+          campaign_id: campaignId,
+          description: text(form, "description", 300) ?? "Cobro de Google Ads en la tarjeta de mi papá",
+        }
+      : {
+          kind: "egreso",
+          category: "devolucion_tarjeta",
+          description: text(form, "description", 300) ?? "Le devolví lo de la tarjeta a mi papá",
+        };
+  const { error } = await db()
+    .from("movements")
+    .insert({ ...row, amount, date });
+  if (error) return { error: missingPlanColumns(error.message) ?? error.message };
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+// Marca o desmarca un gasto como de apertura (desde la Caja).
+export async function setApertura(id: string, on: boolean) {
+  await requireAdmin();
+  const { error } = await db().from("movements").update({ apertura: on }).eq("id", id);
+  if (error) throw new Error(missingPlanColumns(error.message) ?? error.message);
+  revalidatePath("/", "layout");
 }
 
 async function changeStock(productId: string, delta: number) {

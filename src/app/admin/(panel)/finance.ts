@@ -24,8 +24,25 @@ export const EXPENSE_CATEGORIES = {
 export const OTHER_OUTFLOWS = {
   compra_equipos: "Compra de equipos",
   devolucion_prestamo: "Devolución del préstamo",
+  devolucion_tarjeta: "Devolución de la tarjeta del papá",
   devolucion_cliente: "Devolución a un cliente",
 } as const;
+
+// Gastos que pagó la tarjeta de crédito del papá (Google Ads): TERC no sacó plata de la caja,
+// pero se los debe. Se le devuelven con "devolucion_tarjeta".
+export const DAD_CARD = "tarjeta_papa";
+
+export function paidWithDadCard(m: Movement): boolean {
+  return m.paid_with === DAD_CARD;
+}
+
+export function dadCardStatus(movements: Movement[]) {
+  const charges = movements.filter((m) => m.kind === "egreso" && paidWithDadCard(m));
+  const repayments = movements.filter((m) => m.kind === "egreso" && m.category === "devolucion_tarjeta");
+  const charged = charges.reduce((s, m) => s + m.amount, 0);
+  const repaid = repayments.reduce((s, m) => s + m.amount, 0);
+  return { charged, repaid, owed: Math.max(charged - repaid, 0), log: [...charges, ...repayments] };
+}
 
 export const CATEGORY_LABELS: Record<string, string> = {
   ...INCOME_CATEGORIES,
@@ -231,7 +248,7 @@ export function cashBalance(orders: Order[], movements: Movement[], beforeMonth?
   let balance = 0;
   for (const o of orders) if (isSold(o) && include(saleMonth(o))) balance += o.total;
   for (const m of movements) {
-    if (!include(monthOf(m.date))) continue;
+    if (!include(monthOf(m.date)) || paidWithDadCard(m)) continue; // eso no salió de la caja
     balance += m.kind === "ingreso" ? m.amount : -m.amount;
   }
   return balance;
