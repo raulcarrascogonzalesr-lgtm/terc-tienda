@@ -94,7 +94,7 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
         }),
       });
       const out = await res.json();
-      if (!res.ok) throw new Error(out.error ?? "No pudimos enviar tu solicitud");
+      if (!res.ok) throw new Error(out.error ?? "No pudimos enviar tu pedido");
       if (out.token) {
         // Webpay pide llegar con un formulario que lleva el token. El carrito se vacía al volver pagado.
         const go = document.createElement("form");
@@ -115,7 +115,7 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
       clear();
       router.push(`/solicitud-enviada?${params}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No pudimos enviar tu solicitud");
+      setError(err instanceof Error ? err.message : "No pudimos enviar tu pedido");
       setSending(false);
     }
   }
@@ -125,7 +125,7 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
       {sending && (
         <TerquiLoader
           overlay
-          messages={method === "webpay" ? ["Preparando tu pedido…", "Conectando con Webpay…", "Un segundo más"] : ["Enviando tu solicitud…", "Avisándole a TERC…", "Un segundo más"]}
+          messages={method === "webpay" ? ["Preparando tu pedido…", "Conectando con Webpay…", "Un segundo más"] : ["Enviando tu pedido…", "Preparando la cuenta…", "Un segundo más"]}
         />
       )}
       <div>
@@ -234,7 +234,7 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
         </span>
       </label>
 
-      {!canBuy && <p className="text-sm text-muted">Estamos preparando la tienda: muy pronto podrás enviar tu solicitud.</p>}
+      {!canBuy && <p className="text-sm text-muted">Estamos preparando la tienda: muy pronto podrás comprar.</p>}
       {error && <p className="text-sm text-red-700">{error}</p>}
       <button
         type="submit"

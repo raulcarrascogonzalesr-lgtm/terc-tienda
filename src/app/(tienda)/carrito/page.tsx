@@ -270,7 +270,7 @@ export default function CartPage() {
       <div className={current === "carrito" || hasEnergy ? "grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_400px]" : "hidden"}>
         <section className="min-w-0 space-y-4">
           <h1 className="text-2xl font-extrabold text-ink">
-            {hasEnergy ? "Tu solicitud de compra" : items.length === 1 ? "Tu equipo" : "Tus equipos"}
+            {hasEnergy ? "Tu compra" : items.length === 1 ? "Tu equipo" : "Tus equipos"}
           </h1>
           {items.map((item) => (
             <div
@@ -351,7 +351,7 @@ export default function CartPage() {
           {/* Con Energía: cómo sigue la solicitud. Sin Energía: lo que pasa después de pagar. */}
           {hasEnergy ? (
             <div className="rounded-3xl bg-surface p-5">
-              <h2 className="mb-4 text-lg font-extrabold text-ink">Cómo sigue tu solicitud</h2>
+              <h2 className="mb-4 text-lg font-extrabold text-ink">Cómo sigue tu compra</h2>
               <EnergySteps />
             </div>
           ) : (

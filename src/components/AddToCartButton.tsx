@@ -104,7 +104,7 @@ export function BuyNowButton({ product, className = "" }: { product: Product; cl
       }}
       className={`flex w-full items-center justify-center gap-2.5 rounded-full bg-cta px-6 py-4 text-[17px] font-bold text-white shadow-lg shadow-cta/30 transition hover:bg-cta-hover ${className}`}
     >
-      {energyCategory(product.category) ? "Solicitar compra" : "Comprar ahora"} <StoreIcon name="arrow" className="w-5 h-5" />
+      Comprar ahora <StoreIcon name="arrow" className="w-5 h-5" />
     </button>
   );
 }
