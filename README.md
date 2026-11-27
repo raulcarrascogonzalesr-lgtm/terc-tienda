@@ -112,6 +112,28 @@ Para activarlo, una sola vez:
 
 Cada vez que corre envía como máximo 20 correos y responde cuántos salió de cada tipo. Los tiempos se cuentan desde que el pedido se marca "Entregado" en el panel.
 
+### Stock de Esol cada día
+
+Para no vender algo de Energía que Esol ya no tiene. Todos los días se revisa en esol.cl la página de cada producto de Esol publicado (dice "Disponible" o "Agotado"; los precios de Esol no se miran):
+
+- **Agotado en Esol** (o Esol sacó el producto): se oculta de la tienda y de Google. No se borra.
+- **De vuelta en Esol:** se muestra solo otra vez, pero únicamente si lo ocultó la revisión. Lo que ocultes tú a mano no se toca.
+- **Frenos:** si esol.cl no carga o cambió su página, o si de una vez se agotan muchos (más de 10, o del 15 %), no se cambia nada y llega un aviso.
+- **Resumen:** llega a `contacto@terc.cl` solo los días en que algo cambió o hay algo que revisar.
+- Productos nuevos de Esol: la revisión encuentra sola su página en esol.cl (por el código guardado en "Código del proveedor").
+
+Esol avisa que su stock no está al día al segundo: igual confirma con ellos antes de cobrar.
+
+Para activarlo, una sola vez:
+
+1. En Supabase > **SQL Editor**, ejecuta `supabase/stock-esol.sql`.
+2. Si todavía no existe, agrega en cPanel > **Setup Node.js App** > terc.cl la variable `CRON_SECRET` (la misma de los correos de seguimiento) y presiona "Restart".
+3. En cPanel > **Cron Jobs**, crea una tarea diaria a las 7:00 con este comando, reemplazando la clave:
+
+   ```bash
+   curl -s -m 300 -H "Authorization: Bearer LA_CLAVE_DE_CRON_SECRET" https://terc.cl/api/stock-esol
+   ```
+
 ## Conectar Mercado Pago
 
 1. En https://www.mercadopago.cl/developers, crea una aplicación (Checkout Pro).
