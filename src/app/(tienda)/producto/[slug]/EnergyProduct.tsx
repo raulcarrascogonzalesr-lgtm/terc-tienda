@@ -184,8 +184,8 @@ export function EnergyProduct({ product }: { product: Product }) {
             <Row label="Garantía">
               {warranty}
               <small>
-                La da el fabricante. Si algo falla, escríbenos y te acompañamos para hacerla válida. Además tienes 10 días de
-                derecho a retracto si el producto vuelve sin instalar ni usar, en su caja.{" "}
+                {/* Raúl 27-11: sin la frase del retracto en la ficha (el retracto sigue en Garantía y devoluciones). */}
+                La da el fabricante. Si algo falla, escríbenos y te acompañamos para hacerla válida.{" "}
                 <Link href="/garantia-y-devoluciones" className="underline">
                   Ver garantía y devoluciones
                 </Link>
