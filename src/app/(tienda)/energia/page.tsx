@@ -40,7 +40,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     title,
     description: cat
       ? cat.seo.description
-      : "Baterías de litio, UPS, inversores, paneles solares y cables nuevos, con garantía de fábrica y factura. Pagas por transferencia y, si no hay stock, te devolvemos el 100%. Entrega en la Región Metropolitana.",
+      : "Baterías de litio, UPS, inversores, paneles solares y cables nuevos, con garantía de fábrica y factura. Pagas por transferencia, con boleta o factura, y entrega en la Región Metropolitana.",
     alternates: { canonical: `/energia${qs ? `?${qs}` : ""}` },
   };
 }
@@ -338,7 +338,7 @@ export default async function EnergyPage({ searchParams }: Props) {
 
       <section id="como-comprar" className="shell scroll-mt-40 pt-12">
         <h2 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">¿Cómo se compra Energía?</h2>
-        <p className="mt-1 text-sm text-muted">Por transferencia y sin sorpresas: si no tenemos stock, te devolvemos el 100%.</p>
+        <p className="mt-1 text-sm text-muted">Por transferencia, con boleta o factura y sin sorpresas.</p>
         <EnergySteps className="mt-5" />
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <div className="rounded-2xl bg-surface p-4 ring-1 ring-line/[0.06]">

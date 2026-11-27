@@ -1,4 +1,4 @@
-import { energyCategory, type EnergyCategory } from "@/lib/energy";
+import { ENERGY_INFO, energyCategory, type EnergyCategory } from "@/lib/energy";
 import { cardPrice, todayInChile, windowsLabel } from "@/lib/format";
 import { hasRealPhoto } from "@/lib/photo";
 import { listProducts } from "@/lib/products";
@@ -124,7 +124,7 @@ function priceRange(price: number): string {
 // Energía: disponible a pedido en unos 3 días hábiles desde hoy (plazo aproximado del proveedor).
 function energyAvailabilityDate(): string {
   const d = new Date(`${todayInChile()}T12:00:00Z`);
-  for (let left = 3; left > 0; ) {
+  for (let left = ENERGY_INFO.deliveryDays; left > 0; ) {
     d.setUTCDate(d.getUTCDate() + 1);
     if (d.getUTCDay() !== 0 && d.getUTCDay() !== 6) left--;
   }

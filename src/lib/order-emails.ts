@@ -1,5 +1,5 @@
 import { button, C, emailEnabled, escapeHtml, layout, sendMail, siteUrl, type MailPose } from "./email";
-import { isRequestOrder, REQUEST_ZONE } from "./energy";
+import { ENERGY_INFO, isEnergyOrder, isRequestOrder, REQUEST_ZONE } from "./energy";
 import { transferRows, transferSubject } from "./transfer";
 import { formatCLP, QUOTE_KIND_LABELS } from "./format";
 import { courierLabel, isShippingZone } from "./shipping";
@@ -78,7 +78,7 @@ function totalLabel(order: Order) {
   return isRequestOrder(order) && order.status === "pending" ? "Total a transferir" : "Total pagado";
 }
 function shippingLine(order: Order) {
-  if (isRequestOrder(order) && !order.shipping_cost) return { label: "Entrega", value: "Se coordina contigo" };
+  if ((isRequestOrder(order) || isEnergyOrder(order)) && !order.shipping_cost) return { label: "Entrega", value: "Se coordina contigo" };
   return { label: "Envío", value: formatCLP(order.shipping_cost) };
 }
 
@@ -178,7 +178,7 @@ export function paidEmail(order: Order, info: Map<string, ItemInfo>) {
       ${itemsCard(order, info)}
       ${warrantyCard(months)}
       ${
-        isRequestOrder(order)
+        isRequestOrder(order) || isEnergyOrder(order)
           ? `${energyWarrantyNote(order)}${infoBox("¿Qué sigue?", `Preparamos tu pedido y te escribimos por WhatsApp para coordinar la entrega en ${escapeHtml(order.customer.comuna ?? "tu comuna")}.`)}`
           : `${infoBox("Lo enviamos a", escapeHtml(addressOf(order)))}
       ${infoBox("¿Qué sigue?", "Revisamos tu equipo una última vez y lo embalamos con cariño. Cuando salga, te mandamos otro correo con el código de seguimiento.")}`
@@ -193,8 +193,10 @@ export function paidEmail(order: Order, info: Map<string, ItemInfo>) {
     itemsText(order),
     months ? `Garantía TERC: ${months} meses. Guarda este correo como respaldo. Cómo funciona: ${POLICY_URL}` : "",
     "",
-    ...(isRequestOrder(order)
-      ? [`Te escribimos por WhatsApp para coordinar la entrega en ${order.customer.comuna ?? "tu comuna"}.`]
+    ...(isRequestOrder(order) || isEnergyOrder(order)
+      ? [
+          `Te escribimos por WhatsApp para coordinar la entrega en ${order.customer.comuna ?? "tu comuna"}.`,
+        ]
       : [`Lo enviamos a: ${addressOf(order)}`, "Cuando salga, te mandamos otro correo con el código de seguimiento."]),
     "",
     helpText,
@@ -352,7 +354,7 @@ export function requestReceivedEmail(order: Order, info: Map<string, ItemInfo>) 
   const name = firstName(order);
   const energy = order.shipping_zone === REQUEST_ZONE;
   const after = energy
-    ? `Cuando recibimos tu transferencia confirmamos stock con el proveedor y coordinamos la entrega contigo. Si no tenemos stock, te devolvemos el 100% en máximo ${SITE.transfer.refundDays} días hábiles.`
+    ? `Cuando recibimos tu transferencia te enviamos tu boleta o factura y coordinamos la entrega contigo, en hasta ${ENERGY_INFO.deliveryDays} días hábiles en la Región Metropolitana.`
     : `Guardamos tu pedido por ${SITE.transfer.holdHours} horas. Cuando veamos la transferencia en el banco te confirmamos por correo y lo preparamos para el envío.`;
   const html = layout({
     preheader: `Tu pedido ${number}: solo falta la transferencia.`,
