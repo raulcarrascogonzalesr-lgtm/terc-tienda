@@ -232,10 +232,10 @@ export default async function EnergyPage({ searchParams }: Props) {
             </h2>
             <p className="mt-1 text-sm text-muted">
               {soon
-                ? "Muy pronto · se comprarán con solicitud y se pagarán por transferencia"
+                ? "Muy pronto"
                 : `${list.length} ${list.length === 1 ? "producto" : "productos"}${
                     brand ? "" : ` de ${brands.length} ${brands.length === 1 ? "marca" : "marcas"}`
-                  } · se compran con solicitud y se pagan por transferencia`}
+                  } · nuevos, con garantía de fábrica`}
             </p>
           </div>
           {(cat || brand) && (

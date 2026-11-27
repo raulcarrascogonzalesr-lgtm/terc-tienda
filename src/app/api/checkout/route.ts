@@ -147,7 +147,7 @@ export async function POST(request: Request) {
     // Energía (TERC 2.1) no se paga aquí: va como solicitud y se paga por transferencia.
     if (isEnergy(product)) {
       return NextResponse.json(
-        { error: "Tu carrito tiene productos de Energía: se compran enviando una solicitud. Recarga el carrito." },
+        { error: "Tu carrito tiene productos de Energía: Recarga el carrito para comprar." },
         { status: 409 },
       );
     }

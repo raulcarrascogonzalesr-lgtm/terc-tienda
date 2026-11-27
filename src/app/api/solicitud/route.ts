@@ -137,7 +137,7 @@ export async function POST(request: Request) {
 
   const supabase = getAdminClient();
   if (!supabase) {
-    return NextResponse.json({ error: "No pudimos enviar tu solicitud. Escríbenos por WhatsApp." }, { status: 503 });
+    return NextResponse.json({ error: "No pudimos enviar tu pedido. Escríbenos por WhatsApp." }, { status: 503 });
   }
   // Freno contra abuso: cada solicitud le manda un correo al cliente, así que nadie puede usar el
   // formulario para llenar de correos a otra persona ni de solicitudes falsas al panel.
@@ -156,7 +156,7 @@ export async function POST(request: Request) {
   ]);
   if ((byEmail.count ?? 0) >= 3 || (byPhone.count ?? 0) >= 3 || (all.count ?? 0) >= 30) {
     return NextResponse.json(
-      { error: "Ya recibimos tus solicitudes. Te escribimos pronto; si es urgente, háblanos por WhatsApp." },
+      { error: "Ya recibimos tus pedidos. Te escribimos pronto; si es urgente, háblanos por WhatsApp." },
       { status: 429 },
     );
   }
@@ -191,7 +191,7 @@ export async function POST(request: Request) {
   });
   if (error) {
     console.error("No se pudo guardar la solicitud", error);
-    return NextResponse.json({ error: "No pudimos enviar tu solicitud. Escríbenos por WhatsApp." }, { status: 500 });
+    return NextResponse.json({ error: "No pudimos enviar tu pedido. Escríbenos por WhatsApp." }, { status: 500 });
   }
   revalidatePath("/admin", "layout");
 
