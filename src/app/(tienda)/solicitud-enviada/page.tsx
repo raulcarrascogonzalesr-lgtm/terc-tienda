@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EnergySteps, WireSunCard } from "@/components/energy/EnergyParts";
+import { ENERGY_INFO } from "@/lib/energy";
 import { StoreIcon, WhatsAppIcon } from "@/components/icons";
 import { Terqui } from "@/components/Terqui";
 import { TransferDetails } from "@/components/TransferDetails";
-import { SITE, whatsappLink } from "@/lib/site";
+import { whatsappLink } from "@/lib/site";
 import { getAdminClient } from "@/lib/supabase";
 
 export const metadata: Metadata = { title: "Transfiere para completar tu compra | TERC", robots: { index: false } };
@@ -33,9 +34,8 @@ export default async function RequestSentPage({ searchParams }: Props) {
           ¡Gracias{name ? `, ${name}` : ""}! Solo falta tu transferencia
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed text-muted">
-          Transfiere a la cuenta de abajo y mándanos el comprobante. Al recibirla confirmamos stock con el proveedor y coordinamos la
-          entrega contigo. <strong className="text-ink">Si no tenemos stock, te devolvemos el 100% en máximo{" "}
-          {SITE.transfer.refundDays} días hábiles.</strong> También te mandamos estos datos a tu correo.
+          Transfiere a la cuenta de abajo y mándanos el comprobante. Al recibirla te enviamos tu boleta o factura y coordinamos la
+          entrega contigo, en hasta {ENERGY_INFO.deliveryDays} días hábiles en la RM. También te mandamos estos datos a tu correo.
         </p>
         <div className="mt-6">
           <TransferDetails number={number} total={total} />

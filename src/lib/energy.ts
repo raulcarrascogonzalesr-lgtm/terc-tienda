@@ -1,4 +1,5 @@
 import { hasRealPhoto } from "./photo";
+import { SITE } from "./site";
 import type { IconName } from "@/components/icons";
 import type { Order, Product } from "./types";
 
@@ -7,9 +8,10 @@ import type { Order, Product } from "./types";
 // nombre corto). TERC SOLO los vende: nunca los instala. Quien quiera un kit con instalación se
 // deriva a WireSun Energy.
 //
-// Se compran distinto: no se pagan con Mercado Pago ni Webpay. Desde el 26-11-2026 (Raúl) el
-// cliente envía su pedido, ve la cuenta y transfiere al tiro; TERC confirma stock con el proveedor
-// y, si no hay, le devuelve el 100% de la plata.
+// Se compran distinto. Desde el 26-11-2026 (Raúl) el cliente envía su pedido, ve la cuenta y
+// transfiere al tiro; TERC confirma stock con el proveedor y, si no hay, le devuelve el 100% de la
+// plata. Desde el 27-11-2026 también se puede pagar con tarjeta por Webpay (no Mercado Pago), con el
+// mismo % extra que los computadores y solo hasta SITE.energyCardMax por pedido.
 
 export type EnergyCategory = {
   name: string; // como se escribe en el panel y se ve en la tienda
@@ -192,17 +194,23 @@ export function energyHref(category?: Pick<EnergyCategory, "name"> | null) {
 // "Entre los mejores" se puede defender aunque Esol venda un poco más barato al público.
 export const ENERGY_PRICE_CLAIM = "entre los mejores precios del mercado";
 
+const ENERGY_DELIVERY_DAYS = 3; // ver ENERGY_INFO.deliveryDays
+
 // Cómo se compra Energía (carrito, ficha y página de Energía).
 export const ENERGY_STEPS = [
   { title: "Pides", text: "Envías tu carrito con tus datos." },
+  // Raúl 27-11: sin "confirmamos stock" (genera desconfianza). El plazo va en positivo y coincide con
+  // la fecha "a pedido" que se le informa a Google (ENERGY_INFO.deliveryDays).
   { title: "Transfieres", text: "Te mostramos la cuenta al tiro." },
-  { title: "Confirmamos", text: "Stock con el proveedor. Si no hay, te devolvemos el 100%." },
-  { title: "Recibes", text: "Entrega coordinada contigo." },
+  { title: "Boleta o factura", text: "De Wiremax, a tu correo." },
+  { title: "Recibes", text: `Entrega coordinada contigo en hasta ${ENERGY_DELIVERY_DAYS} días hábiles en la RM.` },
 ] as const;
 
 // Datos que se muestran en la tienda (garantía de fábrica, plazo de entrega).
 export const ENERGY_INFO = {
   delivery: "Región Metropolitana: lo llevamos nosotros. Regiones: lo cotizamos según el producto.",
+  // Días hábiles hasta la entrega en la RM (los mismos de la fecha "a pedido" del feed de Google).
+  deliveryDays: ENERGY_DELIVERY_DAYS,
   // Plazo para transferir desde que se le envía la cuenta y el monto al cliente.
   holdHours: 48,
 };
@@ -210,6 +218,16 @@ export const ENERGY_INFO = {
 // Solicitudes de compra: se guardan como pedidos "Pendiente" con estas marcas.
 export const REQUEST_ZONE = "solicitud";
 export const REQUEST_COURIER = "Entrega TERC (se coordina por WhatsApp)";
+
+// ¿Este total (ya con el precio de tarjeta) se puede pagar con Webpay?
+export function energyCardAllowed(cardTotal: number): boolean {
+  return SITE.energyCardMax > 0 && cardTotal <= SITE.energyCardMax;
+}
+
+// Pedido de Energía (o carrito mixto) que entró por el formulario de solicitud, se pague como se pague.
+export function isEnergyOrder(order: Pick<Order, "shipping_zone">): boolean {
+  return order.shipping_zone === REQUEST_ZONE;
+}
 
 export function isRequestOrder(order: Pick<Order, "customer">): boolean {
   return order.customer?.payment === "transferencia";

@@ -2,19 +2,26 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "@/components/CartProvider";
 import { StoreIcon, WhatsAppIcon } from "@/components/icons";
 import { TerquiLoader } from "@/components/Terqui";
 import { normalizePhone, normalizeRut } from "@/lib/address";
 import { trackBeginCheckout, trackLead } from "@/lib/analytics";
-import { formatCLP } from "@/lib/format";
+import { ENERGY_INFO, energyCardAllowed } from "@/lib/energy";
+import { cardPrice, formatCLP } from "@/lib/format";
 import { SITE, whatsappLink } from "@/lib/site";
+import { cartUnitPrice } from "@/lib/types";
 import { UTM_MAX_AGE_MS, UTM_STORAGE_KEY } from "@/lib/utm";
 
-// Carrito con productos de Energía (TERC 2.1): no se paga aquí. El cliente deja 4 datos y envía
-// una solicitud; TERC confirma stock y total y le manda la cuenta y el monto para transferir.
-// Si el carrito trae además equipos, todo va en la misma solicitud y en una sola transferencia.
+// Carrito con productos de Energía (TERC 2.1). El cliente deja 4 datos y elige cómo pagar:
+// - Transferencia (precio publicado): ve la cuenta al tiro y transfiere.
+// - Webpay (Raúl 27-11-2026): precio de tarjeta (+SITE.cardExtraPercent), solo hasta SITE.energyCardMax.
+// Raúl 27-11: la tienda no dice "confirmamos stock" (genera desconfianza). Si un producto no se pudiera
+// conseguir, igual se devuelve el 100% (así lo dicen los Términos).
+// Si el carrito trae además equipos, todo va en el mismo pedido y en un solo pago.
+
+type Pay = "transferencia" | "webpay";
 
 const field = "mt-1 w-full rounded-xl border border-line/20 bg-surface px-3 py-2.5";
 
@@ -36,6 +43,20 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
   const [errors, setErrors] = useState<Errors>({});
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const [pay, setPay] = useState<Pay>("transferencia");
+  const [webpayOn, setWebpayOn] = useState(false);
+  // Webpay aparece solo si está activo (en modo prueba, solo para el administrador).
+  useEffect(() => {
+    fetch("/api/checkout")
+      .then((res) => res.json())
+      .then((data: { methods?: string[] }) => setWebpayOn(!!data.methods?.includes("webpay")))
+      .catch(() => {});
+  }, []);
+  // Mismo cálculo que el servidor: precio de tarjeta por unidad.
+  const cardTotal = items.reduce((sum, i) => sum + cardPrice(cartUnitPrice(i)) * i.quantity, 0);
+  const cardOk = webpayOn && energyCardAllowed(cardTotal);
+  const method: Pay = cardOk ? pay : "transferencia";
+  const shown = method === "webpay" ? cardTotal : total;
   const whatsapp = whatsappLink("Hola, tengo una duda sobre los productos de Energía de TERC");
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
@@ -68,11 +89,26 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
           customer: { name: data.name, phone: data.phone, email: data.email, comuna: data.comuna, rut: data.rut, business: data.business, note: data.note, document: doc },
           utm: readUtm(),
           acceptPolicy: true, // el formulario no se envía sin marcar la casilla
+          method,
           website: data.website,
         }),
       });
       const out = await res.json();
       if (!res.ok) throw new Error(out.error ?? "No pudimos enviar tu solicitud");
+      if (out.token) {
+        // Webpay pide llegar con un formulario que lleva el token. El carrito se vacía al volver pagado.
+        const go = document.createElement("form");
+        go.method = "POST";
+        go.action = out.checkoutUrl;
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "token_ws";
+        input.value = out.token;
+        go.appendChild(input);
+        document.body.appendChild(go);
+        go.submit();
+        return;
+      }
       // Para Meta y Google Ads: alguien pidió comprar Energía (la venta se cierra al transferir).
       trackLead("solicitud-energia", total, mixed ? "Energía y equipos" : "Energía", out.number ? String(out.number) : undefined);
       const params = new URLSearchParams({ n: out.number, id: out.id ?? "", nombre: data.name.split(/\s+/)[0] });
@@ -86,21 +122,25 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
 
   return (
     <form onSubmit={submit} noValidate className="space-y-4">
-      {sending && <TerquiLoader overlay messages={["Enviando tu solicitud…", "Avisándole a TERC…", "Un segundo más"]} />}
+      {sending && (
+        <TerquiLoader
+          overlay
+          messages={method === "webpay" ? ["Preparando tu pedido…", "Conectando con Webpay…", "Un segundo más"] : ["Enviando tu solicitud…", "Avisándole a TERC…", "Un segundo más"]}
+        />
+      )}
       <div>
         <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-pine-700">
-          <StoreIcon name="bank" className="h-4 w-4" /> Compra por transferencia
+          <StoreIcon name="bank" className="h-4 w-4" /> {webpayOn ? "Transferencia o tarjeta" : "Compra por transferencia"}
         </p>
-        <h2 className="mt-1 text-lg font-extrabold text-ink">Tus datos para la solicitud</h2>
+        <h2 className="mt-1 text-lg font-extrabold text-ink">Tus datos para el pedido</h2>
         <p className="mt-1 text-[13px] text-muted">
-          Solo 4 datos. Al enviarlo te mostramos la cuenta para transferir. Si no tenemos stock, te devolvemos el 100% en
-          máximo {SITE.transfer.refundDays} días hábiles.
+          Solo 4 datos. Te damos boleta o factura y te lo entregamos en hasta {ENERGY_INFO.deliveryDays} días hábiles en la RM.
         </p>
       </div>
       {mixed && (
         <p className="flex items-start gap-2 rounded-2xl bg-mint-50 px-3 py-2.5 text-[13px] text-ink">
           <StoreIcon name="bolt" className="mt-0.5 h-4 w-4 text-pine-700" />
-          Tu pedido incluye productos de Energía, así que todo se paga con una sola transferencia.
+          Tu pedido incluye productos de Energía, así que todo se paga junto, en un solo pago.
         </p>
       )}
 
@@ -140,10 +180,33 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
       {/* Campo trampa invisible para robots. */}
       <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
 
+      {webpayOn && (
+        <fieldset className="space-y-2 border-t border-line/10 pt-4 text-sm">
+          <legend className="font-semibold">¿Cómo quieres pagar?</legend>
+          <PayOption
+            checked={method === "transferencia"}
+            onChange={() => setPay("transferencia")}
+            title={`Transferencia · ${formatCLP(total)}`}
+            text="Al enviar el pedido te mostramos la cuenta para transferir."
+          />
+          <PayOption
+            checked={method === "webpay"}
+            disabled={!cardOk}
+            onChange={() => setPay("webpay")}
+            title={`Tarjeta con Webpay · ${formatCLP(cardTotal)}`}
+            text={
+              cardOk
+                ? "Débito, crédito o cuotas. Precio de otros medios de pago."
+                : `Con tarjeta, hasta ${formatCLP(SITE.energyCardMax)} por pedido. Para este monto, por transferencia.`
+            }
+          />
+        </fieldset>
+      )}
+
       <dl className="space-y-2 border-t border-line/10 pt-4 text-[15px]">
         <div className="flex justify-between gap-3">
           <dt className="text-muted">Productos</dt>
-          <dd className="text-ink">{formatCLP(total)}</dd>
+          <dd className="text-ink">{formatCLP(shown)}</dd>
         </div>
         <div className="flex justify-between gap-3">
           <dt className="text-muted">Entrega</dt>
@@ -152,9 +215,11 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
         <div className="flex items-end justify-between border-t border-line/10 pt-3">
           <dt className="font-[family-name:var(--font-display)] text-xl font-extrabold text-ink">
             Total
-            <small className="block font-sans text-xs font-medium text-muted">IVA incluido · lo confirmamos por WhatsApp</small>
+            <small className="block font-sans text-xs font-medium text-muted">
+              IVA incluido · {method === "webpay" ? "con tarjeta" : "por transferencia"}
+            </small>
           </dt>
-          <dd className="font-[family-name:var(--font-display)] text-2xl font-extrabold tabular-nums text-ink">{formatCLP(total)}</dd>
+          <dd className="font-[family-name:var(--font-display)] text-2xl font-extrabold tabular-nums text-ink">{formatCLP(shown)}</dd>
         </div>
       </dl>
 
@@ -176,13 +241,24 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
         disabled={sending || !canBuy}
         className="flex w-full items-center justify-center gap-2.5 rounded-full bg-cta px-6 py-4 font-bold text-white shadow-lg shadow-cta/30 transition hover:bg-cta-hover disabled:opacity-50 disabled:shadow-none"
       >
-        {sending ? "Enviando…" : "Enviar pedido y ver la cuenta"} <StoreIcon name="arrow" className="h-5 w-5" />
+        {sending
+          ? "Enviando…"
+          : method === "webpay"
+            ? `Pagar ${formatCLP(cardTotal)} con Webpay`
+            : "Enviar pedido y ver la cuenta"}{" "}
+        <StoreIcon name={method === "webpay" ? "lock" : "arrow"} className="h-5 w-5" />
       </button>
       <ul className="space-y-2 text-[13px] text-muted">
         <li className="flex items-center gap-2">
-          <StoreIcon name="bank" className="h-[18px] w-[18px] text-pine-700" />
-          Si no tenemos stock, te devolvemos el 100% en máximo {SITE.transfer.refundDays} días hábiles
+          <StoreIcon name="truck" className="h-[18px] w-[18px] text-pine-700" />
+          Entrega coordinada contigo por WhatsApp
         </li>
+        {webpayOn && (
+          <li className="flex items-center gap-2">
+            <StoreIcon name="lock" className="h-[18px] w-[18px] text-pine-700" />
+            Con Webpay pagas en la página de Transbank: nunca vemos tu tarjeta
+          </li>
+        )}
         <li className="flex items-center gap-2">
           <StoreIcon name="receipt" className="h-[18px] w-[18px] text-pine-700" />
           Boleta o factura de Wiremax
@@ -200,6 +276,20 @@ export function RequestForm({ mixed }: { mixed: boolean }) {
         )}
       </ul>
     </form>
+  );
+}
+
+function PayOption(props: { checked: boolean; disabled?: boolean; onChange: () => void; title: string; text: string }) {
+  return (
+    <label
+      className={`flex items-start gap-2 rounded-lg border px-3 py-2 ${props.disabled ? "cursor-not-allowed border-line/10 opacity-60" : "cursor-pointer border-line/15"} ${props.checked ? "border-pine-700/50 bg-mint-50/50" : ""}`}
+    >
+      <input type="radio" name="pay" checked={props.checked} disabled={props.disabled} onChange={props.onChange} className="mt-1" />
+      <span>
+        <span className="font-medium text-ink">{props.title}</span>
+        <span className="block text-muted">{props.text}</span>
+      </span>
+    </label>
   );
 }
 

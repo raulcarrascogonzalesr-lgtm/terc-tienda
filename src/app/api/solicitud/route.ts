@@ -3,13 +3,16 @@ import { revalidatePath } from "next/cache";
 import { after, NextResponse } from "next/server";
 import { getAdminUser } from "@/lib/admin";
 import { normalizePhone, normalizeRut } from "@/lib/address";
-import { isEnergy, REQUEST_COURIER, REQUEST_ZONE } from "@/lib/energy";
+import { energyCardAllowed, isEnergy, REQUEST_COURIER, REQUEST_ZONE } from "@/lib/energy";
+import { cardPrice, formatCLP } from "@/lib/format";
 import { orderNumber, sendRequestEmails } from "@/lib/order-emails";
 import { getProductsByIds } from "@/lib/products";
 import { storeIsOpen } from "@/lib/store-status";
 import { getAdminClient } from "@/lib/supabase";
+import { SITE } from "@/lib/site";
 import { sanitizeUtm } from "@/lib/utm";
 import { warrantyLabel } from "@/lib/warranty";
+import { createWebpayTransaction, getWebpayConfig } from "@/lib/webpay";
 
 // Solicitud de compra (TERC 2.1). Los productos de Energía no se pagan en la página: el cliente
 // envía su carrito con sus datos, ve la cuenta y transfiere al tiro (Raúl, 26-11-2026); TERC
@@ -18,12 +21,18 @@ import { warrantyLabel } from "@/lib/warranty";
 //
 // Se guarda como un pedido "Pendiente" (customer.payment = "transferencia"). En el panel, al
 // marcarlo "Pagado" se descuenta el stock y sale el correo de pago recibido, como cualquier venta.
+//
+// Con tarjeta (Raúl 27-11-2026): el cliente puede elegir Webpay si el total con el precio de tarjeta
+// no pasa de SITE.energyCardMax. El pedido queda "Pendiente" (customer.payment = "webpay") hasta que
+// Webpay confirma; ahí /api/webpay/retorno lo marca pagado y manda el correo, como con los equipos.
+// Si después no hay stock, Raúl anula el cargo desde el portal de Transbank (devolución del 100%).
 
 type Body = {
   items?: { productId?: unknown; quantity?: unknown; extendWarranty?: unknown }[];
   customer?: Record<string, unknown>;
   utm?: unknown;
   acceptPolicy?: unknown;
+  method?: unknown; // "webpay" o "transferencia" (por defecto)
   website?: unknown; // campo trampa invisible: si viene lleno, es un robot
 };
 
@@ -47,6 +56,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Debes aceptar la política de garantía y devoluciones" }, { status: 400 });
   }
 
+  // Webpay solo si está configurado (en modo prueba, solo para el administrador, igual que en el carrito).
+  const method = body.method === "webpay" ? "webpay" : "transferencia";
+  const webpay = method === "webpay" ? getWebpayConfig() : null;
+  if (method === "webpay" && (!webpay || (webpay.adminOnly && !(await getAdminUser())))) {
+    return NextResponse.json({ error: "El pago con tarjeta no está disponible. Elige transferencia." }, { status: 503 });
+  }
+  // Con tarjeta cada unidad cuesta el precio de "otros medios de pago" (la comisión de Transbank).
+  const unit = (price: number) => (method === "webpay" ? cardPrice(price) : price);
+
   const c = body.customer ?? {};
   const name = text(c.name, 120);
   const email = text(c.email, 160).toLowerCase();
@@ -62,7 +80,7 @@ export async function POST(request: Request) {
     email,
     phone,
     comuna,
-    payment: "transferencia",
+    payment: method,
     courier: REQUEST_COURIER,
     document: c.document === "factura" ? "Factura" : "Boleta",
   };
@@ -109,6 +127,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Este carrito se paga en la página. Vuelve al carrito para pagar." }, { status: 400 });
   }
 
+  const subtotal = lines.reduce((sum, l) => sum + unit(l.product.price + l.warrantyExtra) * l.quantity, 0);
+  if (method === "webpay" && !energyCardAllowed(subtotal)) {
+    return NextResponse.json(
+      { error: `Con tarjeta se puede pagar hasta ${formatCLP(SITE.energyCardMax)}. Para este pedido elige transferencia.` },
+      { status: 400 },
+    );
+  }
+
   const supabase = getAdminClient();
   if (!supabase) {
     return NextResponse.json({ error: "No pudimos enviar tu solicitud. Escríbenos por WhatsApp." }, { status: 503 });
@@ -140,7 +166,6 @@ export async function POST(request: Request) {
     .in("id", lines.map((l) => l.product.id));
   const costById = new Map((costs ?? []).map((row) => [row.id, row.cost as number | null]));
 
-  const subtotal = lines.reduce((sum, l) => sum + (l.product.price + l.warrantyExtra) * l.quantity, 0);
   const id = randomUUID();
   const { error } = await supabase.from("orders").insert({
     id,
@@ -155,7 +180,7 @@ export async function POST(request: Request) {
     items: lines.map((l) => ({
       product_id: l.product.id,
       name: l.warrantyExtra ? `${l.product.name} + garantía extendida a ${warrantyLabel(l.warrantyMonths)}` : l.product.name,
-      unit_price: l.product.price + l.warrantyExtra,
+      unit_price: unit(l.product.price + l.warrantyExtra),
       unit_cost: costById.get(l.product.id) ?? null,
       quantity: l.quantity,
       warranty_months: l.warrantyMonths,
@@ -169,6 +194,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No pudimos enviar tu solicitud. Escríbenos por WhatsApp." }, { status: 500 });
   }
   revalidatePath("/admin", "layout");
+
+  if (webpay) {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
+    try {
+      const tx = await createWebpayTransaction(webpay, { orderId: id, amount: subtotal, returnUrl: `${siteUrl}/api/webpay/retorno` });
+      // El token queda en el pedido (se ve en el panel): Transbank lo pide para validar la integración.
+      await supabase.from("orders").update({ payment_id: `webpay${webpay.isTest ? "-prueba" : ""}:token:${tx.token}` }).eq("id", id);
+      // Sin correo todavía: el de "recibimos tu pago" sale cuando Webpay confirma.
+      return NextResponse.json({ number: orderNumber(id), id, checkoutUrl: tx.url, token: tx.token });
+    } catch (err) {
+      console.error("No se pudo crear la transacción Webpay (Energía)", err);
+      await supabase.from("orders").update({ status: "failed" }).eq("id", id);
+      return NextResponse.json({ error: "No pudimos conectar con Webpay. Intenta de nuevo o elige transferencia." }, { status: 502 });
+    }
+  }
+
   after(() => sendRequestEmails(id));
   return NextResponse.json({ number: orderNumber(id), id });
 }

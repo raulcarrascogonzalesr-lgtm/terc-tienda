@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ENERGY_INFO } from "@/lib/energy";
+import { formatCLP } from "@/lib/format";
 import { SITE } from "@/lib/site";
 import { warrantyLabel } from "@/lib/warranty";
 
@@ -63,9 +64,10 @@ export default function TermsPage() {
           transferencia en el banco. TERC no ve ni guarda los datos de tu tarjeta.
         </p>
         <p>
-          <strong className="text-ink">Energía:</strong> se paga por transferencia. Al enviar tu pedido te mostramos los datos
-          para transferir. Cuando recibimos la transferencia confirmamos stock con el proveedor; si no hay, te devolvemos el 100%
-          de lo que pagaste en máximo {SITE.transfer.refundDays} días hábiles.
+          <strong className="text-ink">Energía:</strong> se paga por transferencia y, cuando está disponible, con tarjeta por
+          Webpay (precio de otros medios de pago, hasta {formatCLP(SITE.energyCardMax)} por pedido). Al enviar tu pedido por
+          transferencia te mostramos los datos para transferir. Si por cualquier motivo no pudiéramos entregarte un producto, te
+          devolvemos el 100% de lo que pagaste en máximo {SITE.transfer.refundDays} días hábiles.
         </p>
       </section>
 

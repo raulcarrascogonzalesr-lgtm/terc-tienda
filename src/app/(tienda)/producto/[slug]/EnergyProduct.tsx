@@ -135,8 +135,8 @@ export function EnergyProduct({ product }: { product: Product }) {
             <p className="flex items-start gap-2.5 rounded-2xl bg-mint-50 px-3 py-2.5 text-sm text-ink">
               <StoreIcon name="bank" className="mt-0.5 h-5 w-5 text-pine-700" />
               <span>
-                <strong>Compra por transferencia:</strong> envías tu pedido, ves la cuenta y transfieres. Confirmamos stock
-                con el proveedor y, si no hay, te devolvemos el 100% en máximo {SITE.transfer.refundDays} días hábiles.
+                <strong>Compra por transferencia:</strong> envías tu pedido, ves la cuenta y transfieres. Te damos boleta o
+                factura y te lo entregamos en hasta {ENERGY_INFO.deliveryDays} días hábiles en la RM.
               </span>
             </p>
           </div>
@@ -184,8 +184,8 @@ export function EnergyProduct({ product }: { product: Product }) {
             <Row label="Garantía">
               {warranty}
               <small>
-                La da el fabricante. Si algo falla, escríbenos y te acompañamos para hacerla válida. Además tienes 10 días de
-                derecho a retracto si el producto vuelve sin instalar ni usar, en su caja.{" "}
+                {/* Raúl 27-11: sin la frase del retracto en la ficha (el retracto sigue en Garantía y devoluciones). */}
+                La da el fabricante. Si algo falla, escríbenos y te acompañamos para hacerla válida.{" "}
                 <Link href="/garantia-y-devoluciones" className="underline">
                   Ver garantía y devoluciones
                 </Link>

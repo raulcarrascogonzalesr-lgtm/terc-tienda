@@ -29,6 +29,10 @@ export const SITE = {
   // (Mercado Pago o Webpay, débito, crédito o cuotas) sale este % más caro, por la comisión.
   // Se muestra chico, como "otros medios de pago". 0 = mismo precio con cualquier medio.
   cardExtraPercent: 4,
+  // Energía con tarjeta (Raúl 27-11-2026, para dar confianza): solo Webpay y con el mismo % extra,
+  // hasta este total por pedido. Sobre este monto se paga por transferencia (en productos caros el
+  // riesgo de una tarjeta robada o un contracargo es demasiado alto). 0 = Energía solo por transferencia.
+  energyCardMax: 1_500_000,
   // Cuenta para las transferencias (la misma de Wiremax). El asunto lleva el número de pedido
   // para separar la plata de TERC de la de Wiremax.
   transfer: {

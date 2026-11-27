@@ -7,6 +7,7 @@ import { formatCLP } from "@/lib/format";
 import { photoProps } from "@/lib/photo";
 import { orderNumber } from "@/lib/order-emails";
 import { getProductsByIds } from "@/lib/products";
+import { ENERGY_INFO } from "@/lib/energy";
 import { whatsappLink } from "@/lib/site";
 import { getAdminClient } from "@/lib/supabase";
 import type { Order } from "@/lib/types";
@@ -94,12 +95,21 @@ export default async function PaymentResultPage({
   const whatsapp = whatsappLink(
     order ? `Hola TERC, tengo una consulta sobre mi pedido ${orderNumber(order.id)}` : "Hola TERC, tengo una consulta sobre mi compra",
   );
-  const steps = [
-    { title: "Pago recibido", text: "Hoy · te enviamos el comprobante a tu correo" },
-    { title: "Revisión final y embalaje", text: "Lo probamos otra vez y lo embalamos con protección" },
-    { title: "En camino", text: "Te llega un correo con el número de seguimiento" },
-    { title: "Entregado", text: `Aprox. ${deliveryShort(onDemand)}` },
-  ];
+  // Energía pagada con Webpay (27-11-2026): boleta o factura y entrega coordinada (sin "confirmamos stock").
+  const energy = !!order?.items.some((i) => i.energy);
+  const steps = energy
+    ? [
+        { title: "Pago recibido", text: "Hoy · te enviamos el comprobante a tu correo" },
+        { title: "Boleta o factura", text: "De Wiremax, a tu correo" },
+        { title: "Coordinamos la entrega", text: "Te escribimos por WhatsApp" },
+        { title: "Recibes", text: `En hasta ${ENERGY_INFO.deliveryDays} días hábiles en la RM` },
+      ]
+    : [
+        { title: "Pago recibido", text: "Hoy · te enviamos el comprobante a tu correo" },
+        { title: "Revisión final y embalaje", text: "Lo probamos otra vez y lo embalamos con protección" },
+        { title: "En camino", text: "Te llega un correo con el número de seguimiento" },
+        { title: "Entregado", text: `Aprox. ${deliveryShort(onDemand)}` },
+      ];
 
   return (
     <div className="shell max-w-5xl space-y-6 py-8">
@@ -116,13 +126,21 @@ export default async function PaymentResultPage({
       {/* Después de pagar sí va "elegiste bien": confirmar la decisión evita el arrepentimiento. */}
       <div className="mx-auto grid max-w-2xl justify-items-center gap-2 text-center">
         <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-ink text-balance sm:text-4xl">
-          ¡Listo{firstName && `, ${firstName}`}! <span className="text-pine-700">Tu equipo ya es tuyo.</span>
+          ¡Listo{firstName && `, ${firstName}`}!{" "}
+          <span className="text-pine-700">{energy ? "Recibimos tu pago." : "Tu equipo ya es tuyo."}</span>
         </h1>
-        <p className="text-muted sm:text-lg">
-          Recibimos tu pago. Elegiste bien: un equipo revisado
-          {months ? `, con ${warrantyLabel(months)} de garantía` : " y con garantía"}
-          {saved > 0 ? `, y ahorraste ${formatCLP(saved)} frente a uno nuevo` : ""}. Te enviamos el detalle a tu correo.
-        </p>
+        {energy ? (
+          <p className="text-muted sm:text-lg">
+            Te escribimos por WhatsApp para coordinar la entrega, en hasta {ENERGY_INFO.deliveryDays} días hábiles en la RM.
+            Te enviamos el detalle a tu correo.
+          </p>
+        ) : (
+          <p className="text-muted sm:text-lg">
+            Recibimos tu pago. Elegiste bien: un equipo revisado
+            {months ? `, con ${warrantyLabel(months)} de garantía` : " y con garantía"}
+            {saved > 0 ? `, y ahorraste ${formatCLP(saved)} frente a uno nuevo` : ""}. Te enviamos el detalle a tu correo.
+          </p>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
@@ -182,11 +200,18 @@ export default async function PaymentResultPage({
               <b className="text-ink">{formatCLP(order.total)}</b>
             </p>
           )}
-          <div className="rounded-2xl bg-pine p-4 text-sm text-white">
-            <b className="block font-[family-name:var(--font-display)] text-[15px] text-gold">Tu garantía TERC queda registrada</b>
-            {months ? `Son ${months} meses` : "Corre"} desde el día en que lo recibes. Si algo falla, escríbenos y lo resolvemos
-            nosotros.
-          </div>
+          {energy ? (
+            <div className="rounded-2xl bg-pine p-4 text-sm text-white">
+              <b className="block font-[family-name:var(--font-display)] text-[15px] text-gold">Garantía de fábrica</b>
+              Tu producto es nuevo y trae la garantía del fabricante. Si algo falla, escríbenos y te acompañamos en todo.
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-pine p-4 text-sm text-white">
+              <b className="block font-[family-name:var(--font-display)] text-[15px] text-gold">Tu garantía TERC queda registrada</b>
+              {months ? `Son ${months} meses` : "Corre"} desde el día en que lo recibes. Si algo falla, escríbenos y lo resolvemos
+              nosotros.
+            </div>
+          )}
           <div className="flex flex-wrap gap-2.5">
             {whatsapp && (
               <a
